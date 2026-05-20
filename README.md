@@ -1,0 +1,101 @@
+# Hebrew Homestead
+
+Hebrew Homestead is a cozy click-based illustrated homestead management game about stewardship, clean food, gardening, crafting, Sabbath preparation, Sabbath rest, and journal-based learning.
+
+The project is static and GitHub Pages friendly. It uses only HTML, CSS, JavaScript, localStorage, and local asset paths. There is no backend, database, login, npm dependency, build step, external API, or real online ordering.
+
+## How to Run Locally
+
+Open `index.html` directly in a modern browser.
+
+## Publishing with GitHub Pages
+
+1. Push the project folder to a GitHub repository.
+2. In repository settings, open Pages.
+3. Set the source to the main branch and root folder.
+4. Save and wait for GitHub Pages to publish the static files.
+
+## Controls
+
+- Mouse/tap: click hotspots and buttons
+- J: open or close journal
+- I: open or close inventory
+- C: open or close crafting
+- K: open or close cooking
+- S: save manually
+- Save button: open Save Manager for save now, backup restore, export, and import
+- R: rest when in Cabin Entry or Living Room
+- H: toggle hotspot debug overlay
+- Escape: close modal
+
+## Current Features
+
+- Click-based scene navigation with absolutely positioned hotspots
+- Full Homestead Overview image with responsive percentage-based hotspots
+- Placeholder scene backgrounds that still work if other image files are missing
+- Scenes for Homestead Overview, Cabin Entry, Living Room, Bedroom, Kitchen, Pantry, Barn, Garden, Additional Fields, Workshed, Forest, Well / Water Area, and Sabbath Area
+- Pop-up Status panel for day, weekday, season, weather, time, stamina, energy, water, Sabbath status, Shalom Rest, rested boost, goals, and Sabbath prep
+- Pop-up Areas panel for navigating without clicking the scene image
+- Inventory, tools, crop beds, barn animals, crafting, cooking, fictional shop/ordering, journal, Sabbath preparation, Sabbath rest, save/load, backup, export/import, and reset
+- Hotspot debug mode with visible boxes and labels
+- Gentle scene animation layers for smoke, glow, drifting overlays, leaves, and well shimmer
+- Visual cleaning objects for dishes, crumbs, dust, books, crates, sawdust, and straw after cooking or day changes
+- Bedroom bed hotspot with nap and sleep-through-night recovery options
+- Kitchen pantry doorway plus a separate Ice Box panel for clean dairy and refrigerated prepared foods
+- Clean-food-only starter recipes and ingredient rules
+- Barn scene image with clickable animal groups for chickens, sheep, goats, and cattle
+- Animal ownership counts, feed trough, water trough, barn cleaning for manure, eggs, feathers, milk, shearing, and clean meat harvesting
+- Shop modal for buying supplies, tools, feed, hay, and animals, plus selling goods and animals for fictional coins
+- Garden image with clickable beds, watering can refill, compost, herb patch, and fence gate to Additional Fields
+- Crop bed actions for planting, watering from the watering can, weeding, fertilizing, inspecting, and harvesting
+- Crafting paths for cloth, fertilizer, feed, hay, and feathered arrows
+- Forest scene image with hotspots for fallen branches, trees, stone pile, herb forage, pond/stream, and deer
+- Forest tools and requirements: axe for trees, pickaxe for better stone gathering, fishing pole or net for clean fish, bow and arrows for deer
+- Clean wild-game and fish items: venison, hide, fur, clean fish, clean fish meal, and venison stew
+- Versioned localStorage save/load for scene, time, inventory, tools, crops, barn animals, kitchen and room chores, orders, Sabbath prep, Shalom Rest, rested boost, journal unlocks, and messages
+
+## Save System
+
+- Autosaves after normal play actions.
+- Saves again when the page is hidden or closed.
+- Keeps a backup copy before overwriting the main save.
+- `S` performs an immediate manual save.
+- The Save Manager can export save text, import pasted save text, and restore the backup copy.
+
+## Scene Images
+
+The game expects future local images at:
+
+- `assets/images/scenes/homestead-overview.png`
+- `assets/images/scenes/cabin-entry.png`
+- `assets/images/scenes/living-room.png`
+- `assets/images/scenes/bedroom.png`
+- `assets/images/scenes/kitchen.png`
+- `assets/images/scenes/pantry.png`
+- `assets/images/scenes/barn.png`
+- `assets/images/scenes/garden.png`
+- `assets/images/scenes/workshed.png`
+- `assets/images/scenes/forest.png`
+- `assets/images/scenes/well.png`
+- `assets/images/scenes/sabbath-area.png`
+
+If an image is missing, the scene still displays a pleasant placeholder with title, description, and usable hotspots.
+
+## Known Limitations
+
+- Some scene art is still placeholder-only until local images are added.
+- Hotspot placement is approximate and intended to be adjusted with the debug overlay.
+- Gardening uses three main crop beds plus a first-pass Additional Fields scene.
+- Orders are fictional in-game purchases only and arrive by day count.
+- Deer, fishing, and stone harvesting are first-pass resource actions without seasonal population management yet.
+- Barn animals are first-pass grouped counts rather than individually named animals.
+- Animal harvest has no animation and is intentionally handled through text-only stewardship messaging.
+- There is no audio, accessibility pass, or deep cooking/storage system yet.
+
+## Future Plans
+
+- Add illustrated local scene images and tune hotspot placement.
+- Add richer pantry storage, cooking, crop feedback, and soil care.
+- Add Firstfruits, gleaning, honest measures, land rest, appointed times, and Sukkot.
+- Expand clean animal, wild-game, fishing, and crafting systems with stronger stewardship limits, breeding, housing upgrades, and richer care cycles.
+- Add audio, polish, accessibility improvements, and mobile-specific layout refinements.

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hebrew Homestead</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>Hebrew Homestead</h1>
+        <p class="subtitle">A click-based homestead stewardship prototype</p>
+      </div>
+      <div class="top-actions">
+        <button id="statusBtn" type="button">Status</button>
+        <button id="areasBtn" type="button">Areas</button>
+        <button id="inventoryBtn" type="button">Inventory</button>
+        <button id="craftingBtn" type="button">Craft</button>
+        <button id="cookingBtn" type="button">Cook</button>
+        <button id="journalBtn" type="button">Journal</button>
+        <button id="messagesBtn" type="button">Messages</button>
+        <button id="debugBtn" type="button">Hotspots</button>
+        <button id="saveBtn" type="button">Save</button>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="scene-shell" aria-label="Current scene">
+        <div id="sceneStage" class="scene-stage">
+          <div class="scene-fallback">
+            <h2 id="sceneTitleOverlay">Homestead Overview</h2>
+            <p id="sceneDescriptionOverlay"></p>
+          </div>
+          <div id="sceneDecorations" class="scene-decorations" aria-hidden="true"></div>
+          <div id="hotspotLayer" class="hotspot-layer"></div>
+          <div id="messageBar" class="message-bar" aria-live="polite"></div>
+        </div>
+        <div class="scene-actions">
+          <button id="nextDayBtn" type="button">Next Day</button>
+          <button id="resetSaveBtn" class="danger-action" type="button">Reset Save</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Modal</h2>
+        <button id="closeModalBtn" type="button">Close</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </section>
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
