@@ -33,26 +33,29 @@ Open `index.html` directly in a modern browser.
 - Click-based scene navigation with absolutely positioned hotspots
 - Full Homestead Overview image with responsive percentage-based hotspots
 - Placeholder scene backgrounds that still work if other image files are missing
-- Scenes for Homestead Overview, Cabin Entry, Living Room, Bedroom, Kitchen, Pantry, Barn, Garden, Additional Fields, Workshed, Forest, Well / Water Area, and Sabbath Area
-- Pop-up Status panel for day, weekday, season, weather, time, stamina, energy, water, Sabbath status, Shalom Rest, rested boost, goals, and Sabbath prep
+- Scenes for Homestead Overview, Cabin Entry, Living Room, Bedroom, Kitchen, Pantry, Barn, Garden, Workshed, Forest, Well / Water Area, and Sabbath Area
+- Pop-up Status panel for day, weekday, season, weather, time, stamina, energy, water, Sabbath status, Shalom Rest, rest buffs, daily rest uses, goals, and Sabbath prep
 - Pop-up Areas panel for navigating without clicking the scene image
 - Inventory, tools, crop beds, barn animals, crafting, cooking, fictional shop/ordering, journal, Sabbath preparation, Sabbath rest, save/load, backup, export/import, and reset
 - Hotspot debug mode with visible boxes and labels
 - Gentle scene animation layers for smoke, glow, drifting overlays, leaves, and well shimmer
 - Visual cleaning objects for dishes, crumbs, dust, books, crates, sawdust, and straw after cooking or day changes
-- Bedroom bed hotspot with nap and sleep-through-night recovery options
+- Bedroom bed hotspot with limited nap and evening sleep-through-night recovery options; living room/cabin short rests are limited separately
 - Kitchen pantry doorway plus a separate Ice Box panel for clean dairy and refrigerated prepared foods
 - Clean-food-only starter recipes and ingredient rules
 - Barn scene image with clickable animal groups for chickens, sheep, goats, and cattle
 - Animal ownership counts, feed trough, water trough, barn cleaning for manure, eggs, feathers, milk, shearing, and clean meat harvesting
 - Shop modal for buying supplies, tools, feed, hay, and animals, plus selling goods and animals for fictional coins
-- Garden image with clickable beds, watering can refill, compost, herb patch, and fence gate to Additional Fields
-- Crop bed actions for planting, watering from the watering can, weeding, fertilizing, inspecting, and harvesting
+- Garden image with fifteen clickable beds, watering can refill, and a fence gate that opens a More Fields planning panel
+- Crop beds can be renamed, hold multiple plantings, receive compost or fertilizer before planting, and support watering, weeding, inspecting, and harvesting
+- Lightweight garden animations for planting, watering, crop sway, weeds, harvest, compost steam, soil quality, seasonal tinting, bees, butterflies, and dew shimmer
+- Kitchen counter food prep can stage ingredients before stove cooking for higher-quality prepared food
+- Produce, fish, meat, animal products, and prepared food track Standard, Good, or Excellent quality
 - Crafting paths for cloth, fertilizer, feed, hay, and feathered arrows
 - Forest scene image with hotspots for fallen branches, trees, stone pile, herb forage, pond/stream, and deer
 - Forest tools and requirements: axe for trees, pickaxe for better stone gathering, fishing pole or net for clean fish, bow and arrows for deer
 - Clean wild-game and fish items: venison, hide, fur, clean fish, clean fish meal, and venison stew
-- Versioned localStorage save/load for scene, time, inventory, tools, crops, barn animals, kitchen and room chores, orders, Sabbath prep, Shalom Rest, rested boost, journal unlocks, and messages
+- Versioned localStorage save/load for scene, time, inventory, quality inventory, tools, crops, barn animals, kitchen and room chores, orders, Sabbath prep, Shalom Rest, rest buffs, prepped food, journal unlocks, and messages
 
 ## Save System
 
@@ -73,7 +76,8 @@ The game expects future local images at:
 - `assets/images/scenes/kitchen.png`
 - `assets/images/scenes/pantry.png`
 - `assets/images/scenes/barn.png`
-- `assets/images/scenes/garden.png`
+- `assets/images/scenes/garden-animation-aligned.png` currently used for the garden scene
+- `assets/images/scenes/garden.png` original garden image kept for reference
 - `assets/images/scenes/workshed.png`
 - `assets/images/scenes/forest.png`
 - `assets/images/scenes/well.png`
@@ -85,7 +89,8 @@ If an image is missing, the scene still displays a pleasant placeholder with tit
 
 - Some scene art is still placeholder-only until local images are added.
 - Hotspot placement is approximate and intended to be adjusted with the debug overlay.
-- Gardening uses three main crop beds plus a first-pass Additional Fields scene.
+- Gardening uses fifteen main crop beds plus a locked More Fields planning panel for future tractor-upgrade fields.
+- Garden animations are CSS-based placeholders, so final custom overlay art and audio are still future polish.
 - Orders are fictional in-game purchases only and arrive by day count.
 - Deer, fishing, and stone harvesting are first-pass resource actions without seasonal population management yet.
 - Barn animals are first-pass grouped counts rather than individually named animals.

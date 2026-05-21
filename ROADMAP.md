@@ -13,7 +13,10 @@
 - Grouped clean animal ownership for chickens, sheep, goats, and cattle
 - First-pass animal feeding, watering, cleaning, eggs, milk, shearing, and clean meat/material harvest
 - Direct barn feed trough, water trough, manure collection, and feather collection
-- Garden crop beds with watering can refill, weeding, fertilizer, and fence access to Additional Fields
+- Fifteen clickable garden beds with custom names, mixed plantings, watering can refill, compost, fertilizer, weeding, harvest, and fence access to a More Fields planning panel
+- First-pass garden animations for planting, watering, soil quality, crop sway, weeds, harvest, compost steam, seasonal tint, and small ambient details
+- Food quality tracking for produce, fish, meat, animal products, and prepared meals
+- Counter prep before stove cooking for higher-quality food
 - Forest gathering and axe requirement
 - Forest illustrated clearing with trees, stone pile, pond/stream, and deer hotspots
 - First-pass pickaxe, fishing pole, fishing net, bow, arrows, clean fish, venison, hide, and fur
@@ -31,7 +34,7 @@ Current prototype goals:
 - Static browser game that opens directly from `index.html`
 - Scene placeholders that work without image files
 - Future local image paths prepared
-- Gardening with barley, lentils, and cucumbers
+- Gardening with barley, lentils, cucumbers, named beds, mixed plantings, and quality harvests
 - Clean-food-only starter crops, cooking, and recipes
 - Sabbath preparation quest and Sabbath rest mode
 - Journal entries for Scripture-centered learning themes
@@ -43,7 +46,8 @@ Current prototype goals:
 - Hotspot placement pass
 - More crops and herbs
 - Soil quality and compost effects
-- Better fertilizer effects and expanded field progression
+- Better fertilizer effects and tractor-upgrade field progression
+- Final garden overlay art and sound effects for planting, watering, weeding, composting, and harvesting
 - Weather effects
 - Seasonal planting rules
 - Better pantry storage

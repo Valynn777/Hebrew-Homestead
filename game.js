@@ -1,6 +1,6 @@
-"use strict";
+﻿"use strict";
 
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 6;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
 
@@ -91,8 +91,7 @@ const scenes = {
       hs("iceBox", "Ice Box", 64, 21, 18, 53, "modal", { modal: "iceBox" }),
       hs("pantryDoor", "Pantry", 82, 18, 14, 35, "navigate", { target: "pantry" }),
       hs("counters", "Clean Counters", 45, 42, 19, 19, "cleanCounters"),
-      hs("basket", "Sabbath Basket", 47, 56, 17, 14, "setSabbathBasket"),
-      hs("jar", "Water Jar", 47, 65, 12, 18, "waterJar"),
+      hs("foodPrep", "Food Prep Area", 47, 56, 17, 27, "modal", { modal: "foodPrep" }),
       hs("floor", "Sweep Kitchen", 24, 73, 36, 17, "sweepKitchen"),
       hs("back", "Back to Cabin", 82, 56, 13, 25, "navigate", { target: "cabin" })
     ]
@@ -136,25 +135,38 @@ const scenes = {
     description: "Clean crop beds, herbs, compost, and a watering can provide steady lessons in patience.",
     background: sceneImages.garden,
     hotspots: [
-      hs("wateringCan", "Refill Watering Can", 15, 69, 14, 16, "refillWateringCan"),
-      hs("barleyBed", "Barley Bed", 33, 35, 24, 18, "crop", { crop: "barley" }),
-      hs("lentilBed", "Lentil Bed", 54, 39, 25, 17, "crop", { crop: "lentils" }),
-      hs("cucumberBed", "Cucumber Bed", 25, 55, 29, 20, "crop", { crop: "cucumbers" }),
-      hs("herbPatch", "Herb Patch", 59, 67, 24, 25, "gatherHerbs"),
-      hs("compost", "Compost Area", 74, 23, 19, 21, "compost"),
-      hs("fieldsGate", "More Fields", 46, 12, 18, 19, "navigate", { target: "fields" }),
+      hs("wateringCan", "Refill Watering Can", 3, 57, 16, 20, "refillWateringCan"),
+      // Row 1 — hotspot centered on each bed (left = x-5, top = y-7, w=10, h=14)
+      hs("bed1",  "Garden Bed 1",  17, 24, 10, 14, "crop", { crop: "bed1" }),
+      hs("bed2",  "Garden Bed 2",  30, 24, 10, 14, "crop", { crop: "bed2" }),
+      hs("bed3",  "Garden Bed 3",  43, 24, 10, 14, "crop", { crop: "bed3" }),
+      hs("bed4",  "Garden Bed 4",  56, 24, 10, 14, "crop", { crop: "bed4" }),
+      hs("bed5",  "Garden Bed 5",  69, 24, 10, 14, "crop", { crop: "bed5" }),
+      // Row 2 — same columns, middle row
+      hs("bed6",  "Garden Bed 6",  17, 43, 10, 14, "crop", { crop: "bed6" }),
+      hs("bed7",  "Garden Bed 7",  30, 43, 10, 14, "crop", { crop: "bed7" }),
+      hs("bed8",  "Garden Bed 8",  43, 43, 10, 14, "crop", { crop: "bed8" }),
+      hs("bed9",  "Garden Bed 9",  56, 43, 10, 14, "crop", { crop: "bed9" }),
+      hs("bed10", "Garden Bed 10", 69, 43, 10, 14, "crop", { crop: "bed10" }),
+      // Row 3 — same columns, bottom row
+      hs("bed11", "Garden Bed 11", 17, 62, 10, 14, "crop", { crop: "bed11" }),
+      hs("bed12", "Garden Bed 12", 30, 62, 10, 14, "crop", { crop: "bed12" }),
+      hs("bed13", "Garden Bed 13", 43, 62, 10, 14, "crop", { crop: "bed13" }),
+      hs("bed14", "Garden Bed 14", 56, 62, 10, 14, "crop", { crop: "bed14" }),
+      hs("bed15", "Garden Bed 15", 69, 62, 10, 14, "crop", { crop: "bed15" }),
+      hs("fieldsGate", "More Fields", 33, 4, 22, 16, "fieldsPanel"),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
     ]
   },
   fields: {
     id: "fields",
-    title: "Additional Fields",
-    description: "New beds beyond the fence give the homestead room to grow more clean food.",
+    title: "More Fields",
+    description: "Locked future fields beyond the fence will give the homestead room to grow more clean food after upgrades.",
     background: sceneImages.garden,
     hotspots: [
-      hs("barleyField", "Barley Field", 31, 34, 25, 18, "crop", { crop: "barleyField" }),
-      hs("lentilField", "Lentil Field", 54, 39, 25, 17, "crop", { crop: "lentilField" }),
-      hs("cucumberField", "Cucumber Field", 66, 55, 25, 17, "crop", { crop: "cucumberField" }),
+      hs("field1", "Field 1", 31, 34, 25, 18, "crop", { crop: "field1" }),
+      hs("field2", "Field 2", 54, 39, 25, 17, "crop", { crop: "field2" }),
+      hs("field3", "Field 3", 66, 55, 25, 17, "crop", { crop: "field3" }),
       hs("wateringCan", "Refill Watering Can", 15, 69, 14, 16, "refillWateringCan"),
       hs("backGarden", "Back to Garden", 46, 12, 18, 19, "navigate", { target: "garden" })
     ]
@@ -366,7 +378,7 @@ const starterTools = {
   sabbathBasket: false
 };
 
-const cropCatalog = {
+const cropTypes = {
   barley: {
     name: "Barley",
     cleanStatus: "clean",
@@ -399,40 +411,35 @@ const cropCatalog = {
     seedItem: "cucumberSeeds",
     harvestItem: "cucumbers",
     gardeningNote: "Cucumbers grow quickly in warmth and appreciate regular watering."
-  },
-  barleyField: {
-    name: "Barley Field",
-    cleanStatus: "clean",
-    category: "grain",
-    season: "Spring",
-    daysToMature: 3,
-    waterNeeds: "Water once each growing day.",
-    seedItem: "barleySeeds",
-    harvestItem: "barley",
-    gardeningNote: "An expanded barley bed gives more room for clean grain."
-  },
-  lentilField: {
-    name: "Lentil Field",
-    cleanStatus: "clean",
-    category: "legume",
-    season: "Spring",
-    daysToMature: 4,
-    waterNeeds: "Keep evenly watered while sprouting.",
-    seedItem: "lentilSeeds",
-    harvestItem: "lentils",
-    gardeningNote: "An expanded lentil bed supports clean legumes for the pantry."
-  },
-  cucumberField: {
-    name: "Cucumber Field",
-    cleanStatus: "clean",
-    category: "vegetable",
-    season: "Summer",
-    daysToMature: 3,
-    waterNeeds: "Needs steady moisture for crisp fruit.",
-    seedItem: "cucumberSeeds",
-    harvestItem: "cucumbers",
-    gardeningNote: "An expanded cucumber bed makes room for more summer produce."
   }
+};
+
+const cropCatalog = cropTypes;
+
+const cropChoices = ["barley", "lentils", "cucumbers"];
+
+const gardenBeds = {
+  // Row 1 (y≈31%) — top of rectangular dirt area, 5 evenly spaced square plots
+  bed1:  { defaultName: "Garden Bed 1",  scene: "garden", x: 22, y: 31, w: 8, h: 12, angle: 0 },
+  bed2:  { defaultName: "Garden Bed 2",  scene: "garden", x: 35, y: 31, w: 8, h: 12, angle: 0 },
+  bed3:  { defaultName: "Garden Bed 3",  scene: "garden", x: 48, y: 31, w: 8, h: 12, angle: 0 },
+  bed4:  { defaultName: "Garden Bed 4",  scene: "garden", x: 61, y: 31, w: 8, h: 12, angle: 0 },
+  bed5:  { defaultName: "Garden Bed 5",  scene: "garden", x: 74, y: 31, w: 8, h: 12, angle: 0 },
+  // Row 2 (y≈50%) — middle row, same columns
+  bed6:  { defaultName: "Garden Bed 6",  scene: "garden", x: 22, y: 50, w: 8, h: 12, angle: 0 },
+  bed7:  { defaultName: "Garden Bed 7",  scene: "garden", x: 35, y: 50, w: 8, h: 12, angle: 0 },
+  bed8:  { defaultName: "Garden Bed 8",  scene: "garden", x: 48, y: 50, w: 8, h: 12, angle: 0 },
+  bed9:  { defaultName: "Garden Bed 9",  scene: "garden", x: 61, y: 50, w: 8, h: 12, angle: 0 },
+  bed10: { defaultName: "Garden Bed 10", scene: "garden", x: 74, y: 50, w: 8, h: 12, angle: 0 },
+  // Row 3 (y≈69%) — bottom row, same columns
+  bed11: { defaultName: "Garden Bed 11", scene: "garden", x: 22, y: 69, w: 8, h: 12, angle: 0 },
+  bed12: { defaultName: "Garden Bed 12", scene: "garden", x: 35, y: 69, w: 8, h: 12, angle: 0 },
+  bed13: { defaultName: "Garden Bed 13", scene: "garden", x: 48, y: 69, w: 8, h: 12, angle: 0 },
+  bed14: { defaultName: "Garden Bed 14", scene: "garden", x: 61, y: 69, w: 8, h: 12, angle: 0 },
+  bed15: { defaultName: "Garden Bed 15", scene: "garden", x: 74, y: 69, w: 8, h: 12, angle: 0 },
+  field1: { defaultName: "Field 1", scene: "fields", x: 43, y: 43, w: 28, h: 16, angle: -1, clip: "polygon(8% 18%, 92% 9%, 98% 78%, 6% 94%)", requiresUpgrade: "tractor" },
+  field2: { defaultName: "Field 2", scene: "fields", x: 66, y: 48, w: 28, h: 16, angle: 1, clip: "polygon(8% 18%, 92% 9%, 98% 78%, 6% 94%)", requiresUpgrade: "tractor" },
+  field3: { defaultName: "Field 3", scene: "fields", x: 78, y: 63, w: 28, h: 16, angle: 1, clip: "polygon(8% 18%, 92% 9%, 98% 78%, 6% 94%)", requiresUpgrade: "tractor" }
 };
 
 const edibleItems = {
@@ -642,7 +649,7 @@ const sabbathTasks = [
   { id: "gatherHerbs", label: "Gather herbs", location: "Garden or Forest" },
   { id: "tidyCottage", label: "Tidy the cottage", location: "Cabin Entry" },
   { id: "putToolsAway", label: "Put tools away", location: "Workshed" },
-  { id: "sabbathBasket", label: "Set aside Sabbath basket", location: "Kitchen or Sabbath Area" }
+  { id: "sabbathBasket", label: "Set aside Sabbath basket", location: "Sabbath Area" }
 ];
 
 const journalEntries = [
@@ -684,6 +691,10 @@ let titleTapCount = 0;
 let lastTitleTap = 0;
 
 const TESTER_CODE = "blessing";
+const REST_LIMITS = { shortRest: 2, nap: 1 };
+const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
+const QUALITY_ORDER = ["standard", "good", "excellent"];
+const QUALITY_LABELS = { standard: "Standard", good: "Good", excellent: "Excellent" };
 
 function createNewState() {
   return {
@@ -695,8 +706,10 @@ function createNewState() {
     stamina: 100,
     energy: 100,
     inventory: { ...starterInventory },
+    qualityInventory: {},
     tools: { ...starterTools },
-    crops: Object.fromEntries(Object.keys(cropCatalog).map((key) => [key, emptyCrop()])),
+    upgrades: { tractor: false },
+    crops: createGardenBeds(),
     barnAnimals: createBarnAnimals(),
     kitchenChores: { dishes: false, counters: false, floor: false },
     roomChores: createRoomChores(),
@@ -704,6 +717,9 @@ function createNewState() {
     sabbathPrep: Object.fromEntries(sabbathTasks.map((task) => [task.id, false])),
     shalomRestDays: 0,
     restedBuffDays: 0,
+    restBuffs: createRestBuffs(),
+    dailyRest: createDailyRest(),
+    preppedFood: null,
     isSabbathRest: false,
     hotspotDebug: false,
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
@@ -711,8 +727,16 @@ function createNewState() {
   };
 }
 
-function emptyCrop() {
-  return { planted: false, growthStage: 0, daysWatered: 0, wateredToday: false, weededToday: false, fertilized: false, hasWeeds: false, readyToHarvest: false };
+function createGardenBeds() {
+  return Object.fromEntries(Object.entries(gardenBeds).map(([key, bed]) => [key, emptyCropBed(bed.defaultName)]));
+}
+
+function emptyCropBed(name = "") {
+  return { name, plantings: [], wateredToday: false, weededToday: false, composted: false, fertilized: false, hasWeeds: false };
+}
+
+function emptyCrop(cropType) {
+  return { cropType, growthStage: 0, daysWatered: 0, readyToHarvest: false };
 }
 
 function createBarnAnimals() {
@@ -731,6 +755,14 @@ function createRoomChores() {
     workshed: { sawdust: false },
     barn: { straw: false }
   };
+}
+
+function createRestBuffs() {
+  return { settled: 0, refreshed: 0 };
+}
+
+function createDailyRest() {
+  return { shortRest: 0, nap: 0 };
 }
 
 function loadGame() {
@@ -762,11 +794,16 @@ function hydrateState(savedState) {
     ...createNewState(),
     ...savedState,
     inventory: { ...starterInventory, ...(savedState.inventory || {}) },
+    qualityInventory: hydrateQualityInventory(savedState),
     tools: { ...starterTools, ...(savedState.tools || {}) },
-    crops: { ...createNewState().crops, ...(savedState.crops || {}) },
+    upgrades: { tractor: false, ...(savedState.upgrades || {}) },
+    crops: mergeGardenBeds(savedState.crops || {}),
     barnAnimals: mergeBarnAnimals(savedState.barnAnimals || {}),
     kitchenChores: { dishes: false, counters: false, floor: false, ...(savedState.kitchenChores || {}) },
     roomChores: mergeRoomChores(savedState.roomChores || {}),
+    restBuffs: { ...createRestBuffs(), ...(savedState.restBuffs || {}) },
+    dailyRest: { ...createDailyRest(), ...(savedState.dailyRest || {}) },
+    preppedFood: savedState.preppedFood || null,
     sabbathPrep: { ...Object.fromEntries(sabbathTasks.map((task) => [task.id, false])), ...(savedState.sabbathPrep || {}) },
     journalUnlocked: { ...Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])), ...(savedState.journalUnlocked || {}) },
     messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."]
@@ -779,6 +816,56 @@ function mergeBarnAnimals(savedAnimals) {
     animal,
     { ...data, ...(savedAnimals[animal] || {}) }
   ]));
+}
+
+function hydrateQualityInventory(savedState) {
+  const qualityInventory = { ...(savedState.qualityInventory || {}) };
+  Object.keys(savedState.inventory || {}).forEach((key) => {
+    if (!isQualityTracked(key)) return;
+    const amount = savedState.inventory[key] || 0;
+    const qualityTotal = qualityItemTotal(qualityInventory[key]);
+    if (amount > qualityTotal) {
+      qualityInventory[key] = {
+        ...(qualityInventory[key] || {}),
+        standard: (qualityInventory[key]?.standard || 0) + (amount - qualityTotal)
+      };
+    }
+  });
+  return qualityInventory;
+}
+
+function mergeGardenBeds(savedCrops) {
+  const base = createGardenBeds();
+  const merged = Object.fromEntries(Object.entries(base).map(([bedId, bed]) => {
+    const saved = savedCrops[bedId];
+    if (!saved) return [bedId, bed];
+    if (Array.isArray(saved.plantings)) return [bedId, { ...bed, ...saved }];
+    return [bedId, bed];
+  }));
+  const legacyMap = {
+    barley: ["bed1", "barley"],
+    lentils: ["bed2", "lentils"],
+    cucumbers: ["bed3", "cucumbers"],
+    barleyField: ["field1", "barley"],
+    lentilField: ["field2", "lentils"],
+    cucumberField: ["field3", "cucumbers"]
+  };
+  Object.entries(legacyMap).forEach(([legacyId, [bedId, cropType]]) => {
+    const legacyCrop = savedCrops[legacyId];
+    const bed = merged[bedId];
+    if (!legacyCrop?.planted || !bed || bed.plantings.length) return;
+    bed.plantings.push({
+      cropType,
+      growthStage: legacyCrop.growthStage || 1,
+      daysWatered: legacyCrop.daysWatered || 0,
+      readyToHarvest: Boolean(legacyCrop.readyToHarvest)
+    });
+    bed.wateredToday = Boolean(legacyCrop.wateredToday);
+    bed.weededToday = Boolean(legacyCrop.weededToday);
+    bed.fertilized = Boolean(legacyCrop.fertilized);
+    bed.hasWeeds = Boolean(legacyCrop.hasWeeds);
+  });
+  return merged;
 }
 
 function mergeRoomChores(savedChores) {
@@ -859,7 +946,118 @@ function sabbathStatus() {
 }
 
 function hasRestedStaminaBoost() {
-  return state.shalomRestDays > 0 || state.restedBuffDays > 0;
+  return restStaminaDiscount() > 0;
+}
+
+function isQualityTracked(key) {
+  return Boolean(edibleItems[key]);
+}
+
+function qualityItemTotal(bucket = {}) {
+  return QUALITY_ORDER.reduce((sum, quality) => sum + (bucket[quality] || 0), 0);
+}
+
+function ensureQualityTotals(key) {
+  if (!isQualityTracked(key)) return;
+  state.qualityInventory ||= {};
+  const amount = state.inventory[key] || 0;
+  const bucket = state.qualityInventory[key] || {};
+  const qualityTotal = qualityItemTotal(bucket);
+  if (amount > qualityTotal) {
+    bucket.standard = (bucket.standard || 0) + (amount - qualityTotal);
+  }
+  state.qualityInventory[key] = bucket;
+}
+
+function addQualityItem(key, amount, quality = "standard") {
+  if (!isQualityTracked(key) || amount <= 0) return;
+  state.qualityInventory ||= {};
+  const cleanQuality = QUALITY_ORDER.includes(quality) ? quality : "standard";
+  state.qualityInventory[key] = state.qualityInventory[key] || {};
+  state.qualityInventory[key][cleanQuality] = (state.qualityInventory[key][cleanQuality] || 0) + amount;
+}
+
+function spendQualityItem(key, amount) {
+  if (!isQualityTracked(key) || amount <= 0) return [];
+  ensureQualityTotals(key);
+  const spent = [];
+  const bucket = state.qualityInventory[key] || {};
+  let remaining = amount;
+  for (const quality of QUALITY_ORDER) {
+    if (remaining <= 0) break;
+    const used = Math.min(bucket[quality] || 0, remaining);
+    if (!used) continue;
+    bucket[quality] -= used;
+    spent.push({ quality, amount: used });
+    remaining -= used;
+  }
+  state.qualityInventory[key] = bucket;
+  return spent;
+}
+
+function qualityScore(quality) {
+  return Math.max(0, QUALITY_ORDER.indexOf(quality));
+}
+
+function qualityFromScore(score) {
+  if (score >= 1.5) return "excellent";
+  if (score >= 0.75) return "good";
+  return "standard";
+}
+
+function nextQuality(quality) {
+  const index = QUALITY_ORDER.indexOf(quality);
+  return QUALITY_ORDER[Math.min(QUALITY_ORDER.length - 1, Math.max(0, index) + 1)];
+}
+
+function qualityFromSpent(spentByItem) {
+  let score = 0;
+  let count = 0;
+  Object.values(spentByItem).flat().forEach((spent) => {
+    score += qualityScore(spent.quality) * spent.amount;
+    count += spent.amount;
+  });
+  return count ? qualityFromScore(score / count) : "standard";
+}
+
+function qualityBreakdown(key) {
+  if (!isQualityTracked(key)) return "";
+  ensureQualityTotals(key);
+  const bucket = state.qualityInventory?.[key] || {};
+  return QUALITY_ORDER
+    .filter((quality) => (bucket[quality] || 0) > 0)
+    .map((quality) => `${QUALITY_LABELS[quality]} ${bucket[quality]}`)
+    .join(", ");
+}
+
+function restStaminaDiscount() {
+  let discount = 0;
+  if (state.shalomRestDays > 0 || state.restedBuffDays > 0) discount += 1;
+  if ((state.restBuffs?.refreshed || 0) > 0) discount += 2;
+  else if ((state.restBuffs?.settled || 0) > 0) discount += 1;
+  return Math.min(3, discount);
+}
+
+function consumeRestBuffUse() {
+  if ((state.restBuffs?.refreshed || 0) > 0) {
+    state.restBuffs.refreshed -= 1;
+  } else if ((state.restBuffs?.settled || 0) > 0) {
+    state.restBuffs.settled -= 1;
+  }
+}
+
+function restBuffSummary() {
+  const buffs = [];
+  if (state.restedBuffDays > 0) buffs.push("Well Rested");
+  if ((state.restBuffs?.refreshed || 0) > 0) buffs.push(`Refreshed (${state.restBuffs.refreshed})`);
+  if ((state.restBuffs?.settled || 0) > 0) buffs.push(`Settled (${state.restBuffs.settled})`);
+  return buffs.length ? buffs.join(", ") : "None";
+}
+
+function restUsesSummary() {
+  const shortLeft = Math.max(0, REST_LIMITS.shortRest - (state.dailyRest?.shortRest || 0));
+  const napLeft = Math.max(0, REST_LIMITS.nap - (state.dailyRest?.nap || 0));
+  return `${shortLeft} short, ${napLeft} nap`;
 }
 
 function canDoLabor(action) {
@@ -870,15 +1068,16 @@ function canDoLabor(action) {
 }
 
 function spendStamina(amount) {
-  const cost = Math.max(1, amount - (hasRestedStaminaBoost() ? 1 : 0));
+  const cost = Math.max(1, amount - restStaminaDiscount());
   if (!hasStamina(amount)) return false;
   state.stamina -= cost;
+  consumeRestBuffUse();
   advanceTime(20);
   return true;
 }
 
 function hasStamina(amount) {
-  const cost = Math.max(1, amount - (hasRestedStaminaBoost() ? 1 : 0));
+  const cost = Math.max(1, amount - restStaminaDiscount());
   if (state.stamina >= cost) return true;
   pushMessage("You are low on stamina. Rest in the cabin.");
   return false;
@@ -914,6 +1113,7 @@ function handleHotspot(hotspot) {
   if (action === "sweepKitchen") sweepKitchen();
   if (action === "storeHarvest") openModal("inventory", "Pantry Inventory");
   if (action === "crop") openCropModal(hotspot.crop);
+  if (action === "fieldsPanel") openFieldsPanel();
   if (action === "gatherHerbs") gatherHerbs();
   if (action === "compost") compostArea();
   if (action === "refillWateringCan") refillWateringCan();
@@ -947,10 +1147,21 @@ function restAtCabin() {
     pushMessage("Short rest is available in the Cabin Entry or Living Room. Deeper sleep is available in the Bedroom.");
     return;
   }
-  state.energy = Math.min(100, state.energy + 35);
-  state.stamina = Math.min(100, state.stamina + 35);
-  advanceTime(90);
-  pushMessage("You rested in the cabin and recovered energy.");
+  if ((state.dailyRest?.shortRest || 0) >= REST_LIMITS.shortRest) {
+    pushMessage("You have already taken your short rests for today. A bed nap or evening sleep will restore more.");
+    return;
+  }
+  if (state.minute + 45 >= 21 * 60) {
+    pushMessage("It is too late for a short rest. Sleep through the night from the bedroom instead.");
+    return;
+  }
+  state.dailyRest.shortRest += 1;
+  state.energy = Math.min(100, state.energy + 10);
+  state.stamina = Math.min(100, state.stamina + 20);
+  state.restBuffs.settled = Math.max(state.restBuffs.settled || 0, 2);
+  triggerSceneEffect("rest");
+  advanceTime(45);
+  pushMessage("You took a short rest and feel settled. The next two labor actions cost 1 less stamina.");
 }
 
 function tidyCottage() {
@@ -1042,7 +1253,7 @@ function waterJar() {
 
 function gatherHerbs() {
   if (!canDoLabor("gather") || !spendStamina(4)) return;
-  addItem("herbs", 2);
+  addItem("herbs", 2, "standard");
   markPrep("gatherHerbs");
   pushMessage("Gathered clean herbs. Herbal learning remains cautious and educational.");
 }
@@ -1121,8 +1332,9 @@ function fishPond() {
     return;
   }
   if (!canDoLabor("fish") || !spendStamina(state.tools.fishingNet ? 6 : 8)) return;
-  addItem("cleanFish", state.tools.fishingNet ? 2 : 1);
-  pushMessage("Caught clean fish from the pond, keeping only fish with fins and scales.");
+  const quality = state.tools.fishingNet ? "good" : "standard";
+  addItem("cleanFish", state.tools.fishingNet ? 2 : 1, quality);
+  pushMessage(`Caught ${QUALITY_LABELS[quality]} clean fish from the pond, keeping only fish with fins and scales.`);
 }
 
 function huntDeer() {
@@ -1136,10 +1348,10 @@ function huntDeer() {
   }
   if (!canDoLabor("hunt") || !spendStamina(14)) return;
   state.inventory.arrows -= 1;
-  addItem("venison", 2);
+  addItem("venison", 2, "good");
   addItem("hide", 1);
   addItem("fur", 1);
-  pushMessage("Harvested clean wild game with care: venison, hide, and fur were added.");
+  pushMessage("Harvested clean wild game with care: good venison, hide, and fur were added.");
 }
 
 function setAsideSabbathBasket() {
@@ -1151,9 +1363,9 @@ function setAsideSabbathBasket() {
     pushMessage("Set aside prepared food, water, and herbs for the Sabbath basket.");
     return;
   }
-  state.inventory.preparedFood -= 1;
+  spendItem("preparedFood", 1);
   state.inventory.water -= 1;
-  state.inventory.herbs -= 1;
+  spendItem("herbs", 1);
   markPrep("sabbathBasket");
   pushMessage("The Sabbath basket is set aside.");
 }
@@ -1292,10 +1504,11 @@ function collectAnimalProduct(animalId) {
     return;
   }
   if (!canDoLabor("animalProduct") || !spendStamina(4)) return;
-  addItem(catalog.product, Math.max(1, group.count * catalog.productAmount));
+  const quality = group.cleanedToday ? "good" : "standard";
+  addItem(catalog.product, Math.max(1, group.count * catalog.productAmount), quality);
   group.productCollectedToday = true;
   closeModal();
-  pushMessage(`${catalog.productLabel} complete: ${itemLabels[catalog.product]} added.`);
+  pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.`);
 }
 
 function collectChickenFeathers() {
@@ -1324,10 +1537,11 @@ function harvestAnimal(animalId) {
   }
   if (!canDoLabor("animalHarvest") || !spendStamina(10)) return;
   group.count -= 1;
-  addItem(catalog.meatItem, catalog.meatAmount);
+  const quality = group.fedToday && group.wateredToday && group.cleanedToday ? "excellent" : group.fedToday || group.wateredToday ? "good" : "standard";
+  addItem(catalog.meatItem, catalog.meatAmount, quality);
   if (catalog.secondaryItem) addItem(catalog.secondaryItem, catalog.secondaryAmount);
   closeModal();
-  pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. Clean meat was prepared without blood.`);
+  pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. ${QUALITY_LABELS[quality]} clean meat was prepared without blood.`);
 }
 
 function openBarnCareModal() {
@@ -1444,29 +1658,76 @@ function barnAnimalSummary() {
     .join("<br>");
 }
 
-function openCropModal(cropId) {
-  const catalog = cropCatalog[cropId];
-  const crop = state.crops[cropId];
-  const cards = [];
-
-  if (!crop.planted) {
-    cards.push(buttonCard("Plant", `Use 1 ${itemLabels[catalog.seedItem]} to plant ${catalog.name}.`, () => plantCrop(cropId), state.inventory[catalog.seedItem] <= 0 || !canPreviewLabor("plant")));
-  } else {
-    cards.push(buttonCard("Water", catalog.waterNeeds, () => waterCrop(cropId), state.inventory.wateringCanWater <= 0));
-    cards.push(buttonCard("Weed", "Remove weeds so the bed can grow well.", () => weedCrop(cropId), !crop.hasWeeds || !canPreviewLabor("weed")));
-    cards.push(buttonCard("Apply Fertilizer", "Use fertilizer to support stronger growth.", () => fertilizeCrop(cropId), crop.fertilized || state.inventory.fertilizer <= 0 || !canPreviewLabor("fertilize")));
-    cards.push(buttonCard("Harvest", "Harvest mature clean produce and plant matter.", () => harvestCrop(cropId), !crop.readyToHarvest || !canPreviewLabor("harvest")));
-  }
-  cards.push(`<article class="modal-card"><h3>Inspect Notes</h3><p>${catalog.gardeningNote}</p><p><strong>Status:</strong> ${cropStatus(cropId)}</p><p><strong>Clean status:</strong> ${catalog.cleanStatus}</p></article>`);
-
-  openCustomModal(`${catalog.name} Bed`, `<div class="card-grid">${cards.join("")}</div>`);
-  bindModalActions({
-    plant: () => plantCrop(cropId),
-    water: () => waterCrop(cropId),
-    weed: () => weedCrop(cropId),
-    "apply fertilizer": () => fertilizeCrop(cropId),
-    harvest: () => harvestCrop(cropId)
+function openFieldsPanel() {
+  const fieldCards = ["field1", "field2", "field3"].map((fieldId, index) => {
+    const bed = state.crops[fieldId];
+    const requiredUpgrade = gardenBeds[fieldId].requiresUpgrade;
+    const locked = requiredUpgrade && !state.upgrades?.[requiredUpgrade];
+    return `<article class="modal-card">
+      <h3>${bed.name || gardenBeds[fieldId].defaultName}</h3>
+      <p>${locked ? "Future tractor field. This will unlock after the upgrade system is added." : cropStatus(fieldId)}</p>
+      <p><strong>Planned role:</strong> larger plantings, field crops, and upgrade-based expansion.</p>
+      <button type="button" data-field-bed="${fieldId}" ${locked ? "disabled" : ""}>Manage Field ${index + 1}</button>
+    </article>`;
+  }).join("");
+  openCustomModal("More Fields", `
+    <p>Beyond the fence are larger fields planned for tractor work and future upgrades. For now they show the expansion plan without cluttering the main garden.</p>
+    <div class="card-grid">${fieldCards}</div>
+  `);
+  document.querySelectorAll("[data-field-bed]").forEach((button) => {
+    button.addEventListener("click", () => openCropModal(button.dataset.fieldBed));
   });
+}
+
+function openCropModal(cropId) {
+  const bed = state.crops[cropId];
+  if (!bed) return;
+  const requiredUpgrade = gardenBeds[cropId]?.requiresUpgrade;
+  if (requiredUpgrade && !state.upgrades?.[requiredUpgrade]) {
+    pushMessage("Those larger fields need a tractor upgrade before they can be worked.");
+    openFieldsPanel();
+    return;
+  }
+  const cropButtons = cropChoices.map((type) => {
+    const crop = cropTypes[type];
+    return `<button type="button" data-plant-crop="${type}" ${state.inventory[crop.seedItem] <= 0 || !canPreviewLabor("plant") ? "disabled" : ""}>Plant ${crop.name}</button>`;
+  }).join("");
+  const plantList = bed.plantings.length
+    ? bed.plantings.map((planting) => `<li>${cropTypes[planting.cropType].name}: ${planting.readyToHarvest ? "ready" : `stage ${planting.growthStage}`}</li>`).join("")
+    : "<li>No plantings yet.</li>";
+  openCustomModal(bed.name || gardenBeds[cropId].defaultName, `
+    <div class="card-grid">
+      <article class="modal-card">
+        <h3>Bed Name</h3>
+        <label class="tester-field">Name
+          <input id="bedNameInput" type="text" maxlength="32" value="${escapeAttribute(bed.name || "")}">
+        </label>
+        <button type="button" data-modal-action="save name">Save Name</button>
+      </article>
+      <article class="modal-card">
+        <h3>Plant</h3>
+        <p>Plant multiple clean crops in this bed if you have seeds.</p>
+        ${cropButtons}
+      </article>
+      <article class="modal-card">
+        <h3>Soil</h3>
+        <p>${cropStatus(cropId)}</p>
+        <button type="button" data-modal-action="add compost" ${bed.composted || state.inventory.plantMatter <= 0 || !canPreviewLabor("compost") ? "disabled" : ""}>Add Compost</button>
+        <button type="button" data-modal-action="apply fertilizer" ${bed.fertilized || state.inventory.fertilizer <= 0 || !canPreviewLabor("fertilize") ? "disabled" : ""}>Apply Fertilizer</button>
+      </article>
+      <article class="modal-card">
+        <h3>Care</h3>
+        <button type="button" data-modal-action="water" ${!bed.plantings.length || state.inventory.wateringCanWater <= 0 ? "disabled" : ""}>Water</button>
+        <button type="button" data-modal-action="weed" ${!bed.hasWeeds || !canPreviewLabor("weed") ? "disabled" : ""}>Weed</button>
+        <button type="button" data-modal-action="harvest" ${!bed.plantings.some((planting) => planting.readyToHarvest) || !canPreviewLabor("harvest") ? "disabled" : ""}>Harvest Ready</button>
+      </article>
+      <article class="modal-card">
+        <h3>Plantings</h3>
+        <ul>${plantList}</ul>
+      </article>
+    </div>
+  `);
+  bindCropBedActions(cropId);
 }
 
 function canPreviewLabor(action) {
@@ -1478,6 +1739,27 @@ function buttonCard(title, text, handler, disabled = false) {
   return `<article class="modal-card"><h3>${title}</h3><p>${text}</p><button type="button" data-modal-action="${action}" ${disabled ? "disabled" : ""}>${title}</button></article>`;
 }
 
+function escapeAttribute(value) {
+  return String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
+}
+
+function bindCropBedActions(cropId) {
+  bindModalActions({
+    "save name": () => saveBedName(cropId),
+    "add compost": () => compostCropBed(cropId),
+    "apply fertilizer": () => fertilizeCrop(cropId),
+    water: () => waterCrop(cropId),
+    weed: () => weedCrop(cropId),
+    harvest: () => harvestCrop(cropId)
+  });
+  document.querySelectorAll("[data-plant-crop]").forEach((button) => {
+    button.addEventListener("click", () => {
+      plantCrop(cropId, button.dataset.plantCrop);
+      render();
+    });
+  });
+}
+
 function bindModalActions(actions) {
   document.querySelectorAll("[data-modal-action]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1487,22 +1769,34 @@ function bindModalActions(actions) {
   });
 }
 
-function plantCrop(cropId) {
-  const catalog = cropCatalog[cropId];
+function saveBedName(cropId) {
+  const bed = state.crops[cropId];
+  const name = document.getElementById("bedNameInput")?.value.trim();
+  bed.name = name || gardenBeds[cropId].defaultName;
+  closeModal();
+  pushMessage(`Renamed bed to ${bed.name}.`);
+}
+
+function plantCrop(cropId, cropType) {
+  const bed = state.crops[cropId];
+  const catalog = cropTypes[cropType];
+  if (!bed || !catalog) return;
   if (!canDoLabor("plant")) return;
   if (state.inventory[catalog.seedItem] <= 0) {
     pushMessage(`You need ${itemLabels[catalog.seedItem]} to plant ${catalog.name}.`);
     return;
   }
   state.inventory[catalog.seedItem] -= 1;
-  state.crops[cropId] = { ...emptyCrop(), planted: true, growthStage: 1 };
+  bed.plantings.push({ ...emptyCrop(cropType), growthStage: 1 });
+  bed.hasWeeds = false;
   closeModal();
+  triggerSceneEffect("plant", cropId);
   pushMessage(`Planted clean ${catalog.name}.`);
 }
 
 function waterCrop(cropId) {
-  const crop = state.crops[cropId];
-  if (!crop.planted) return;
+  const bed = state.crops[cropId];
+  if (!bed?.plantings.length) return;
   if ((state.inventory.wateringCanWater || 0) <= 0) {
     pushMessage("Refill the watering can before watering crops.");
     return;
@@ -1510,30 +1804,51 @@ function waterCrop(cropId) {
   if (!canDoLabor("water")) return;
   if (!hasStamina(2)) return;
   state.inventory.wateringCanWater -= 1;
-  crop.wateredToday = true;
+  bed.wateredToday = true;
   spendStamina(2);
   closeModal();
-  pushMessage(`${cropCatalog[cropId].name} watered.`);
+  triggerSceneEffect("waterCrop", cropId);
+  pushMessage(`${bed.name} watered.`);
 }
 
 function weedCrop(cropId) {
-  const crop = state.crops[cropId];
-  if (!crop.planted || !crop.hasWeeds) {
+  const bed = state.crops[cropId];
+  if (!bed?.hasWeeds) {
     pushMessage("This bed does not need weeding.");
     return;
   }
   if (!canDoLabor("weed") || !spendStamina(3)) return;
-  crop.hasWeeds = false;
-  crop.weededToday = true;
+  bed.hasWeeds = false;
+  bed.weededToday = true;
   addItem("plantMatter", 1);
   closeModal();
-  pushMessage(`${cropCatalog[cropId].name} bed weeded. Plant matter was collected for compost.`);
+  triggerSceneEffect("weed", cropId);
+  pushMessage(`${bed.name} weeded. Plant matter was collected for compost.`);
+}
+
+function compostCropBed(cropId) {
+  const bed = state.crops[cropId];
+  if (!bed) return;
+  if (bed.composted) {
+    pushMessage("This bed already has compost worked in.");
+    return;
+  }
+  if ((state.inventory.plantMatter || 0) <= 0) {
+    pushMessage("Collect plant matter before adding compost.");
+    return;
+  }
+  if (!canDoLabor("compost") || !spendStamina(2)) return;
+  state.inventory.plantMatter -= 1;
+  bed.composted = true;
+  triggerSceneEffect("compost", cropId);
+  closeModal();
+  pushMessage(`${bed.name} has compost worked into the soil.`);
 }
 
 function fertilizeCrop(cropId) {
-  const crop = state.crops[cropId];
-  if (!crop.planted) return;
-  if (crop.fertilized) {
+  const bed = state.crops[cropId];
+  if (!bed) return;
+  if (bed.fertilized) {
     pushMessage("This bed has already been fertilized.");
     return;
   }
@@ -1543,31 +1858,41 @@ function fertilizeCrop(cropId) {
   }
   if (!canDoLabor("fertilize") || !spendStamina(2)) return;
   state.inventory.fertilizer -= 1;
-  crop.fertilized = true;
+  bed.fertilized = true;
   closeModal();
-  pushMessage(`${cropCatalog[cropId].name} bed fertilized.`);
+  triggerSceneEffect("compost", cropId);
+  pushMessage(`${bed.name} fertilized.`);
 }
 
 function harvestCrop(cropId) {
-  const catalog = cropCatalog[cropId];
-  const crop = state.crops[cropId];
-  if (!crop.readyToHarvest) {
-    pushMessage(`${catalog.name} is not ready to harvest.`);
+  const bed = state.crops[cropId];
+  if (!bed?.plantings.some((planting) => planting.readyToHarvest)) {
+    pushMessage(`${bed?.name || "This bed"} is not ready to harvest.`);
     return;
   }
   if (!canDoLabor("harvest") || !spendStamina(5)) return;
-  addItem(catalog.harvestItem, crop.fertilized ? 4 : 3);
+  const ready = bed.plantings.filter((planting) => planting.readyToHarvest);
+  const quality = bed.fertilized ? "excellent" : bed.composted ? "good" : "standard";
+  ready.forEach((planting) => {
+    const catalog = cropTypes[planting.cropType];
+    addItem(catalog.harvestItem, bed.fertilized || bed.composted ? 4 : 3, quality);
+  });
   addItem("plantMatter", 1);
-  state.crops[cropId] = emptyCrop();
+  bed.plantings = bed.plantings.filter((planting) => !planting.readyToHarvest);
+  if (!bed.plantings.length) {
+    bed.wateredToday = false;
+    bed.hasWeeds = false;
+  }
   closeModal();
-  pushMessage(`Harvested clean ${catalog.name}.`);
+  triggerSceneEffect("harvest", cropId);
+  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}.`);
 }
 
 function cropStatus(cropId) {
-  const crop = state.crops[cropId];
-  if (!crop.planted) return "Empty bed";
-  if (crop.readyToHarvest) return "Ready to harvest";
-  return `Growing, stage ${crop.growthStage}, watered today: ${crop.wateredToday ? "yes" : "no"}, weeds: ${crop.hasWeeds ? "yes" : "no"}, fertilized: ${crop.fertilized ? "yes" : "no"}`;
+  const bed = state.crops[cropId];
+  if (!bed?.plantings.length) return `Empty bed. Compost: ${bed?.composted ? "yes" : "no"}, fertilizer: ${bed?.fertilized ? "yes" : "no"}`;
+  const ready = bed.plantings.filter((planting) => planting.readyToHarvest).length;
+  return `${bed.plantings.length} planting${bed.plantings.length === 1 ? "" : "s"}, ${ready} ready, watered today: ${bed.wateredToday ? "yes" : "no"}, weeds: ${bed.hasWeeds ? "yes" : "no"}, compost: ${bed.composted ? "yes" : "no"}, fertilizer: ${bed.fertilized ? "yes" : "no"}`;
 }
 
 function craftItem(id) {
@@ -1592,7 +1917,33 @@ function craftItem(id) {
   openModal("crafting");
 }
 
-function cookItem(id) {
+function prepRecipe(id) {
+  const item = cookingRecipes.find((recipeItem) => recipeItem.id === id);
+  if (!item || !canDoLabor("cook")) return;
+  if (state.preppedFood) {
+    pushMessage("A recipe is already prepped on the counter. Cook it at the stove first.");
+    return;
+  }
+  if (item.cleanStatus !== "clean" || !edibleItems[item.id]) {
+    pushMessage("This food is not approved by clean food rules.");
+    return;
+  }
+  if (!hasIngredients(item.ingredients)) {
+    pushMessage(`Not enough ingredients for ${item.name}.`);
+    return;
+  }
+  if (!spendStamina(2)) return;
+  const spent = spendIngredients(item.ingredients);
+  const quality = qualityFromSpent(spent);
+  state.preppedFood = { recipeId: item.id, quality };
+  state.kitchenChores.counters = true;
+  closeModal();
+  triggerSceneEffect("prep");
+  pushMessage(`${item.name} is prepped on the counter at ${QUALITY_LABELS[quality]} quality. Move to the stove to cook it higher.`);
+  render();
+}
+
+function cookItem(id, mode = "direct") {
   const item = cookingRecipes.find((recipeItem) => recipeItem.id === id);
   if (!item || !canDoLabor("cook")) return;
   if (item.cleanStatus !== "clean" || !edibleItems[item.id]) {
@@ -1603,15 +1954,31 @@ function cookItem(id) {
     pushMessage(`Not enough ingredients for ${item.name}.`);
     return;
   }
-  spendIngredients(item.ingredients);
-  addItem(item.id, 1);
-  Object.entries(item.bonus || {}).forEach(([key, value]) => addItem(key, value));
+  const spent = spendIngredients(item.ingredients);
+  const quality = qualityFromSpent(spent);
+  finishCookedRecipe(item, quality, mode);
+}
+
+function cookPreppedFood() {
+  const prepped = state.preppedFood;
+  const item = prepped ? cookingRecipes.find((recipeItem) => recipeItem.id === prepped.recipeId) : null;
+  if (!item || !canDoLabor("cook")) {
+    pushMessage("Prep food on the counter before using this stove option.");
+    return;
+  }
+  state.preppedFood = null;
+  finishCookedRecipe(item, nextQuality(prepped.quality), "prepped");
+}
+
+function finishCookedRecipe(item, quality, mode) {
+  addItem(item.id, 1, quality);
+  Object.entries(item.bonus || {}).forEach(([key, value]) => addItem(key, value, quality));
   markPrep("prepareFood");
   state.kitchenChores.dishes = true;
-  state.kitchenChores.counters = true;
+  if (mode === "direct") state.kitchenChores.counters = true;
   closeModal();
   triggerSceneEffect("cook");
-  pushMessage(`Prepared clean food: ${item.name}.`);
+  pushMessage(`Prepared ${QUALITY_LABELS[quality]} clean food: ${item.name}.`);
   render();
 }
 
@@ -1645,13 +2012,24 @@ function hasIngredients(ingredients) {
 }
 
 function spendIngredients(ingredients) {
+  const spentByItem = {};
   Object.entries(ingredients).forEach(([key, amount]) => {
+    spentByItem[key] = spendQualityItem(key, amount);
     state.inventory[key] -= amount;
   });
+  return spentByItem;
 }
 
-function addItem(key, amount) {
+function spendItem(key, amount) {
+  if ((state.inventory[key] || 0) < amount) return false;
+  spendQualityItem(key, amount);
+  state.inventory[key] -= amount;
+  return true;
+}
+
+function addItem(key, amount, quality = "standard") {
   state.inventory[key] = (state.inventory[key] || 0) + amount;
+  addQualityItem(key, amount, quality);
 }
 
 function advanceTime(minutes) {
@@ -1668,20 +2046,27 @@ function nextDay() {
   state.minute = 7 * 60;
   state.weatherIndex = (state.weatherIndex + 1) % weatherCycle.length;
   state.seasonIndex = Math.floor((state.day - 1) / 28) % seasons.length;
+  state.dailyRest = createDailyRest();
+  state.restBuffs = createRestBuffs();
+  state.preppedFood = null;
   if (state.day % 2 === 0) state.kitchenChores.floor = true;
   updateRoomChoresForNewDay();
   resetBarnAnimalDailyCare();
 
-  for (const [cropId, crop] of Object.entries(state.crops)) {
-    if (!crop.planted) continue;
-    if (crop.wateredToday && !crop.hasWeeds) {
-      crop.daysWatered += crop.fertilized ? 2 : 1;
-      crop.growthStage = Math.min(4, crop.growthStage + (crop.fertilized ? 2 : 1));
-      crop.readyToHarvest = crop.daysWatered >= cropCatalog[cropId].daysToMature;
+  for (const [bedId, bed] of Object.entries(state.crops)) {
+    if (!bed.plantings?.length) continue;
+    if (bed.wateredToday && !bed.hasWeeds) {
+      const growthBoost = bed.fertilized ? 2 : 1;
+      bed.plantings.forEach((planting) => {
+        const crop = cropTypes[planting.cropType];
+        planting.daysWatered += growthBoost;
+        planting.growthStage = Math.min(4, planting.growthStage + growthBoost);
+        planting.readyToHarvest = planting.daysWatered >= crop.daysToMature;
+      });
     }
-    if (!crop.readyToHarvest && !crop.weededToday && ((state.day + cropId.length) % 3 === 0)) crop.hasWeeds = true;
-    crop.wateredToday = false;
-    crop.weededToday = false;
+    if (!bed.plantings.every((planting) => planting.readyToHarvest) && !bed.weededToday && ((state.day + bedId.length) % 3 === 0)) bed.hasWeeds = true;
+    bed.wateredToday = false;
+    bed.weededToday = false;
   }
 
   if (wasSabbathRest && previousWeekdayIndex === 6) {
@@ -1764,8 +2149,13 @@ function openModal(type, titleOverride) {
   }
   if (type === "cooking") {
     modalTitle.textContent = "Cooking";
-    modalBody.innerHTML = recipeMarkup(cookingRecipes, "cook");
-    bindRecipeButtons("cook");
+    modalBody.innerHTML = cookingMarkup();
+    bindCookingButtons();
+  }
+  if (type === "foodPrep") {
+    modalTitle.textContent = "Food Prep Area";
+    modalBody.innerHTML = foodPrepMarkup();
+    bindPrepButtons();
   }
   if (type === "ordering") {
     modalTitle.textContent = "Supply Catalog";
@@ -1852,12 +2242,32 @@ function bindRecipeButtons(type) {
   });
 }
 
+function bindCookingButtons() {
+  document.querySelectorAll("[data-cook]").forEach((button) => {
+    button.addEventListener("click", () => cookItem(button.dataset.cook, "direct"));
+  });
+  document.querySelectorAll("[data-cook-prepped]").forEach((button) => {
+    button.addEventListener("click", () => cookPreppedFood());
+  });
+}
+
+function bindPrepButtons() {
+  document.querySelectorAll("[data-prep-recipe]").forEach((button) => {
+    button.addEventListener("click", () => prepRecipe(button.dataset.prepRecipe));
+  });
+}
+
 function inventoryMarkup(includeAll = false) {
   const rows = Object.entries(state.inventory)
     .filter(([, amount]) => includeAll || amount > 0)
-    .map(([key, amount]) => `<div class="inventory-item"><span>${itemLabels[key] || key}</span><strong>${amount}</strong></div>`)
+    .map(([key, amount]) => inventoryItemMarkup(key, amount))
     .join("");
   return `<div class="inventory-list">${rows || "<p class=\"hint-text\">Inventory is empty.</p>"}</div>`;
+}
+
+function inventoryItemMarkup(key, amount) {
+  const breakdown = qualityBreakdown(key);
+  return `<div class="inventory-item"><span>${itemLabels[key] || key}${breakdown ? `<br><small>${breakdown}</small>` : ""}</span><strong>${amount}</strong></div>`;
 }
 
 function toolsMarkup() {
@@ -1880,6 +2290,56 @@ function recipeMarkup(list, type) {
       <button type="button" ${attr}="${item.id}" ${disabled ? "disabled" : ""}>${alreadyOwnedTool ? "Owned" : type === "craft" ? "Craft" : "Cook"}</button>
     </article>`;
   }).join("")}</div>`;
+}
+
+function cookingMarkup() {
+  const prepped = state.preppedFood;
+  const preppedRecipe = prepped ? cookingRecipes.find((item) => item.id === prepped.recipeId) : null;
+  const preppedCard = preppedRecipe ? `
+    <article class="modal-card">
+      <h3>Cook Prepped ${preppedRecipe.name}</h3>
+      <p>Counter prep is ready. Cooking now will finish at ${QUALITY_LABELS[nextQuality(prepped.quality)]} quality.</p>
+      <button type="button" data-cook-prepped="${preppedRecipe.id}">Cook Prepped Food</button>
+    </article>
+  ` : `
+    <article class="modal-card">
+      <h3>No Counter Prep</h3>
+      <p>Use the Food Prep Area first for higher-quality cooking, or cook directly below.</p>
+      <button type="button" disabled>Nothing Prepped</button>
+    </article>
+  `;
+  return `
+    <div class="card-grid">${preppedCard}</div>
+    <h3>Cook Directly</h3>
+    <p class="hint-text">Direct stove cooking skips counter prep and keeps food at ingredient quality.</p>
+    ${recipeMarkup(cookingRecipes, "cook")}
+  `;
+}
+
+function foodPrepMarkup() {
+  const prepped = state.preppedFood;
+  const preppedRecipe = prepped ? cookingRecipes.find((item) => item.id === prepped.recipeId) : null;
+  const ingredientKeys = [...new Set(cookingRecipes.flatMap((item) => Object.keys(item.ingredients)))];
+  const ingredientRows = ingredientKeys
+    .map((key) => inventoryItemMarkup(key, state.inventory[key] || 0))
+    .join("");
+  return `
+    <div class="panel-section">
+      <p class="hint-text">Place clean ingredients here before cooking. Counter prep raises the finished food by one quality step.</p>
+      ${preppedRecipe ? `<p><strong>Ready for stove:</strong> ${preppedRecipe.name} (${QUALITY_LABELS[prepped.quality]} prep)</p>` : ""}
+      <div class="inventory-list">${ingredientRows}</div>
+    </div>
+    <div class="card-grid">${cookingRecipes.map((item) => {
+      const needs = Object.entries(item.ingredients).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
+      const disabled = Boolean(state.preppedFood) || !hasIngredients(item.ingredients) || isSabbath();
+      return `<article class="modal-card">
+        <h3>${item.name}</h3>
+        <p>${item.description}</p>
+        <p><strong>Needs:</strong> ${needs}</p>
+        <button type="button" data-prep-recipe="${item.id}" ${disabled ? "disabled" : ""}>Prep on Counter</button>
+      </article>`;
+    }).join("")}</div>
+  `;
 }
 
 function orderingMarkup() {
@@ -1988,7 +2448,7 @@ function sellShopItem(id) {
     pushMessage(`No ${itemLabels[id] || id} available to sell.`);
     return;
   }
-  state.inventory[id] -= 1;
+  spendItem(id, 1);
   state.inventory.coins += item.price;
   pushMessage(`Sold 1 ${itemLabels[id] || id}.`);
   render();
@@ -2023,16 +2483,21 @@ function iceBoxMarkup() {
 }
 
 function bedRestMarkup() {
+  const napUsed = state.dailyRest?.nap || 0;
+  const napRemaining = Math.max(0, REST_LIMITS.nap - napUsed);
+  const napReady = state.minute + 90 < 21 * 60;
+  const sleepReady = state.minute >= SLEEP_THROUGH_NIGHT_MINUTE;
   return `<div class="card-grid">
     <article class="modal-card">
       <h3>Nap</h3>
-      <p>Recover a little stamina and energy without ending the day.</p>
-      <button type="button" data-bed-rest="nap">Nap</button>
+      <p>Recover 45 stamina and 30 energy without ending the day. Adds Refreshed for the next three labor actions.</p>
+      <p><strong>Remaining today:</strong> ${napRemaining}</p>
+      <button type="button" data-bed-rest="nap" ${napRemaining <= 0 || !napReady ? "disabled" : ""}>Nap</button>
     </article>
     <article class="modal-card">
       <h3>Sleep Through Night</h3>
-      <p>Begin the next morning restored, with a gentle rested boost for the work day.</p>
-      <button type="button" data-bed-rest="sleep">Sleep Through Night</button>
+      <p>Available after 6:00 PM. Begin the next morning restored, with Well Rested for the work day.</p>
+      <button type="button" data-bed-rest="sleep" ${sleepReady ? "" : "disabled"}>Sleep Through Night</button>
     </article>
   </div>`;
 }
@@ -2047,23 +2512,43 @@ function bindBedRestButtons() {
 }
 
 function napInBed() {
-  state.stamina = Math.min(100, state.stamina + 25);
-  state.energy = Math.min(100, state.energy + 20);
+  if ((state.dailyRest?.nap || 0) >= REST_LIMITS.nap) {
+    pushMessage("You have already napped today. Sleep through the night after 6:00 PM for a full reset.");
+    closeModal();
+    render();
+    return;
+  }
+  if (state.minute + 90 >= 21 * 60) {
+    pushMessage("It is too late for a nap. Sleep through the night for a full reset.");
+    closeModal();
+    render();
+    return;
+  }
+  state.dailyRest.nap += 1;
+  state.stamina = Math.min(100, state.stamina + 45);
+  state.energy = Math.min(100, state.energy + 30);
+  state.restBuffs.refreshed = Math.max(state.restBuffs.refreshed || 0, 3);
   triggerSceneEffect("rest");
-  advanceTime(75);
-  pushMessage("You took a quiet nap and recovered strength.");
+  advanceTime(90);
+  pushMessage("You took a quiet nap and feel refreshed. The next three labor actions cost 2 less stamina.");
   closeModal();
   render();
 }
 
 function sleepThroughNight() {
+  if (state.minute < SLEEP_THROUGH_NIGHT_MINUTE) {
+    pushMessage("It is too early to sleep through the night. Evening sleep opens after 6:00 PM.");
+    closeModal();
+    render();
+    return;
+  }
   closeModal();
   nextDay();
   state.stamina = 100;
   state.energy = 100;
   state.restedBuffDays = 1;
   triggerSceneEffect("rest");
-  pushMessage("You slept through the night and woke rested for the day ahead.");
+  pushMessage("You slept through the night and woke well rested. Labor costs 1 less stamina today.");
   saveGame(false);
   render();
 }
@@ -2393,7 +2878,8 @@ function statusMarkup() {
     ["Water", state.inventory.water],
     ["Sabbath", sabbathStatus()],
     ["Shalom", state.shalomRestDays > 0 ? "Active" : "None"],
-    ["Rested", state.restedBuffDays > 0 ? "Active" : "None"]
+    ["Rest Buffs", restBuffSummary()],
+    ["Rest Uses", restUsesSummary()]
   ];
   return `<div class="status-grid">${hudItems.map(([label, value]) => `
     <div class="modal-card"><span class="hud-label">${label}</span><span class="hud-value">${value}</span></div>
@@ -2416,7 +2902,6 @@ function areaMenuMarkup() {
     ["pantry", "Pantry"],
     ["barn", "Barn"],
     ["garden", "Garden"],
-    ["fields", "Additional Fields"],
     ["workshed", "Workshed"],
     ["forest", "Forest"],
     ["well", "Well / Water Area"],
@@ -2441,6 +2926,7 @@ function renderScene() {
   stage.classList.toggle("debug-hotspots", state.hotspotDebug);
   document.getElementById("sceneTitleOverlay").textContent = scene.title;
   document.getElementById("sceneDescriptionOverlay").textContent = scene.description;
+  stage.dataset.season = seasons[state.seasonIndex].toLowerCase();
   document.getElementById("sceneDecorations").innerHTML = decorationMarkup(scene.id);
   if (pendingSceneEffect) {
     playSceneEffect(pendingSceneEffect);
@@ -2498,6 +2984,17 @@ function decorationMarkup(sceneId) {
       <span class="leaf" style="--x: 82%; --duration: 20s; --delay: -10s;"></span>
     `;
   }
+  if (sceneId === "garden" || sceneId === "fields") {
+    return `
+      ${effect}
+      ${cropBedObjects(sceneId)}
+      <span class="garden-ambient butterfly" style="--x: 16%; --y: 49%; --delay: -2s;"></span>
+      <span class="garden-ambient bee" style="--x: 70%; --y: 72%; --delay: -5s;"></span>
+      <span class="dew-shimmer" style="--x: 62%; --y: 70%; --w: 20%; --h: 12%;"></span>
+      <span class="compost-steam" style="--x: 83%; --y: 27%; --delay: 0s;"></span>
+      <span class="compost-steam" style="--x: 87%; --y: 25%; --delay: 1.4s;"></span>
+    `;
+  }
   if (sceneId === "kitchen") {
     return `
       ${effect}
@@ -2529,6 +3026,7 @@ function decorationMarkup(sceneId) {
 function kitchenChoreObjects() {
   const chores = state.kitchenChores || {};
   return `
+    ${state.preppedFood ? `<span class="chore-object food-prep-board" style="--x: 49%; --y: 61%;"></span>` : ""}
     ${chores.dishes ? `<span class="chore-object dirty-dishes" style="--x: 9.5%; --y: 48%;"></span>` : ""}
     ${chores.counters ? `<span class="chore-object crumbs" style="--x: 53%; --y: 45%;"></span>` : ""}
     ${chores.floor ? `<span class="chore-object dust-bunny" style="--x: 39%; --y: 76%;"></span>` : ""}
@@ -2560,13 +3058,45 @@ function roomChoreObjects(room) {
   return Object.entries(chores).map(([chore, active]) => active ? positions[chore] || "" : "").join("");
 }
 
-function triggerSceneEffect(type) {
-  pendingSceneEffect = type;
+function cropBedObjects(sceneId) {
+  return Object.entries(gardenBeds)
+    .filter(([, bed]) => bed.scene === sceneId)
+    .map(([bedId, bed]) => cropBedObject(bedId, bed))
+    .join("");
 }
 
-function playSceneEffect(type) {
+function cropBedObject(bedId, bedMeta) {
+  const bed = state.crops[bedId];
+  if (!bed) return "";
+  const soilClass = bed.wateredToday ? "watered" : bed.fertilized || bed.composted ? "healthy" : bed.hasWeeds ? "overgrown" : "dry";
+  const plantings = (bed.plantings || []).slice(0, 5).map((planting, index) => {
+    const crop = cropTypes[planting.cropType];
+    const total = Math.min(bed.plantings.length, 5);
+    const rowTop = 28 + index * (42 / Math.max(total, 1));
+    const rowHeight = Math.max(12, Math.min(28, 40 / Math.max(total, 1)));
+    return `<span class="crop-patch ${planting.cropType} stage-${planting.growthStage} ${planting.readyToHarvest ? "ready" : ""}" style="--i:${index}; --row-top:${rowTop}%; --row-h:${rowHeight}%;" title="${crop.name}"></span>`;
+  }).join("");
+  return `
+    <span class="crop-bed-visual ${bedId} ${soilClass}" style="--x:${bedMeta.x}%; --y:${bedMeta.y}%; --w:${bedMeta.w || 17}%; --h:${bedMeta.h || 12}%; --angle:${bedMeta.angle || 0}deg;${bedMeta.clip ? ` clip-path:${bedMeta.clip};` : ""}">
+      ${plantings}
+      ${bed.hasWeeds ? `<span class="weed-cluster"></span>` : ""}
+      ${bed.composted || bed.fertilized ? `<span class="soil-life"></span>` : ""}
+    </span>
+  `;
+}
+
+function triggerSceneEffect(type, target = null) {
+  pendingSceneEffect = { type, target };
+}
+
+function playSceneEffect(effect) {
   const layer = document.getElementById("sceneEffectLayer");
   if (!layer) return;
+  const type = typeof effect === "string" ? effect : effect.type;
+  const target = typeof effect === "string" ? null : effect.target;
+  const targetBed = target ? gardenBeds[target] : null;
+  const effectStyle = targetBed ? ` style="--fx-x:${targetBed.x}%; --fx-y:${targetBed.y}%;"` : "";
+  const bedEffect = (inner) => targetBed ? `<span class="bed-effect"${effectStyle}>${inner}</span>` : inner;
   const markup = {
     tidy: `
       <span class="tidy-sparkle" style="--x: 18%; --y: 70%; --delay: 0s;"></span>
@@ -2580,6 +3110,11 @@ function playSceneEffect(type) {
       <span class="cooking-steam" style="--x: 35%; --y: 42%; --delay: 0.28s;"></span>
       <span class="stove-warmth"></span>
     `,
+    prep: `
+      <span class="food-prep-board prep-effect" style="--x: 49%; --y: 61%;"></span>
+      <span class="tidy-sparkle" style="--x: 45%; --y: 57%; --delay: 0s;"></span>
+      <span class="tidy-sparkle" style="--x: 53%; --y: 62%; --delay: 0.2s;"></span>
+    `,
     wash: `
       <span class="water-bubble" style="--x: 8%; --y: 47%; --delay: 0s;"></span>
       <span class="water-bubble" style="--x: 12%; --y: 50%; --delay: 0.18s;"></span>
@@ -2590,7 +3125,35 @@ function playSceneEffect(type) {
       <span class="tidy-sparkle" style="--x: 36%; --y: 42%; --delay: 0s;"></span>
       <span class="tidy-sparkle" style="--x: 54%; --y: 36%; --delay: 0.22s;"></span>
       <span class="tidy-sparkle" style="--x: 67%; --y: 48%; --delay: 0.42s;"></span>
-    `
+    `,
+    plant: bedEffect(`
+      <span class="plant-hand"></span>
+      <span class="seed-drop" style="--x: 51%; --y: 54%; --delay: 0s;"></span>
+      <span class="dirt-puff" style="--x: 50%; --y: 58%; --delay: 0.16s;"></span>
+    `),
+    waterCrop: bedEffect(`
+      <span class="watering-can-effect"></span>
+      <span class="water-stream"></span>
+      <span class="water-bubble" style="--x: 46%; --y: 58%; --delay: 0s;"></span>
+      <span class="water-bubble" style="--x: 55%; --y: 60%; --delay: 0.18s;"></span>
+      <span class="soil-darken"></span>
+    `),
+    weed: bedEffect(`
+      <span class="weed-pull"></span>
+      <span class="dirt-puff" style="--x: 51%; --y: 60%; --delay: 0s;"></span>
+      <span class="dirt-puff" style="--x: 55%; --y: 62%; --delay: 0.18s;"></span>
+    `),
+    harvest: bedEffect(`
+      <span class="harvest-sweep"></span>
+      <span class="basket-fill"></span>
+      <span class="tidy-sparkle" style="--x: 48%; --y: 58%; --delay: 0s;"></span>
+      <span class="tidy-sparkle" style="--x: 58%; --y: 55%; --delay: 0.25s;"></span>
+    `),
+    compost: bedEffect(`
+      <span class="compost-toss"></span>
+      <span class="soil-darken"></span>
+      <span class="compost-steam burst" style="--x: 52%; --y: 56%; --delay: 0s;"></span>
+    `)
   }[type];
   if (!markup) return;
   layer.innerHTML = markup;
