@@ -124,7 +124,7 @@ small {
   background-color: #84a969;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   box-shadow: var(--shadow);
 }
 
@@ -1505,24 +1505,41 @@ small {
 
 @media (max-width: 740px) {
   .app-shell {
-    padding: 10px;
+    padding: 8px;
   }
 
   .topbar {
     align-items: stretch;
     flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .topbar h1 {
+    font-size: 1.15rem;
+    margin-bottom: 0;
+  }
+
+  .subtitle {
+    display: none;
   }
 
   .top-actions {
     flex-wrap: nowrap;
     justify-content: flex-start;
     overflow-x: auto;
-    padding-bottom: 4px;
+    gap: 6px;
+    padding-bottom: 3px;
   }
 
-  .top-actions button,
-  .scene-actions button {
+  .top-actions button {
     flex: 0 0 auto;
+    min-height: 40px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  .scene-actions button {
     min-height: 44px;
   }
 
@@ -1539,16 +1556,86 @@ small {
   }
 
   .scene-actions {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
   }
 
   .message-bar {
-    left: 12px;
-    right: 12px;
-    bottom: 76px;
+    left: 10px;
+    right: 10px;
+    bottom: 72px;
     font-size: 0.9rem;
+  }
+}
+
+/* Landscape mobile: phones rotated sideways (height ≤ 500px) */
+@media (max-height: 500px) {
+  .app-shell {
+    padding: 5px 10px;
+  }
+
+  .topbar {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  .topbar h1 {
+    font-size: 1rem;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .top-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 5px;
+    padding-bottom: 2px;
+  }
+
+  .top-actions button {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 4px 8px;
+    font-size: 0.73rem;
+  }
+
+  .scene-actions button {
+    min-height: 34px;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+
+  .hotspot {
+    font-size: 0.78rem;
+  }
+}
+
+/* Portrait orientation hint for mobile */
+.landscape-hint {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 768px) {
+  .landscape-hint {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(30, 22, 10, 0.88);
+    color: rgba(255, 248, 220, 0.95);
+    text-align: center;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    z-index: 200;
+    pointer-events: none;
   }
 }
 
