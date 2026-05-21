@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 8;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
 
@@ -14,6 +14,7 @@ const sceneImages = {
   kitchen: "assets/images/scenes/kitchen.png",
   livingRoom: "assets/images/scenes/living-room.png",
   bedroom: "assets/images/scenes/bedroom.png",
+  bathroom: "assets/images/scenes/bathroom.png",
   pantry: "assets/images/scenes/pantry.png",
   barn: "assets/images/scenes/barn.png",
   garden: "assets/images/scenes/garden.png",
@@ -63,6 +64,7 @@ const scenes = {
     hotspots: [
       hs("rest", "Rest", 30, 42, 25, 22, "rest"),
       hs("bedroom", "Bedroom", 0, 8, 14, 48, "navigate", { target: "bedroom" }),
+      hs("bathroom", "Bathroom", 14, 8, 13, 40, "navigate", { target: "bathroom" }),
       hs("dustBunnies", "Sweep Dust Bunnies", 18, 62, 26, 21, "cleanRoomChore", { room: "livingRoom", chore: "dust", effect: "tidy", message: "The dust bunnies are swept away." }),
       hs("books", "Put Books Away", 56, 42, 22, 20, "cleanRoomChore", { room: "livingRoom", chore: "books", effect: "tidy", message: "The living room books are put away." }),
       hs("journal", "Read Journal", 42, 66, 18, 14, "modal", { modal: "journal" }),
@@ -78,6 +80,18 @@ const scenes = {
       hs("bed", "Bed", 26, 35, 48, 34, "modal", { modal: "bedRest" }),
       hs("dresser", "Dresser", 80, 36, 15, 26, "modal", { modal: "inventory" }),
       hs("back", "Back to Living Room", 0, 13, 14, 48, "navigate", { target: "livingRoom" })
+    ]
+  },
+  bathroom: {
+    id: "bathroom",
+    title: "Bathroom",
+    description: "A clean washroom for bathing, brushing teeth, washing hands, and renewing strength.",
+    background: sceneImages.bathroom,
+    hotspots: [
+      hs("bathtub", "Bathe", 66, 51, 31, 36, "bathe"),
+      hs("sink", "Wash Hands", 18, 39, 30, 24, "washHands"),
+      hs("mirror", "Brush Teeth", 17, 12, 25, 26, "brushTeeth"),
+      hs("back", "Back to Living Room", 0, 11, 12, 61, "navigate", { target: "livingRoom" })
     ]
   },
   kitchen: {
@@ -210,6 +224,7 @@ const scenes = {
     hotspots: [
       hs("gatherWater", "Gather Water", 31, 45, 22, 25, "gatherWater"),
       hs("fillJar", "Fill Water Jar", 58, 46, 20, 21, "fillWaterJar"),
+      hs("laundry", "Wash Laundry", 5, 62, 31, 27, "washLaundry"),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
     ]
   },
@@ -695,6 +710,29 @@ const REST_LIMITS = { shortRest: 2, nap: 1 };
 const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
 const QUALITY_ORDER = ["standard", "good", "excellent"];
 const QUALITY_LABELS = { standard: "Standard", good: "Good", excellent: "Excellent" };
+const WATERING_CAN_CAPACITY = 6;
+const BUFF_DEFINITIONS = {
+  cleanLaundry: {
+    label: "Clean Laundry",
+    className: "buff-laundry",
+    detail: "Fresh laundry boosts harvest and production yields."
+  },
+  relaxed: {
+    label: "Relaxed",
+    className: "buff-relaxed",
+    detail: "Bathing restores stamina and lowers upcoming labor stamina costs."
+  },
+  cleanHands: {
+    label: "Clean Hands",
+    className: "buff-hands",
+    detail: "The next two cooking actions finish one quality tier higher."
+  },
+  freshStart: {
+    label: "Fresh Start",
+    className: "buff-fresh",
+    detail: "Brushing teeth boosts upcoming harvest and production yields."
+  }
+};
 
 function createNewState() {
   return {
@@ -719,6 +757,7 @@ function createNewState() {
     restedBuffDays: 0,
     restBuffs: createRestBuffs(),
     dailyRest: createDailyRest(),
+    buffs: createBuffs(),
     preppedFood: null,
     isSabbathRest: false,
     hotspotDebug: false,
@@ -765,6 +804,10 @@ function createDailyRest() {
   return { shortRest: 0, nap: 0 };
 }
 
+function createBuffs() {
+  return { cleanLaundry: 0, relaxed: 0, cleanHands: 0, freshStart: 0 };
+}
+
 function loadGame() {
   isLoadingSave = true;
   const loaded = readStoredSave(SAVE_KEY) || readStoredSave(SAVE_BACKUP_KEY);
@@ -803,6 +846,7 @@ function hydrateState(savedState) {
     roomChores: mergeRoomChores(savedState.roomChores || {}),
     restBuffs: { ...createRestBuffs(), ...(savedState.restBuffs || {}) },
     dailyRest: { ...createDailyRest(), ...(savedState.dailyRest || {}) },
+    buffs: { ...createBuffs(), ...(savedState.buffs || {}) },
     preppedFood: savedState.preppedFood || null,
     sabbathPrep: { ...Object.fromEntries(sabbathTasks.map((task) => [task.id, false])), ...(savedState.sabbathPrep || {}) },
     journalUnlocked: { ...Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])), ...(savedState.journalUnlocked || {}) },
@@ -1035,6 +1079,7 @@ function restStaminaDiscount() {
   if (state.shalomRestDays > 0 || state.restedBuffDays > 0) discount += 1;
   if ((state.restBuffs?.refreshed || 0) > 0) discount += 2;
   else if ((state.restBuffs?.settled || 0) > 0) discount += 1;
+  if ((state.buffs?.relaxed || 0) > 0) discount += 1;
   return Math.min(3, discount);
 }
 
@@ -1044,6 +1089,7 @@ function consumeRestBuffUse() {
   } else if ((state.restBuffs?.settled || 0) > 0) {
     state.restBuffs.settled -= 1;
   }
+  if ((state.buffs?.relaxed || 0) > 0) state.buffs.relaxed -= 1;
 }
 
 function restBuffSummary() {
@@ -1060,9 +1106,59 @@ function restUsesSummary() {
   return `${shortLeft} short, ${napLeft} nap`;
 }
 
+function activeBuffs() {
+  const buffs = [];
+  if (state.shalomRestDays > 0) {
+    buffs.push({ id: "shalomRest", label: "Shalom Rest", className: "buff-shalom", count: "1d", detail: "Labor costs less stamina today." });
+  }
+  if (state.restedBuffDays > 0) {
+    buffs.push({ id: "wellRested", label: "Well Rested", className: "buff-rested", count: "1d", detail: "Labor costs less stamina today." });
+  }
+  if ((state.restBuffs?.refreshed || 0) > 0) {
+    buffs.push({ id: "refreshed", label: "Refreshed", className: "buff-refreshed", count: state.restBuffs.refreshed, detail: "Stronger stamina discount on upcoming labor." });
+  }
+  if ((state.restBuffs?.settled || 0) > 0) {
+    buffs.push({ id: "settled", label: "Settled", className: "buff-settled", count: state.restBuffs.settled, detail: "Small stamina discount on upcoming labor." });
+  }
+  Object.entries(BUFF_DEFINITIONS).forEach(([id, buff]) => {
+    const count = state.buffs?.[id] || 0;
+    if (count > 0) buffs.push({ id, ...buff, count });
+  });
+  return buffs;
+}
+
+function buffEmblemsMarkup() {
+  const buffs = activeBuffs();
+  if (!buffs.length) return "";
+  return `<div class="buff-emblems" aria-label="Active buffs">${buffs.map((buff) => `
+    <span class="buff-emblem ${buff.className}" title="${buff.label}: ${buff.detail}">
+      <span class="buff-icon" aria-hidden="true"></span>
+      <span class="buff-count">${buff.count}</span>
+    </span>
+  `).join("")}</div>`;
+}
+
+function consumeProductionBuff() {
+  if ((state.buffs?.cleanLaundry || 0) > 0) {
+    state.buffs.cleanLaundry -= 1;
+    return 1;
+  }
+  if ((state.buffs?.freshStart || 0) > 0) {
+    state.buffs.freshStart -= 1;
+    return 1;
+  }
+  return 0;
+}
+
+function improveQualityWithBuff(quality) {
+  if ((state.buffs?.cleanHands || 0) <= 0) return quality;
+  state.buffs.cleanHands -= 1;
+  return nextQuality(quality);
+}
+
 function canDoLabor(action) {
   if (!isSabbath()) return true;
-  if (action === "water" || action === "read" || action === "navigate" || action === "rest" || action === "animalCare") return true;
+  if (action === "water" || action === "read" || action === "navigate" || action === "rest" || action === "animalCare" || action === "hygiene") return true;
   pushMessage("Sabbath rest has begun. Ordinary labor waits; peaceful navigation, reading, and necessary care remain open.");
   return false;
 }
@@ -1111,6 +1207,10 @@ function handleHotspot(hotspot) {
   if (action === "washDishes") washDishes();
   if (action === "cleanCounters") cleanCounters();
   if (action === "sweepKitchen") sweepKitchen();
+  if (action === "washLaundry") washLaundry();
+  if (action === "bathe") batheInTub();
+  if (action === "washHands") washHands();
+  if (action === "brushTeeth") brushTeeth();
   if (action === "storeHarvest") openModal("inventory", "Pantry Inventory");
   if (action === "crop") openCropModal(hotspot.crop);
   if (action === "fieldsPanel") openFieldsPanel();
@@ -1229,10 +1329,15 @@ function putToolsAway() {
 }
 
 function gatherWater() {
-  addItem("water", 3);
+  addItem("water", 4);
+  const beforeCan = state.inventory.wateringCanWater || 0;
+  if (state.tools.wateringCan) {
+    state.inventory.wateringCanWater = WATERING_CAN_CAPACITY;
+  }
   markPrep("gatherWater");
   advanceTime(15);
-  pushMessage("Gathered water for the homestead.");
+  const canText = state.tools.wateringCan && beforeCan < WATERING_CAN_CAPACITY ? " The watering can was topped off for the garden." : "";
+  pushMessage(`Gathered water for the kitchen, animals, Sabbath preparation, and household needs.${canText}`);
 }
 
 function fillWaterJar() {
@@ -1249,6 +1354,61 @@ function waterJar() {
   }
   markPrep("gatherWater");
   pushMessage("The water jar is ready for cooking and Sabbath preparation.");
+}
+
+function washLaundry() {
+  if (!canDoLabor("laundry")) return;
+  if ((state.inventory.water || 0) <= 0) {
+    pushMessage("Gather water first, then wash laundry at the basin.");
+    return;
+  }
+  if (!spendStamina(4)) return;
+  state.inventory.water -= 1;
+  state.buffs.cleanLaundry = Math.max(state.buffs.cleanLaundry || 0, 5);
+  triggerSceneEffect("laundry");
+  pushMessage("Laundry is washed and drying. Clean Laundry will boost the next five harvest or production yields.");
+}
+
+function batheInTub() {
+  if (!canDoLabor("hygiene")) return;
+  if ((state.inventory.water || 0) < 2) {
+    pushMessage("Gather more water before drawing a bath.");
+    return;
+  }
+  if (!spendStamina(2)) return;
+  state.inventory.water -= 2;
+  state.stamina = Math.min(100, state.stamina + 15);
+  state.energy = Math.min(100, state.energy + 5);
+  state.buffs.relaxed = Math.max(state.buffs.relaxed || 0, 4);
+  triggerSceneEffect("hygiene");
+  pushMessage("You bathed and feel relaxed. Stamina recovered a little, and upcoming labor costs less stamina.");
+}
+
+function washHands() {
+  if (!canDoLabor("hygiene")) return;
+  if ((state.inventory.water || 0) <= 0) {
+    pushMessage("Gather water before washing hands.");
+    return;
+  }
+  state.inventory.water -= 1;
+  state.buffs.cleanHands = Math.max(state.buffs.cleanHands || 0, 2);
+  triggerSceneEffect("hygiene");
+  advanceTime(5);
+  pushMessage("Hands are washed clean. Clean Hands will improve upcoming cooking quality.");
+}
+
+function brushTeeth() {
+  if (!canDoLabor("hygiene")) return;
+  if ((state.inventory.water || 0) <= 0) {
+    pushMessage("Gather water before brushing teeth.");
+    return;
+  }
+  state.inventory.water -= 1;
+  state.energy = Math.min(100, state.energy + 5);
+  state.buffs.freshStart = Math.max(state.buffs.freshStart || 0, 3);
+  triggerSceneEffect("hygiene");
+  advanceTime(5);
+  pushMessage("Teeth are brushed. Fresh Start will boost the next three harvest or production yields.");
 }
 
 function gatherHerbs() {
@@ -1273,7 +1433,7 @@ function refillWateringCan() {
     pushMessage("Gather water from the well before refilling the watering can.");
     return;
   }
-  const needed = Math.max(0, 6 - (state.inventory.wateringCanWater || 0));
+  const needed = Math.max(0, WATERING_CAN_CAPACITY - (state.inventory.wateringCanWater || 0));
   if (!needed) {
     pushMessage("The watering can is already full.");
     return;
@@ -1333,8 +1493,9 @@ function fishPond() {
   }
   if (!canDoLabor("fish") || !spendStamina(state.tools.fishingNet ? 6 : 8)) return;
   const quality = state.tools.fishingNet ? "good" : "standard";
-  addItem("cleanFish", state.tools.fishingNet ? 2 : 1, quality);
-  pushMessage(`Caught ${QUALITY_LABELS[quality]} clean fish from the pond, keeping only fish with fins and scales.`);
+  const bonus = consumeProductionBuff();
+  addItem("cleanFish", (state.tools.fishingNet ? 2 : 1) + bonus, quality);
+  pushMessage(`Caught ${QUALITY_LABELS[quality]} clean fish from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
 
 function huntDeer() {
@@ -1348,10 +1509,11 @@ function huntDeer() {
   }
   if (!canDoLabor("hunt") || !spendStamina(14)) return;
   state.inventory.arrows -= 1;
-  addItem("venison", 2, "good");
+  const bonus = consumeProductionBuff();
+  addItem("venison", 2 + bonus, "good");
   addItem("hide", 1);
   addItem("fur", 1);
-  pushMessage("Harvested clean wild game with care: good venison, hide, and fur were added.");
+  pushMessage(`Harvested clean wild game with care: good venison, hide, and fur were added.${bonus ? " Clean Laundry added 1 extra venison." : ""}`);
 }
 
 function setAsideSabbathBasket() {
@@ -1505,10 +1667,11 @@ function collectAnimalProduct(animalId) {
   }
   if (!canDoLabor("animalProduct") || !spendStamina(4)) return;
   const quality = group.cleanedToday ? "good" : "standard";
-  addItem(catalog.product, Math.max(1, group.count * catalog.productAmount), quality);
+  const bonus = consumeProductionBuff();
+  addItem(catalog.product, Math.max(1, group.count * catalog.productAmount) + bonus, quality);
   group.productCollectedToday = true;
   closeModal();
-  pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.`);
+  pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
 
 function collectChickenFeathers() {
@@ -1538,10 +1701,11 @@ function harvestAnimal(animalId) {
   if (!canDoLabor("animalHarvest") || !spendStamina(10)) return;
   group.count -= 1;
   const quality = group.fedToday && group.wateredToday && group.cleanedToday ? "excellent" : group.fedToday || group.wateredToday ? "good" : "standard";
-  addItem(catalog.meatItem, catalog.meatAmount, quality);
+  const bonus = consumeProductionBuff();
+  addItem(catalog.meatItem, catalog.meatAmount + bonus, quality);
   if (catalog.secondaryItem) addItem(catalog.secondaryItem, catalog.secondaryAmount);
   closeModal();
-  pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. ${QUALITY_LABELS[quality]} clean meat was prepared without blood.`);
+  pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. ${QUALITY_LABELS[quality]} clean meat was prepared without blood.${bonus ? " Clean Laundry added 1 extra meat." : ""}`);
 }
 
 function openBarnCareModal() {
@@ -1873,10 +2037,15 @@ function harvestCrop(cropId) {
   if (!canDoLabor("harvest") || !spendStamina(5)) return;
   const ready = bed.plantings.filter((planting) => planting.readyToHarvest);
   const quality = bed.fertilized ? "excellent" : bed.composted ? "good" : "standard";
+  const bonus = consumeProductionBuff();
   ready.forEach((planting) => {
     const catalog = cropTypes[planting.cropType];
     addItem(catalog.harvestItem, bed.fertilized || bed.composted ? 4 : 3, quality);
   });
+  if (bonus && ready.length) {
+    const firstCatalog = cropTypes[ready[0].cropType];
+    addItem(firstCatalog.harvestItem, bonus, quality);
+  }
   addItem("plantMatter", 1);
   bed.plantings = bed.plantings.filter((planting) => !planting.readyToHarvest);
   if (!bed.plantings.length) {
@@ -1885,7 +2054,7 @@ function harvestCrop(cropId) {
   }
   closeModal();
   triggerSceneEffect("harvest", cropId);
-  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}.`);
+  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
 }
 
 function cropStatus(cropId) {
@@ -1971,6 +2140,7 @@ function cookPreppedFood() {
 }
 
 function finishCookedRecipe(item, quality, mode) {
+  quality = improveQualityWithBuff(quality);
   addItem(item.id, 1, quality);
   Object.entries(item.bonus || {}).forEach(([key, value]) => addItem(key, value, quality));
   markPrep("prepareFood");
@@ -2879,11 +3049,14 @@ function statusMarkup() {
     ["Sabbath", sabbathStatus()],
     ["Shalom", state.shalomRestDays > 0 ? "Active" : "None"],
     ["Rest Buffs", restBuffSummary()],
+    ["Active Buffs", activeBuffs().map((buff) => buff.label).join(", ") || "None"],
     ["Rest Uses", restUsesSummary()]
   ];
   return `<div class="status-grid">${hudItems.map(([label, value]) => `
     <div class="modal-card"><span class="hud-label">${label}</span><span class="hud-value">${value}</span></div>
   `).join("")}</div>
+  <h3>Buff Effects</h3>
+  ${buffDetailsMarkup()}
   <h3>Goals</h3>
   <ul class="goal-list">${goals().map((goal) => `<li>${goal}</li>`).join("")}</ul>
   <h3>Barn Animals</h3>
@@ -2892,12 +3065,24 @@ function statusMarkup() {
   ${sabbathPrepMarkup()}`;
 }
 
+function buffDetailsMarkup() {
+  const buffs = activeBuffs();
+  if (!buffs.length) return "<p class=\"hint-text\">No active buffs.</p>";
+  return `<div class="prep-list">${buffs.map((buff) => `
+    <div class="prep-item">
+      <span>${buff.label}<br><small>${buff.detail}</small></span>
+      <strong>${buff.count}</strong>
+    </div>
+  `).join("")}</div>`;
+}
+
 function areaMenuMarkup() {
   const areaButtons = [
     ["overview", "Homestead Overview"],
     ["cabin", "Cabin Entry"],
     ["livingRoom", "Living Room"],
     ["bedroom", "Bedroom"],
+    ["bathroom", "Bathroom"],
     ["kitchen", "Kitchen"],
     ["pantry", "Pantry"],
     ["barn", "Barn"],
@@ -2958,9 +3143,11 @@ function visibleHotspots(scene) {
 
 function decorationMarkup(sceneId) {
   const effect = `<span id="sceneEffectLayer" class="scene-effect-layer"></span>`;
+  const buffs = buffEmblemsMarkup();
   if (sceneId === "cabin") {
     return `
       ${effect}
+      ${buffs}
       <span class="lantern-glow" style="--x: 46.2%; --y: 5.8%; --w: 7.2%; --h: 13%;"></span>
       <span class="lantern-glow" style="--x: 11.8%; --y: 18.6%; --w: 6.6%; --h: 12%;"></span>
       <span class="lantern-glow" style="--x: 74%; --y: 45%; --w: 6.2%; --h: 10%;"></span>
@@ -2968,17 +3155,28 @@ function decorationMarkup(sceneId) {
     `;
   }
   if (sceneId === "livingRoom") {
-    return `${effect}${roomChoreObjects("livingRoom")}`;
+    return `${effect}${buffs}${roomChoreObjects("livingRoom")}`;
   }
   if (sceneId === "bedroom") {
     return `
       ${effect}
+      ${buffs}
       <span class="lantern-glow" style="--x: 76%; --y: 26%; --w: 8%; --h: 13%;"></span>
+    `;
+  }
+  if (sceneId === "bathroom") {
+    return `
+      ${effect}
+      ${buffs}
+      <span class="lantern-glow" style="--x: 14%; --y: 20%; --w: 8%; --h: 14%;"></span>
+      <span class="well-shimmer" style="--x: 75%; --y: 64%; --w: 25%; --h: 18%;"></span>
+      <span class="well-shimmer" style="--x: 27%; --y: 49%; --w: 23%; --h: 12%;"></span>
     `;
   }
   if (sceneId === "forest") {
     return `
       ${effect}
+      ${buffs}
       <span class="well-shimmer" style="--x: 45%; --y: 35%; --w: 22%; --h: 13%;"></span>
       <span class="leaf" style="--x: 18%; --duration: 16s; --delay: -4s;"></span>
       <span class="leaf" style="--x: 82%; --duration: 20s; --delay: -10s;"></span>
@@ -2987,6 +3185,7 @@ function decorationMarkup(sceneId) {
   if (sceneId === "garden" || sceneId === "fields") {
     return `
       ${effect}
+      ${buffs}
       ${cropBedObjects(sceneId)}
       <span class="garden-ambient butterfly" style="--x: 16%; --y: 49%; --delay: -2s;"></span>
       <span class="garden-ambient bee" style="--x: 70%; --y: 72%; --delay: -5s;"></span>
@@ -2998,6 +3197,7 @@ function decorationMarkup(sceneId) {
   if (sceneId === "kitchen") {
     return `
       ${effect}
+      ${buffs}
       <span class="lantern-glow" style="--x: 55%; --y: 4.5%; --w: 7%; --h: 13%;"></span>
       <span class="lantern-glow" style="--x: 31%; --y: 52%; --w: 10%; --h: 16%;"></span>
       <span class="lantern-glow" style="--x: 13%; --y: 17%; --w: 6%; --h: 10%;"></span>
@@ -3005,11 +3205,20 @@ function decorationMarkup(sceneId) {
     `;
   }
   if (["pantry", "workshed", "barn"].includes(sceneId)) {
-    return `${effect}${roomChoreObjects(sceneId)}`;
+    return `${effect}${buffs}${roomChoreObjects(sceneId)}`;
   }
-  if (sceneId !== "overview") return "";
+  if (sceneId === "well") {
+    return `
+      ${effect}
+      ${buffs}
+      <span class="well-shimmer" style="--x: 9%; --y: 71%; --w: 30%; --h: 17%;"></span>
+      <span class="laundry-basin"></span>
+    `;
+  }
+  if (sceneId !== "overview") return `${effect}${buffs}`;
   return `
     ${effect}
+    ${buffs}
     <span class="smoke" style="--x: 23.6%; --y: 16%; --size: 42px; --delay: 0s;"></span>
     <span class="smoke" style="--x: 24.7%; --y: 15%; --size: 34px; --delay: 1.8s;"></span>
     <span class="smoke" style="--x: 22.8%; --y: 15.8%; --size: 48px; --delay: 3.4s;"></span>
@@ -3119,6 +3328,18 @@ function playSceneEffect(effect) {
       <span class="water-bubble" style="--x: 8%; --y: 47%; --delay: 0s;"></span>
       <span class="water-bubble" style="--x: 12%; --y: 50%; --delay: 0.18s;"></span>
       <span class="water-sparkle"></span>
+    `,
+    laundry: `
+      <span class="water-bubble" style="--x: 9%; --y: 70%; --delay: 0s;"></span>
+      <span class="water-bubble" style="--x: 17%; --y: 73%; --delay: 0.18s;"></span>
+      <span class="water-bubble" style="--x: 25%; --y: 69%; --delay: 0.34s;"></span>
+      <span class="laundry-basin"></span>
+    `,
+    hygiene: `
+      <span class="water-bubble" style="--x: 28%; --y: 49%; --delay: 0s;"></span>
+      <span class="water-bubble" style="--x: 74%; --y: 64%; --delay: 0.16s;"></span>
+      <span class="tidy-sparkle" style="--x: 24%; --y: 36%; --delay: 0.15s;"></span>
+      <span class="tidy-sparkle" style="--x: 81%; --y: 54%; --delay: 0.35s;"></span>
     `,
     rest: `
       <span class="rest-glow"></span>

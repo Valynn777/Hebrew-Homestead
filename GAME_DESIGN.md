@@ -28,8 +28,13 @@ The player navigates between illustrated homestead scenes by clicking hotspots. 
 - Clicking a hotspot navigates, opens a modal, gathers resources, tends crops, cooks, crafts, orders supplies, rests, or completes Sabbath preparation.
 - H toggles hotspot debug borders for placement tuning.
 - The bedroom bed offers a once-per-day nap or evening sleep-through-night option. Full sleep restores stamina and energy and grants a work-day rested boost; living room/cabin short rests are smaller and limited.
+- The bathroom is reached from the living room and offers bathing, hand washing, and teeth brushing.
+- Bathing grants a Relaxed buff and a small stamina recovery. Washing hands grants a Clean Hands buff for cooking quality. Brushing teeth grants a Fresh Start buff for upcoming harvest and production yields.
 - The kitchen uses a pantry doorway for dry storage and a separate Ice Box panel for clean dairy and refrigerated prepared foods.
 - The kitchen counter can prep ingredients before stove cooking. Counter-prepped food cooks one quality tier higher than direct stove cooking.
+- The well draw fills general household water and tops off the garden watering can in one visit.
+- The well area includes a laundry wash basin. Clean laundry creates a temporary buff for upcoming harvest and production yields.
+- Active buffs are shown as small colored emblems in the upper-right of the scene image, and their effects are listed in the Status panel.
 - The barn scene supports grouped clean animals: chickens, sheep, goats, and cattle.
 - Clicking an animal group shows how many are owned and offers care or harvest actions.
 - Barn care includes adding feed to the trough, adding water to the trough, cleaning for manure, collecting eggs and feathers, milking with a bucket, shearing with shears, and clean meat/material harvesting.
@@ -102,6 +107,7 @@ Each hotspot has:
 - Scenes: scene objects with hotspot arrays.
 - Inventory: item counts, including water, watering can water, wood, stone, herbs, crops, prepared food, plant matter, coins, seeds, clean dairy, refrigerated foods, clean fish, venison, eggs, milk, wool, feathers, manure, fertilizer, flax, hay, feed, clean meats, hides, fur, arrows, and supplies.
 - Quality inventory: Standard, Good, and Excellent counts for tracked clean food items.
+- Buffs: active emblem-backed boosts such as Shalom Rest, Well Rested, Refreshed, Settled, Clean Laundry, Relaxed, Clean Hands, and Fresh Start.
 - Tools: owned flags for hands, basket, watering can, basic axe, pickaxe, fishing pole, fishing net, bow, bucket, shears, hoe, drying rack, compost bin, garden bed, and Sabbath basket.
 - Barn animals: grouped animal counts and daily care flags for fed, watered, cleaned, and product-collected status.
 - Crops: named crop bed states with multiple plantings, watered state, weeds, compost, fertilizer, growth stages, harvest readiness, and locked expanded field beds for future upgrades.
@@ -111,7 +117,7 @@ Each hotspot has:
 - Orders: pending fictional supply orders with item id, amount, and arrival day.
 - Sabbath preparation: task ids for water, clean food, herbs, cottage tidying, tools, and Sabbath basket.
 - Journal entries: short title/body entries with unlock flags.
-- Save data: current scene, day, time, season, weather, inventory, quality inventory, tools, crops, barn animals, orders, Sabbath prep, rest buffs, prepped food, journal unlocks, and messages.
+- Save data: current scene, day, time, season, weather, inventory, quality inventory, tools, crops, barn animals, orders, Sabbath prep, rest buffs, active buffs, prepped food, journal unlocks, and messages.
 
 ## Version 1 Crops
 

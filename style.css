@@ -333,6 +333,147 @@ small {
   inset: 0;
 }
 
+.buff-emblems {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(42%, 280px);
+}
+
+.buff-emblem {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 2px solid rgba(255, 252, 237, 0.86);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 250, 232, 0.86);
+  box-shadow: 0 6px 18px rgba(20, 18, 12, 0.28);
+}
+
+.buff-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.buff-count {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fffdf6;
+  background: rgba(35, 42, 31, 0.88);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.buff-laundry {
+  background: linear-gradient(145deg, rgba(218, 244, 250, 0.94), rgba(83, 154, 185, 0.88));
+}
+
+.buff-laundry .buff-icon {
+  border-radius: 5px 5px 8px 8px;
+  background: #f7fbff;
+  box-shadow:
+    -9px 4px 0 -3px #f7fbff,
+    9px 4px 0 -3px #f7fbff,
+    inset 0 5px 0 rgba(91, 157, 186, 0.3);
+}
+
+.buff-shalom {
+  background: linear-gradient(145deg, rgba(227, 246, 217, 0.95), rgba(82, 137, 82, 0.9));
+}
+
+.buff-shalom .buff-icon {
+  border-radius: 100% 0 100% 0;
+  background: #eef8d9;
+  transform: rotate(-18deg);
+}
+
+.buff-rested {
+  background: linear-gradient(145deg, rgba(255, 242, 184, 0.95), rgba(197, 139, 63, 0.92));
+}
+
+.buff-rested .buff-icon {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fff7cf 0 34%, transparent 36%),
+    conic-gradient(from 0deg, #fff7cf 0 12deg, transparent 12deg 35deg, #fff7cf 35deg 47deg, transparent 47deg 75deg, #fff7cf 75deg 90deg, transparent 90deg 130deg, #fff7cf 130deg 143deg, transparent 143deg 180deg, #fff7cf 180deg 193deg, transparent 193deg 232deg, #fff7cf 232deg 246deg, transparent 246deg 290deg, #fff7cf 290deg 304deg, transparent 304deg);
+}
+
+.buff-refreshed {
+  background: linear-gradient(145deg, rgba(221, 238, 255, 0.95), rgba(85, 126, 183, 0.9));
+}
+
+.buff-refreshed .buff-icon {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 40%, #ffffff 0 8px, transparent 9px),
+    radial-gradient(circle at 58% 60%, rgba(255, 255, 255, 0.72) 0 7px, transparent 8px);
+}
+
+.buff-settled {
+  background: linear-gradient(145deg, rgba(242, 229, 202, 0.95), rgba(139, 107, 71, 0.9));
+}
+
+.buff-settled .buff-icon {
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent 0 20%, #fff5d8 20% 80%, transparent 80%),
+    linear-gradient(#fff5d8 0 42%, transparent 42% 62%, #fff5d8 62% 100%);
+}
+
+.buff-relaxed {
+  background: linear-gradient(145deg, rgba(232, 224, 255, 0.95), rgba(118, 101, 171, 0.9));
+}
+
+.buff-relaxed .buff-icon {
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 62%, #f7f0ff 0 11px, transparent 12px),
+    radial-gradient(circle at 36% 34%, rgba(247, 240, 255, 0.9) 0 5px, transparent 6px),
+    radial-gradient(circle at 64% 30%, rgba(247, 240, 255, 0.72) 0 4px, transparent 5px);
+}
+
+.buff-hands {
+  background: linear-gradient(145deg, rgba(226, 250, 239, 0.95), rgba(74, 151, 118, 0.9));
+}
+
+.buff-hands .buff-icon {
+  border-radius: 45% 45% 35% 35%;
+  background:
+    radial-gradient(ellipse at 32% 56%, #fff9ea 0 8px, transparent 9px),
+    radial-gradient(ellipse at 68% 56%, #fff9ea 0 8px, transparent 9px),
+    linear-gradient(90deg, transparent 0 28%, #fff9ea 28% 43%, transparent 43% 57%, #fff9ea 57% 72%, transparent 72%);
+}
+
+.buff-fresh {
+  background: linear-gradient(145deg, rgba(235, 249, 255, 0.95), rgba(72, 143, 166, 0.9));
+}
+
+.buff-fresh .buff-icon {
+  border-radius: 50% 50% 45% 45%;
+  background:
+    linear-gradient(#fff 0 48%, #d7f4ff 48% 56%, #fff 56% 100%);
+  box-shadow:
+    0 -7px 0 -2px rgba(255, 255, 255, 0.9),
+    0 7px 0 -2px rgba(255, 255, 255, 0.9);
+}
+
 .bed-effect {
   position: absolute;
   left: var(--fx-x);
@@ -376,6 +517,20 @@ small {
   background: radial-gradient(ellipse, rgba(160, 220, 236, 0.42), rgba(160, 220, 236, 0.10) 42%, transparent 72%);
   filter: blur(1px);
   animation: wellShimmer 4.6s ease-in-out infinite;
+}
+
+.laundry-basin {
+  position: absolute;
+  left: 8%;
+  top: 71%;
+  width: 28%;
+  height: 16%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(219, 246, 255, 0.22), transparent 58%),
+    linear-gradient(90deg, transparent, rgba(255, 252, 236, 0.52), transparent);
+  filter: blur(0.5px);
+  animation: waterSparkle 4s ease-in-out infinite;
 }
 
 .drift {

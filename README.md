@@ -33,14 +33,17 @@ Open `index.html` directly in a modern browser.
 - Click-based scene navigation with absolutely positioned hotspots
 - Full Homestead Overview image with responsive percentage-based hotspots
 - Placeholder scene backgrounds that still work if other image files are missing
-- Scenes for Homestead Overview, Cabin Entry, Living Room, Bedroom, Kitchen, Pantry, Barn, Garden, Workshed, Forest, Well / Water Area, and Sabbath Area
-- Pop-up Status panel for day, weekday, season, weather, time, stamina, energy, water, Sabbath status, Shalom Rest, rest buffs, daily rest uses, goals, and Sabbath prep
+- Scenes for Homestead Overview, Cabin Entry, Living Room, Bedroom, Bathroom, Kitchen, Pantry, Barn, Garden, Workshed, Forest, Well / Water Area, and Sabbath Area
+- Pop-up Status panel for day, weekday, season, weather, time, stamina, energy, water, Sabbath status, Shalom Rest, active buffs, daily rest uses, goals, and Sabbath prep
 - Pop-up Areas panel for navigating without clicking the scene image
 - Inventory, tools, crop beds, barn animals, crafting, cooking, fictional shop/ordering, journal, Sabbath preparation, Sabbath rest, save/load, backup, export/import, and reset
 - Hotspot debug mode with visible boxes and labels
 - Gentle scene animation layers for smoke, glow, drifting overlays, leaves, and well shimmer
+- Active buffs appear as small colored emblems in the upper-right of the scene image
 - Visual cleaning objects for dishes, crumbs, dust, books, crates, sawdust, and straw after cooking or day changes
 - Bedroom bed hotspot with limited nap and evening sleep-through-night recovery options; living room/cabin short rests are limited separately
+- Bathroom image with tub, sink, and mirror hotspots for bathing, washing hands, and brushing teeth
+- Bathroom buffs include Relaxed, Clean Hands, and Fresh Start, with active effects listed in the Status panel
 - Kitchen pantry doorway plus a separate Ice Box panel for clean dairy and refrigerated prepared foods
 - Clean-food-only starter recipes and ingredient rules
 - Barn scene image with clickable animal groups for chickens, sheep, goats, and cattle
@@ -51,11 +54,13 @@ Open `index.html` directly in a modern browser.
 - Lightweight garden animations for planting, watering, crop sway, weeds, harvest, compost steam, soil quality, seasonal tinting, bees, butterflies, and dew shimmer
 - Kitchen counter food prep can stage ingredients before stove cooking for higher-quality prepared food
 - Produce, fish, meat, animal products, and prepared food track Standard, Good, or Excellent quality
+- Gathering water at the well fills household water and tops off the watering can for garden work
+- Well-area laundry washing grants a Clean Laundry buff that boosts upcoming harvest and production yields
 - Crafting paths for cloth, fertilizer, feed, hay, and feathered arrows
 - Forest scene image with hotspots for fallen branches, trees, stone pile, herb forage, pond/stream, and deer
 - Forest tools and requirements: axe for trees, pickaxe for better stone gathering, fishing pole or net for clean fish, bow and arrows for deer
 - Clean wild-game and fish items: venison, hide, fur, clean fish, clean fish meal, and venison stew
-- Versioned localStorage save/load for scene, time, inventory, quality inventory, tools, crops, barn animals, kitchen and room chores, orders, Sabbath prep, Shalom Rest, rest buffs, prepped food, journal unlocks, and messages
+- Versioned localStorage save/load for scene, time, inventory, quality inventory, tools, crops, barn animals, kitchen and room chores, orders, Sabbath prep, Shalom Rest, active buffs, prepped food, journal unlocks, and messages
 
 ## Save System
 
@@ -73,6 +78,7 @@ The game expects future local images at:
 - `assets/images/scenes/cabin-entry.png`
 - `assets/images/scenes/living-room.png`
 - `assets/images/scenes/bedroom.png`
+- `assets/images/scenes/bathroom.png`
 - `assets/images/scenes/kitchen.png`
 - `assets/images/scenes/pantry.png`
 - `assets/images/scenes/barn.png`

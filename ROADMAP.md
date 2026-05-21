@@ -8,6 +8,7 @@
 - Modal inventory, crafting, cooking, shop/ordering, journal, and messages
 - Living room to bedroom navigation
 - Bedroom bed rest, nap, and sleep-through-night recovery
+- Bathroom scene with tub, sink, brushing teeth, washing hands, and hygiene buffs
 - Kitchen pantry doorway and separate ice box storage panel
 - Barn illustrated animal hotspots
 - Grouped clean animal ownership for chickens, sheep, goats, and cattle
@@ -17,6 +18,10 @@
 - First-pass garden animations for planting, watering, soil quality, crop sway, weeds, harvest, compost steam, seasonal tint, and small ambient details
 - Food quality tracking for produce, fish, meat, animal products, and prepared meals
 - Counter prep before stove cooking for higher-quality food
+- Well water gathering fills household water and garden watering can together
+- Laundry washing at the well grants a Clean Laundry production and harvest buff
+- Active buffs display as colored scene emblems
+- Status panel lists active buff effects
 - Forest gathering and axe requirement
 - Forest illustrated clearing with trees, stone pile, pond/stream, and deer hotspots
 - First-pass pickaxe, fishing pole, fishing net, bow, arrows, clean fish, venison, hide, and fur
