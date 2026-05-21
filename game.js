@@ -1872,6 +1872,7 @@ function feedAnimal(animalId) {
   spendAnimalFeed(catalog.feedNeed);
   group.fedToday = true;
   learnFrom("animalCare");
+  triggerSceneEffect("barnFeed");
   closeModal();
   pushMessage(`${catalog.name} are fed.`);
 }
@@ -1920,6 +1921,7 @@ function collectAnimalProduct(animalId) {
   addItem(catalog.product, Math.max(1, group.count * catalog.productAmount) + bonus, quality);
   group.productCollectedToday = true;
   learnFrom("animalCare");
+  triggerSceneEffect("barnCollect");
   closeModal();
   pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
@@ -1938,6 +1940,7 @@ function collectChickenFeathers() {
   addItem("feathers", Math.max(1, group.count));
   group.feathersCollectedToday = true;
   learnFrom("animalCare");
+  triggerSceneEffect("barnFeathers");
   closeModal();
   pushMessage("Gathered loose chicken feathers for crafting.");
 }
@@ -1957,6 +1960,7 @@ function harvestAnimal(animalId) {
   addItem(catalog.meatItem, catalog.meatAmount + bonus, quality);
   if (catalog.secondaryItem) addItem(catalog.secondaryItem, catalog.secondaryAmount);
   learnFrom("animalCare");
+  triggerSceneEffect("barnHarvest");
   closeModal();
   pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. ${QUALITY_LABELS[quality]} clean meat was prepared without blood.${bonus ? " Clean Laundry added 1 extra meat." : ""}`);
 }
@@ -2007,6 +2011,7 @@ function waterBarnAnimals() {
     if (group.count > 0) group.wateredToday = true;
   });
   learnFrom("animalCare");
+  triggerSceneEffect("barnWater");
   markPrep("gatherWater");
   closeModal();
   pushMessage("All barn animals were watered.");
@@ -2031,6 +2036,7 @@ function addFeedTrough() {
     if (group.count > 0) group.fedToday = true;
   });
   learnFrom("animalCare");
+  triggerSceneEffect("barnFeed");
   closeModal();
   pushMessage("Feed was added to the trough. All animal groups are fed.");
 }
@@ -2051,6 +2057,7 @@ function addWaterTrough() {
     if (group.count > 0) group.wateredToday = true;
   });
   learnFrom("animalCare");
+  triggerSceneEffect("barnWater");
   markPrep("gatherWater");
   closeModal();
   pushMessage("Water was added to the trough. All animals are watered.");
@@ -3775,7 +3782,43 @@ function playSceneEffect(effect) {
       <span class="compost-toss"></span>
       <span class="soil-darken"></span>
       <span class="compost-steam burst" style="--x: 52%; --y: 56%; --delay: 0s;"></span>
-    `)
+    `),
+    barnFeed: `
+      <span class="hay-strand" style="--x: 32%; --y: 35%; --rot: -18deg; --rot2: 14deg; --delay: 0s;"></span>
+      <span class="hay-strand" style="--x: 42%; --y: 30%; --rot: 10deg; --rot2: -22deg; --delay: 0.1s;"></span>
+      <span class="hay-strand" style="--x: 53%; --y: 33%; --rot: -8deg; --rot2: 20deg; --delay: 0.18s;"></span>
+      <span class="hay-strand" style="--x: 63%; --y: 28%; --rot: 20deg; --rot2: -12deg; --delay: 0.06s;"></span>
+      <span class="hay-strand" style="--x: 37%; --y: 42%; --rot: -22deg; --rot2: 8deg; --delay: 0.26s;"></span>
+      <span class="hay-strand" style="--x: 58%; --y: 38%; --rot: 14deg; --rot2: -18deg; --delay: 0.34s;"></span>
+      <span class="hay-strand" style="--x: 46%; --y: 26%; --rot: -6deg; --rot2: 24deg; --delay: 0.14s;"></span>
+    `,
+    barnWater: `
+      <span class="water-pour-arc"></span>
+      <span class="trough-ripple"></span>
+      <span class="trough-ripple-inner"></span>
+    `,
+    barnCollect: `
+      <span class="collect-glow"></span>
+      <span class="product-star" style="--x: 28%; --y: 38%; --delay: 0s;"></span>
+      <span class="product-star" style="--x: 44%; --y: 30%; --delay: 0.18s;"></span>
+      <span class="product-star" style="--x: 60%; --y: 36%; --delay: 0.32s;"></span>
+      <span class="product-star" style="--x: 72%; --y: 44%; --delay: 0.1s;"></span>
+      <span class="product-star" style="--x: 38%; --y: 50%; --delay: 0.44s;"></span>
+    `,
+    barnFeathers: `
+      <span class="feather-float" style="--x: 26%; --y: 28%; --dx: 20px; --rot: 14deg; --duration: 1.6s; --delay: 0s;"></span>
+      <span class="feather-float" style="--x: 40%; --y: 22%; --dx: -16px; --rot: -22deg; --duration: 1.45s; --delay: 0.12s;"></span>
+      <span class="feather-float" style="--x: 54%; --y: 26%; --dx: 24px; --rot: 6deg; --duration: 1.75s; --delay: 0.06s;"></span>
+      <span class="feather-float" style="--x: 66%; --y: 20%; --dx: -20px; --rot: -16deg; --duration: 1.55s; --delay: 0.22s;"></span>
+      <span class="feather-float" style="--x: 34%; --y: 36%; --dx: 14px; --rot: 24deg; --duration: 1.65s; --delay: 0.3s;"></span>
+      <span class="feather-float" style="--x: 60%; --y: 34%; --dx: -10px; --rot: -10deg; --duration: 1.5s; --delay: 0.4s;"></span>
+    `,
+    barnHarvest: `
+      <span class="barn-harvest-glow"></span>
+      <span class="tidy-sparkle" style="--x: 34%; --y: 46%; --delay: 0.2s;"></span>
+      <span class="tidy-sparkle" style="--x: 56%; --y: 40%; --delay: 0.4s;"></span>
+      <span class="tidy-sparkle" style="--x: 68%; --y: 52%; --delay: 0.6s;"></span>
+    `
   }[type];
   if (!markup) return;
   layer.innerHTML = markup;
