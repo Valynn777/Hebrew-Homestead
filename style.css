@@ -1247,6 +1247,45 @@ small {
   animation: collectGlow 2s ease-out forwards;
 }
 
+.sabbath-glow {
+  position: absolute;
+  left: 15%;
+  top: 10%;
+  width: 70%;
+  height: 65%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 248, 200, 0.55) 0%, rgba(255, 220, 100, 0.22) 45%, transparent 72%);
+  filter: blur(12px);
+  animation: collectGlow 2.8s ease-out forwards;
+}
+
+.sabbath-ray {
+  position: absolute;
+  left: var(--x, 49%);
+  top: 0;
+  width: 2.5%;
+  height: 62%;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, rgba(255, 230, 100, 0.65), transparent);
+  transform-origin: top center;
+  transform: rotate(var(--angle, 0deg)) scaleY(0);
+  animation: sabbathRayFade 2.6s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.sabbath-petal {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: 10px;
+  height: 15px;
+  border-radius: 50% 0 50% 0;
+  background: rgba(255, 235, 130, 0.85);
+  transform: rotate(var(--rot, 0deg));
+  animation: featherFloat var(--duration, 2s) ease-out forwards;
+  animation-delay: var(--delay, 0s);
+}
+
 .status-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -1945,4 +1984,11 @@ small {
     opacity: 0;
     transform: translate(var(--dx, 22px), 52px) rotate(calc(var(--rot, 0deg) + 130deg));
   }
+}
+
+@keyframes sabbathRayFade {
+  0%   { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleY(0); }
+  25%  { opacity: 1; transform: rotate(var(--angle, 0deg)) scaleY(1); }
+  70%  { opacity: 0.7; }
+  100% { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleY(1.08); }
 }

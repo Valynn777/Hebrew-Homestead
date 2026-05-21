@@ -240,7 +240,10 @@ const scenes = {
       hs("basket", "Set Aside Sabbath Basket", 39, 41, 23, 20, "setSabbathBasket"),
       hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath"),
       hs("reflection", "Read Sabbath Reflection", 34, 67, 30, 17, "sabbathReflection"),
-      hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
+      hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" }),
+      hs("worship", "Worship and Celebrate", 10, 62, 22, 16, "sabbathWorship", { sabbathOnly: true }),
+      hs("gathering", "Host a Gathering", 38, 62, 22, 16, "sabbathGathering", { sabbathOnly: true }),
+      hs("stroll", "Take a Sabbath Stroll", 67, 62, 22, 16, "sabbathStroll", { sabbathOnly: true })
     ]
   }
 };
@@ -301,7 +304,32 @@ const itemLabels = {
   chickenSoup: "Chicken Soup",
   muttonStew: "Mutton Stew",
   goatStew: "Goat Stew",
-  beefStew: "Beef Stew"
+  beefStew: "Beef Stew",
+  wheat: "Wheat",
+  onions: "Onions",
+  garlic: "Garlic",
+  figs: "Figs",
+  grapes: "Grapes",
+  leeks: "Leeks",
+  wheatSeeds: "Wheat Seeds",
+  onionSeeds: "Onion Seeds",
+  garlicSeeds: "Garlic Seeds",
+  figSeedlings: "Fig Seedlings",
+  grapeSeedlings: "Grape Seedlings",
+  leekSeeds: "Leek Seeds",
+  trout: "Trout",
+  salmon: "Salmon",
+  wheatBread: "Wheat Bread",
+  stuffedFlatbread: "Stuffed Flatbread",
+  onionLentilSoup: "Onion Lentil Soup",
+  gardenSalad: "Garden Salad",
+  garlicHerbSoup: "Garlic Herb Soup",
+  leekSoup: "Leek Soup",
+  harvestStew: "Harvest Stew",
+  figPreserve: "Fig Preserve",
+  grapeJuice: "Grape Juice",
+  troutMeal: "Trout Meal",
+  salmonMeal: "Salmon Meal"
 };
 
 const starterInventory = {
@@ -356,7 +384,32 @@ const starterInventory = {
   chickenSoup: 0,
   muttonStew: 0,
   goatStew: 0,
-  beefStew: 0
+  beefStew: 0,
+  wheat: 0,
+  onions: 0,
+  garlic: 0,
+  figs: 0,
+  grapes: 0,
+  leeks: 0,
+  wheatSeeds: 0,
+  onionSeeds: 0,
+  garlicSeeds: 0,
+  figSeedlings: 0,
+  grapeSeedlings: 0,
+  leekSeeds: 0,
+  trout: 0,
+  salmon: 0,
+  wheatBread: 0,
+  stuffedFlatbread: 0,
+  onionLentilSoup: 0,
+  gardenSalad: 0,
+  garlicHerbSoup: 0,
+  leekSoup: 0,
+  harvestStew: 0,
+  figPreserve: 0,
+  grapeJuice: 0,
+  troutMeal: 0,
+  salmonMeal: 0
 };
 
 const toolLabels = {
@@ -428,12 +481,78 @@ const cropTypes = {
     seedItem: "cucumberSeeds",
     harvestItem: "cucumbers",
     gardeningNote: "Cucumbers grow quickly in warmth and appreciate regular watering."
+  },
+  wheat: {
+    name: "Wheat",
+    cleanStatus: "clean",
+    category: "grain",
+    season: "Spring",
+    daysToMature: 4,
+    waterNeeds: "Water regularly while establishing. Reduce as stalks ripen.",
+    seedItem: "wheatSeeds",
+    harvestItem: "wheat",
+    gardeningNote: "Wheat is a clean grain sown in spring. It ripens in early summer and can be ground into flour or used whole."
+  },
+  onions: {
+    name: "Onions",
+    cleanStatus: "clean",
+    category: "vegetable",
+    season: "Spring",
+    daysToMature: 3,
+    waterNeeds: "Keep moist while bulbs are forming.",
+    seedItem: "onionSeeds",
+    harvestItem: "onions",
+    gardeningNote: "Onions are clean vegetables that grow well in cool spring soil. They are a staple of the homestead table."
+  },
+  garlic: {
+    name: "Garlic",
+    cleanStatus: "clean",
+    category: "vegetable",
+    season: "Autumn",
+    daysToMature: 4,
+    waterNeeds: "Water moderately; avoid waterlogged roots.",
+    seedItem: "garlicSeeds",
+    harvestItem: "garlic",
+    gardeningNote: "Garlic is planted in autumn and matures slowly through cooler weather. It is a clean, nourishing crop valued for flavour."
+  },
+  figs: {
+    name: "Figs",
+    cleanStatus: "clean",
+    category: "fruit",
+    season: "Summer",
+    daysToMature: 5,
+    waterNeeds: "Deep watering every few days is better than shallow daily watering.",
+    seedItem: "figSeedlings",
+    harvestItem: "figs",
+    gardeningNote: "Figs are a clean summer fruit mentioned throughout Scripture as a symbol of blessing and abundance."
+  },
+  grapes: {
+    name: "Grapes",
+    cleanStatus: "clean",
+    category: "fruit",
+    season: "Summer",
+    daysToMature: 5,
+    waterNeeds: "Water deeply once established; grapes dislike wet feet.",
+    seedItem: "grapeSeedlings",
+    harvestItem: "grapes",
+    gardeningNote: "Grapes are a clean summer fruit central to biblical harvest celebrations. They can be eaten fresh or pressed for juice."
+  },
+  leeks: {
+    name: "Leeks",
+    cleanStatus: "clean",
+    category: "vegetable",
+    season: "Autumn",
+    daysToMature: 3,
+    waterNeeds: "Keep soil consistently moist around the base.",
+    seedItem: "leekSeeds",
+    harvestItem: "leeks",
+    gardeningNote: "Leeks are a clean autumn vegetable with a mild flavour, good for soups and stews as the weather cools."
   }
 };
 
 const cropCatalog = cropTypes;
 
-const cropChoices = ["barley", "lentils", "cucumbers"];
+const cropChoices = ["barley", "lentils", "cucumbers", "wheat", "onions", "garlic", "figs", "grapes", "leeks"];
 
 const gardenBeds = {
   // Row 1 (y≈31%) — top of rectangular dirt area, 5 evenly spaced square plots
@@ -486,7 +605,26 @@ const edibleItems = {
   chickenSoup: { cleanStatus: "clean", category: "prepared clean food" },
   muttonStew: { cleanStatus: "clean", category: "prepared clean food" },
   goatStew: { cleanStatus: "clean", category: "prepared clean food" },
-  beefStew: { cleanStatus: "clean", category: "prepared clean food" }
+  beefStew: { cleanStatus: "clean", category: "prepared clean food" },
+  wheat: { cleanStatus: "clean", category: "grain" },
+  onions: { cleanStatus: "clean", category: "vegetable" },
+  garlic: { cleanStatus: "clean", category: "vegetable" },
+  figs: { cleanStatus: "clean", category: "fruit" },
+  grapes: { cleanStatus: "clean", category: "fruit" },
+  leeks: { cleanStatus: "clean", category: "vegetable" },
+  trout: { cleanStatus: "clean", category: "fish with fins and scales" },
+  salmon: { cleanStatus: "clean", category: "fish with fins and scales" },
+  wheatBread: { cleanStatus: "clean", category: "prepared clean food" },
+  stuffedFlatbread: { cleanStatus: "clean", category: "prepared clean food" },
+  onionLentilSoup: { cleanStatus: "clean", category: "prepared clean food" },
+  gardenSalad: { cleanStatus: "clean", category: "prepared clean food" },
+  garlicHerbSoup: { cleanStatus: "clean", category: "prepared clean food" },
+  leekSoup: { cleanStatus: "clean", category: "prepared clean food" },
+  harvestStew: { cleanStatus: "clean", category: "prepared clean food" },
+  figPreserve: { cleanStatus: "clean", category: "prepared clean food" },
+  grapeJuice: { cleanStatus: "clean", category: "prepared clean drink" },
+  troutMeal: { cleanStatus: "clean", category: "prepared clean food" },
+  salmonMeal: { cleanStatus: "clean", category: "prepared clean food" }
 };
 
 const craftingRecipes = [
@@ -523,7 +661,18 @@ const cookingRecipes = [
   recipe("chickenSoup", "Chicken Soup", { chickenMeat: 1, herbs: 1, water: 1 }, "Clean bird meat prepared with care and without blood.", "food", { preparedFood: 1 }),
   recipe("muttonStew", "Mutton Stew", { mutton: 1, herbs: 1, water: 1 }, "Clean sheep meat prepared with care and without blood.", "food", { preparedFood: 1 }),
   recipe("goatStew", "Goat Stew", { goatMeat: 1, herbs: 1, water: 1 }, "Clean goat meat prepared with care and without blood.", "food", { preparedFood: 1 }),
-  recipe("beefStew", "Beef Stew", { beef: 1, herbs: 1, water: 1 }, "Clean cattle meat prepared with care and without blood.", "food", { preparedFood: 1 })
+  recipe("beefStew", "Beef Stew", { beef: 1, herbs: 1, water: 1 }, "Clean cattle meat prepared with care and without blood.", "food", { preparedFood: 1 }),
+  recipe("wheatBread", "Wheat Bread", { wheat: 1, water: 1 }, "A clean loaf of wheat bread, nourishing and simple.", "food", { preparedFood: 1 }),
+  recipe("stuffedFlatbread", "Stuffed Flatbread", { wheat: 1, onions: 1, herbs: 1 }, "A wheat flatbread filled with onions and herbs. A satisfying clean meal.", "food", { preparedFood: 2 }),
+  recipe("onionLentilSoup", "Onion Lentil Soup", { lentils: 1, onions: 1, herbs: 1, water: 1 }, "A hearty clean soup with lentils and onions.", "food", { preparedFood: 1 }),
+  recipe("gardenSalad", "Garden Salad", { cucumbers: 1, onions: 1, herbs: 1 }, "A fresh clean salad from the garden.", "food", { preparedFood: 1 }),
+  recipe("garlicHerbSoup", "Garlic Herb Soup", { garlic: 1, herbs: 2, water: 1 }, "A warming clean soup made with garlic and herbs.", "food", { preparedFood: 1 }),
+  recipe("leekSoup", "Leek Soup", { leeks: 1, herbs: 1, water: 1 }, "A gentle clean soup made with autumn leeks.", "food", { preparedFood: 1 }),
+  recipe("harvestStew", "Harvest Stew", { wheat: 1, lentils: 1, garlic: 1, water: 1 }, "A filling clean stew made from the season's harvest.", "food", { preparedFood: 2 }),
+  recipe("figPreserve", "Fig Preserve", { figs: 2, water: 1, jars: 1 }, "Sweet clean figs preserved in a jar for the days ahead.", "food", { preparedFood: 2 }),
+  recipe("grapeJuice", "Grape Juice", { grapes: 2, water: 1, jars: 1 }, "Fresh pressed juice from clean grapes, stored in a jar.", "food", { preparedFood: 1 }),
+  recipe("troutMeal", "Trout Meal", { trout: 1, herbs: 1, water: 1 }, "Autumn trout with fins and scales, prepared as a clean meal.", "food", { preparedFood: 1 }),
+  recipe("salmonMeal", "Salmon Meal", { salmon: 1, herbs: 1, water: 1 }, "Winter salmon with fins and scales, prepared as a clean meal.", "food", { preparedFood: 1 })
 ];
 
 function recipe(id, name, ingredients, description, type, bonus = {}) {
@@ -616,6 +765,12 @@ const shopBuyItems = [
   shopItem("barleySeeds", "Barley Seeds", 2, "item", 1),
   shopItem("lentilSeeds", "Lentil Seeds", 2, "item", 1),
   shopItem("cucumberSeeds", "Cucumber Seeds", 2, "item", 1),
+  shopItem("wheatSeeds", "Wheat Seeds", 2, "item", 1),
+  shopItem("onionSeeds", "Onion Seeds", 2, "item", 1),
+  shopItem("garlicSeeds", "Garlic Seeds", 2, "item", 1),
+  shopItem("figSeedlings", "Fig Seedlings", 3, "item", 1),
+  shopItem("grapeSeedlings", "Grape Seedlings", 3, "item", 1),
+  shopItem("leekSeeds", "Leek Seeds", 2, "item", 1),
   shopItem("cloth", "Cloth", 3, "item", 1),
   shopItem("ironToolHead", "Iron Tool Head", 5, "item", 1),
   shopItem("wateringCan", "Watering Can", 6, "tool", 1),
@@ -647,6 +802,14 @@ const shopSellItems = [
   sellItem("barley", 2),
   sellItem("lentils", 2),
   sellItem("cucumbers", 2),
+  sellItem("wheat", 2),
+  sellItem("onions", 2),
+  sellItem("garlic", 3),
+  sellItem("figs", 3),
+  sellItem("grapes", 3),
+  sellItem("leeks", 2),
+  sellItem("trout", 5),
+  sellItem("salmon", 5),
   sellItem("herbs", 2),
   sellItem("wood", 1),
   sellItem("stone", 1)
@@ -659,6 +822,36 @@ function shopItem(id, name, cost, type, amount) {
 function sellItem(id, price) {
   return { id, price };
 }
+
+const MAX_COMMUNITY_ORDERS = 3;
+
+const ORDER_POOL = [
+  { tpl: "barleyBag",      label: "Bag of Barley",           items: { barley: 3 },                      reward: 8,  days: 3 },
+  { tpl: "lentilBag",      label: "Bag of Lentils",          items: { lentils: 3 },                     reward: 8,  days: 3 },
+  { tpl: "wheatBag",       label: "Bag of Wheat",            items: { wheat: 3 },                       reward: 9,  days: 3 },
+  { tpl: "herbBundle",     label: "Bundle of Herbs",         items: { herbs: 3 },                       reward: 8,  days: 4 },
+  { tpl: "freshFish",      label: "Fresh Clean Fish",        items: { cleanFish: 2 },                   reward: 12, days: 2 },
+  { tpl: "troutOrder",     label: "Fresh Trout",             items: { trout: 2 },                       reward: 14, days: 3 },
+  { tpl: "salmonOrder",    label: "Fresh Salmon",            items: { salmon: 2 },                      reward: 14, days: 3 },
+  { tpl: "eggBasket",      label: "Basket of Eggs",          items: { eggs: 4 },                        reward: 10, days: 3 },
+  { tpl: "woolBundle",     label: "Bundle of Wool",          items: { wool: 3 },                        reward: 16, days: 4 },
+  { tpl: "milkJug",        label: "Fresh Milk",              items: { milk: 3 },                        reward: 9,  days: 2 },
+  { tpl: "cheesePortion",  label: "Portion of Cheese",       items: { cheese: 2 },                      reward: 10, days: 3 },
+  { tpl: "vegBasket",      label: "Garden Vegetables",       items: { cucumbers: 2, onions: 2 },        reward: 12, days: 3 },
+  { tpl: "garlicOrder",    label: "Garlic Cloves",           items: { garlic: 3 },                      reward: 12, days: 4 },
+  { tpl: "figsOrder",      label: "Basket of Figs",          items: { figs: 2 },                        reward: 10, days: 3 },
+  { tpl: "grapeOrder",     label: "Bunch of Grapes",         items: { grapes: 3 },                      reward: 11, days: 3 },
+  { tpl: "leekOrder",      label: "Leeks for the Table",     items: { leeks: 3 },                       reward: 9,  days: 3 },
+  { tpl: "breadLoaves",    label: "Bread Loaves",            items: { wheatBread: 2 },                  reward: 14, days: 3 },
+  { tpl: "flatbreadOrder", label: "Stuffed Flatbread",       items: { stuffedFlatbread: 2 },            reward: 16, days: 3 },
+  { tpl: "stewPot",        label: "Pot of Lentil Stew",      items: { lentilStew: 2 },                  reward: 12, days: 3 },
+  { tpl: "soupOrder",      label: "Pot of Soup",             items: { onionLentilSoup: 2 },             reward: 14, days: 3 },
+  { tpl: "chickenOrder",   label: "Prepared Chicken",        items: { chickenMeat: 2 },                 reward: 14, days: 3 },
+  { tpl: "muttonOrder",    label: "Portion of Mutton",       items: { mutton: 2 },                      reward: 16, days: 4 },
+  { tpl: "harvestBundle",  label: "Harvest Bundle",          items: { wheat: 2, barley: 2, herbs: 1 },  reward: 18, days: 4 },
+  { tpl: "fishMealOrder",  label: "Clean Fish Meal",         items: { cleanFishMeal: 1, cleanFish: 1 }, reward: 16, days: 3 },
+  { tpl: "sabbathBasket",  label: "Sabbath Meal Basket",     items: { simpleSabbathMeal: 1, herbs: 1 }, reward: 16, days: 6 }
+];
 
 const sabbathTasks = [
   { id: "gatherWater", label: "Gather water", location: "Well / Water Area" },
@@ -675,7 +868,7 @@ const journalEntries = [
   entry("barley", "Barley", "Barley is a clean grain and an early crop in the land. It likes cooler weather and well-drained soil."),
   entry("lentils", "Lentils", "Lentils are clean legumes, simple and nourishing. They grow best in loose soil with steady moisture while sprouting."),
   entry("cucumbers", "Cucumbers", "Cucumbers are clean garden produce. They enjoy warmth and regular water."),
-  entry("herbs", "Herbal Notes and Safety", "Herbs are educational here. They may be traditionally used for fragrance, food, or gentle support. Use caution; herb notes do not replace medical care."),
+  entry("herbs", "Herbal Notes and Safety", "Herbs are part of Elohims beautful creation given to us for our good. More will be added here later for herbs."),
   entry("cleanFood", "Clean Food and Faithful Stewardship", "Food systems begin with clean grains, legumes, vegetables, fruits, and herbs. Questionable or unclassified foods are not edible until reviewed."),
   entry("sabbathPrep", "Sabbath Preparation and Rest", "Preparation Day invites water, clean food, herbs, tidying, tools put away, and a Sabbath basket. Sabbath rest is blessing, not punishment."),
   entry("sixDays", "Six Days You Shall Labor", "Six days are for ordinary work. The rhythm gives work dignity and keeps it from swallowing the whole life of the homestead."),
@@ -687,7 +880,17 @@ const journalEntries = [
   entry("sukkot", "Sukkot and Rejoicing", "Sukkot can later become a joyful season of gathering branches, building a sukkah, sharing clean food, and rejoicing before Yehovah."),
   entry("prayer", "Prayer and Reflection", "Quiet reflection is welcome here. The game should leave space for thankfulness, confession, hope, and simple attention."),
   entry("stewardship", "Stewardship", "Stewardship means receiving the homestead as a trust. Tools, soil, time, food, and rest are handled with care."),
-  entry("shalomRest", "Shalom Rest", "After Sabbath, stamina and energy are restored. Rest strengthens the next work day and reminds the homestead that trust is part of provision.")
+  entry("shalomRest", "Shalom Rest", "After Sabbath, stamina and energy are restored. Rest strengthens the next work day and reminds the homestead that trust is part of provision."),
+  entry("wheat", "Wheat", "Wheat is a clean spring grain planted after the barley. It takes four days to mature and can be baked into bread or added to hearty stews."),
+  entry("onions", "Onions", "Onions are a clean spring vegetable that mature in three days. They add flavour to soups, salads, and flatbreads and keep well after harvest."),
+  entry("garlic", "Garlic", "Garlic is a clean autumn vegetable planted when the days shorten. It takes four days to mature and is valued for flavour and warming soups."),
+  entry("figs", "Figs", "Figs are a clean summer fruit that take five days to mature. Scripture speaks of sitting under one's own fig tree as a picture of peace and provision."),
+  entry("grapes", "Grapes", "Grapes are a clean summer fruit taking five days to mature. They can be eaten fresh, pressed for juice, or preserved. Gleaning traditions apply to the vineyard as well."),
+  entry("leeks", "Leeks", "Leeks are a clean autumn vegetable that mature in three days. They make a gentle, warming soup as the season turns cold."),
+  entry("seasonalPlanting", "Seasonal Planting Guide", "Spring: barley, wheat, onions, lentils. Summer: cucumbers, figs, grapes. Autumn: garlic, leeks. Each season has its own planting, and the rhythm of the land echoes the rhythm of rest."),
+  entry("cleanFishSeasons", "Clean Fish by Season", "Clean fish must have both fins and scales (Leviticus 11:9-12). The pond yields clean fish in spring and summer. In autumn, trout are running. In winter, salmon come to the cold waters. All are clean and good for the table."),
+  entry("trout", "Trout", "Trout have fins and scales and are therefore clean according to Leviticus 11. They run in autumn and can be caught with a fishing pole or net from the pond."),
+  entry("salmon", "Salmon", "Salmon have fins and scales and are therefore clean. They are a winter catch at the pond, nourishing and suitable for a warm meal in the cold months.")
 ];
 
 function entry(id, title, body) {
@@ -826,6 +1029,9 @@ function createNewState() {
     preppedFood: null,
     isSabbathRest: false,
     hotspotDebug: false,
+    communityOrders: [],
+    nextOrderId: 1,
+    sabbathActivities: { worshipped: false, strolled: false, gathered: false },
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
     messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."]
   };
@@ -928,6 +1134,9 @@ function hydrateState(savedState) {
     preppedFood: savedState.preppedFood || null,
     sabbathPrep: { ...Object.fromEntries(sabbathTasks.map((task) => [task.id, false])), ...(savedState.sabbathPrep || {}) },
     journalUnlocked: { ...Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])), ...(savedState.journalUnlocked || {}) },
+    communityOrders: savedState.communityOrders || [],
+    nextOrderId: savedState.nextOrderId || 1,
+    sabbathActivities: { worshipped: false, strolled: false, gathered: false, ...(savedState.sabbathActivities || {}) },
     messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."]
   };
 }
@@ -1462,6 +1671,9 @@ function handleHotspot(hotspot) {
   if (action === "fillWaterJar") fillWaterJar();
   if (action === "enterSabbath") enterSabbathRest();
   if (action === "sabbathReflection") sabbathReflection();
+  if (action === "sabbathWorship") sabbathWorshipAction();
+  if (action === "sabbathStroll") sabbathStrollAction();
+  if (action === "sabbathGathering") sabbathGatheringAction();
   render();
 }
 
@@ -1733,9 +1945,21 @@ function fishPond() {
   if (!canDoLabor("fish") || !spendStamina(state.tools.fishingNet ? 6 : 8)) return;
   const quality = improveQualityByLearning(state.tools.fishingNet ? "good" : "standard", "gathering");
   const bonus = consumeProductionBuff();
-  addItem("cleanFish", (state.tools.fishingNet ? 2 : 1) + bonus, quality);
+  const currentSeason = seasons[state.seasonIndex] || "Spring";
+  let fishItem, fishName;
+  if (currentSeason === "Autumn") {
+    fishItem = "trout";
+    fishName = "trout";
+  } else if (currentSeason === "Winter") {
+    fishItem = "salmon";
+    fishName = "salmon";
+  } else {
+    fishItem = "cleanFish";
+    fishName = "clean fish";
+  }
+  addItem(fishItem, (state.tools.fishingNet ? 2 : 1) + bonus, quality);
   learnFrom("gathering");
-  pushMessage(`Caught ${QUALITY_LABELS[quality]} clean fish from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
+  pushMessage(`Caught ${QUALITY_LABELS[quality]} ${fishName} from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
 
 function huntDeer() {
@@ -1795,6 +2019,140 @@ function enterSabbathRest() {
   state.currentScene = "sabbath";
   state.minute = 18 * 60;
   pushMessage("Sabbath rest begins. Ordinary labor pauses; delight and restoration remain.");
+}
+
+function sabbathWorshipAction() {
+  if (!isSabbath()) {
+    pushMessage("This celebration is for the Sabbath day.");
+    return;
+  }
+  if (state.sabbathActivities?.worshipped) {
+    pushMessage("You have already worshipped today. Rest in the delight of Sabbath.");
+    return;
+  }
+  state.sabbathActivities = state.sabbathActivities || {};
+  state.sabbathActivities.worshipped = true;
+  triggerSceneEffect("sabbathWorship");
+  render();
+  pushMessage("Singing and celebration fill the Sabbath with praise. The day closes in gratitude.");
+  setTimeout(() => { nextDay(); }, 2800);
+}
+
+function sabbathStrollAction() {
+  if (!isSabbath()) {
+    pushMessage("This peaceful stroll is for the Sabbath day.");
+    return;
+  }
+  if (state.sabbathActivities?.strolled) {
+    pushMessage("You have already taken your Sabbath stroll today.");
+    return;
+  }
+  state.sabbathActivities = state.sabbathActivities || {};
+  state.sabbathActivities.strolled = true;
+  state.restedBuffDays = 1;
+  state.currentScene = "forest";
+  advanceTime(45);
+  pushMessage("A quiet Sabbath stroll through the forest. The trees and birdsong are a gentle delight. A rested spirit carries into tomorrow.");
+}
+
+function sabbathGatheringAction() {
+  if (!isSabbath()) {
+    pushMessage("A Sabbath gathering is only for the Sabbath day.");
+    return;
+  }
+  const canHost = (state.inventory.preparedFood || 0) >= 1 && (state.inventory.herbs || 0) >= 1;
+  openCustomModal("Host a Gathering", `
+    <div class="card-grid">
+      <article class="modal-card">
+        <h3>Sabbath Gathering</h3>
+        <p>Welcome neighbors for fellowship, song, and a shared clean table. Costs 1 prepared food and 1 herbs.</p>
+        <button type="button" data-modal-action="host gathering" ${!canHost || state.sabbathActivities?.gathered ? "disabled" : ""}>Host Gathering</button>
+        ${state.sabbathActivities?.gathered ? "<p class='hint-text'>The gathering has already been held today.</p>" : ""}
+      </article>
+    </div>
+  `);
+  bindModalActions({ "host gathering": () => hostSabbathGathering() });
+}
+
+function hostSabbathGathering() {
+  if ((state.inventory.preparedFood || 0) < 1 || (state.inventory.herbs || 0) < 1) {
+    pushMessage("You need 1 prepared food and 1 herbs to host a gathering.");
+    return;
+  }
+  if (state.sabbathActivities?.gathered) {
+    pushMessage("The gathering has already been held this Sabbath.");
+    return;
+  }
+  spendItem("preparedFood", 1);
+  spendItem("herbs", 1);
+  state.sabbathActivities = state.sabbathActivities || {};
+  state.sabbathActivities.gathered = true;
+  state.restedBuffDays = 2;
+  closeModal();
+  triggerSceneEffect("sabbathWorship");
+  advanceTime(90);
+  pushMessage("A joyful gathering fills the homestead with song, fellowship, and gratitude. Your spirit is lifted. Well-rested buff extended.");
+}
+
+function generateCommunityOrders() {
+  expireCommunityOrders();
+  if ((state.communityOrders || []).length >= MAX_COMMUNITY_ORDERS) return;
+  if (!state.communityOrders) state.communityOrders = [];
+  if (!state.nextOrderId) state.nextOrderId = 1;
+  const usedTemplates = new Set(state.communityOrders.map((o) => o.tpl));
+  const available = ORDER_POOL.filter((t) => !usedTemplates.has(t.tpl));
+  if (!available.length) return;
+  const newCount = Math.min(2, MAX_COMMUNITY_ORDERS - state.communityOrders.length);
+  for (let i = 0; i < newCount && available.length > 0; i++) {
+    const idx = Math.floor(Math.random() * available.length);
+    const tpl = available.splice(idx, 1)[0];
+    state.communityOrders.push({ id: state.nextOrderId++, tpl: tpl.tpl, label: tpl.label, items: tpl.items, reward: tpl.reward, dueDay: state.day + tpl.days });
+  }
+}
+
+function expireCommunityOrders() {
+  if (!state.communityOrders) return;
+  const before = state.communityOrders.length;
+  state.communityOrders = state.communityOrders.filter((o) => o.dueDay >= state.day);
+  if (state.communityOrders.length < before) pushMessage("Some community orders have expired.");
+}
+
+function fulfillCommunityOrder(id) {
+  const order = (state.communityOrders || []).find((o) => o.id === id);
+  if (!order) return;
+  if (!hasIngredients(order.items)) {
+    const needed = Object.entries(order.items).map(([k, v]) => `${v} ${itemLabels[k] || k}`).join(", ");
+    pushMessage(`Still need: ${needed}`);
+    openModal("orders");
+    return;
+  }
+  spendIngredients(order.items);
+  addItem("coins", order.reward);
+  state.communityOrders = state.communityOrders.filter((o) => o.id !== id);
+  pushMessage(`Order filled: "${order.label}". Received ${order.reward} coins!`);
+  saveGame(false);
+  render();
+  openModal("orders");
+}
+
+function communityOrdersMarkup() {
+  if (!state.communityOrders) state.communityOrders = [];
+  if (!state.communityOrders.length) {
+    return `<p>No community orders right now. Check back tomorrow — new requests arrive each day.</p>`;
+  }
+  const cards = state.communityOrders.map((order) => {
+    const needed = Object.entries(order.items).map(([k, v]) => `${v} ${itemLabels[k] || k}`).join(", ");
+    const canFill = hasIngredients(order.items);
+    const daysLeft = order.dueDay - state.day;
+    const urgency = daysLeft <= 1 ? " — <strong>Due tomorrow!</strong>" : ` — ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+    return `<article class="modal-card">
+      <h3>${order.label}</h3>
+      <p>Needs: ${needed}</p>
+      <p>Reward: ${order.reward} coins${urgency}</p>
+      <button type="button" data-fill-order="${order.id}" ${!canFill || isSabbath() ? "disabled" : ""}>${canFill ? "Fill Order" : "Missing items"}</button>
+    </article>`;
+  }).join("");
+  return `<div class="card-grid">${cards}</div><p class="hint-text">Fill orders by delivering requested clean goods for coins. New requests arrive each morning.</p>`;
 }
 
 function openAnimalModal(animalId) {
@@ -2514,12 +2872,15 @@ function nextDay() {
     bed.weededToday = false;
   }
 
+  generateCommunityOrders();
+
   if (wasSabbathRest && previousWeekdayIndex === 6) {
     state.isSabbathRest = false;
     state.stamina = 100;
     state.energy = 100;
     state.shalomRestDays = 1;
     state.journalUnlocked.shalomRest = true;
+    state.sabbathActivities = { worshipped: false, strolled: false, gathered: false };
     resetSabbathPrep();
     pushMessage("Sabbath has ended. Shalom Rest strengthens this work day.");
   } else if (wasSabbathRest) {
@@ -2670,6 +3031,13 @@ function openModal(type, titleOverride) {
   if (type === "overview") {
     modalTitle.textContent = scenes[state.currentScene].title;
     modalBody.innerHTML = sceneInfoMarkup();
+  }
+  if (type === "orders") {
+    modalTitle.textContent = "Community Orders";
+    modalBody.innerHTML = communityOrdersMarkup();
+    document.querySelectorAll("[data-fill-order]").forEach((btn) => {
+      btn.addEventListener("click", () => fulfillCommunityOrder(Number(btn.dataset.fillOrder)));
+    });
   }
 }
 
@@ -3541,6 +3909,7 @@ function renderScene() {
 
 function visibleHotspots(scene) {
   return scene.hotspots.filter((hotspot) => {
+    if (hotspot.sabbathOnly) return isSabbath();
     if (hotspot.action === "cleanRoomChore") return Boolean(state.roomChores?.[hotspot.room]?.[hotspot.chore]);
     if (hotspot.action === "washDishes") return Boolean(state.kitchenChores?.dishes);
     if (hotspot.action === "cleanCounters") return Boolean(state.kitchenChores?.counters);
@@ -3818,6 +4187,19 @@ function playSceneEffect(effect) {
       <span class="tidy-sparkle" style="--x: 34%; --y: 46%; --delay: 0.2s;"></span>
       <span class="tidy-sparkle" style="--x: 56%; --y: 40%; --delay: 0.4s;"></span>
       <span class="tidy-sparkle" style="--x: 68%; --y: 52%; --delay: 0.6s;"></span>
+    `,
+    sabbathWorship: `
+      <span class="sabbath-glow"></span>
+      <span class="sabbath-ray" style="--x:28%;--angle:-22deg;--delay:0s;"></span>
+      <span class="sabbath-ray" style="--x:38%;--angle:-10deg;--delay:0.08s;"></span>
+      <span class="sabbath-ray" style="--x:49%;--angle:0deg;--delay:0.04s;"></span>
+      <span class="sabbath-ray" style="--x:58%;--angle:10deg;--delay:0.12s;"></span>
+      <span class="sabbath-ray" style="--x:67%;--angle:22deg;--delay:0.06s;"></span>
+      <span class="sabbath-petal" style="--x:22%;--y:56%;--rot:30deg;--duration:2.2s;--delay:0.3s;"></span>
+      <span class="sabbath-petal" style="--x:41%;--y:62%;--rot:-20deg;--duration:1.9s;--delay:0.5s;"></span>
+      <span class="sabbath-petal" style="--x:60%;--y:53%;--rot:45deg;--duration:2.3s;--delay:0.2s;"></span>
+      <span class="sabbath-petal" style="--x:74%;--y:59%;--rot:-35deg;--duration:2s;--delay:0.6s;"></span>
+      <span class="sabbath-petal" style="--x:33%;--y:70%;--rot:15deg;--duration:2.1s;--delay:0.4s;"></span>
     `
   }[type];
   if (!markup) return;
@@ -3881,6 +4263,7 @@ function bindEvents() {
   document.getElementById("cookingBtn").addEventListener("click", () => openModal("cooking"));
   document.getElementById("journalBtn").addEventListener("click", () => openModal("journal"));
   document.getElementById("messagesBtn").addEventListener("click", () => openModal("messages"));
+  document.getElementById("ordersBtn").addEventListener("click", () => openModal("orders"));
   document.getElementById("debugBtn").addEventListener("click", toggleDebug);
   document.getElementById("saveBtn").addEventListener("click", () => openModal("save"));
   document.getElementById("nextDayBtn").addEventListener("click", nextDay);
