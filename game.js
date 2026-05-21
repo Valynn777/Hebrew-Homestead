@@ -3,6 +3,8 @@
 const SAVE_VERSION = 9;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
+const NAMED_SAVE_PREFIX = `${SAVE_KEY}-save-`;
+const MAX_NAMED_SAVES = 5;
 
 const weekdays = ["Day One", "Day Two", "Day Three", "Day Four", "Day Five", "Preparation Day", "Sabbath"];
 const seasons = ["Spring", "Summer", "Autumn", "Winter"];
@@ -1047,6 +1049,85 @@ function readStoredSave(key) {
   } catch {
     return null;
   }
+}
+
+function namedSaveKey(index) {
+  return `${NAMED_SAVE_PREFIX}${index}`;
+}
+
+function readRawSave(key) {
+  const saved = localStorage.getItem(key);
+  if (!saved) return null;
+  try {
+    const parsed = JSON.parse(saved);
+    return parsed?.state ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function getAllNamedSaves() {
+  const saves = [];
+  for (let i = 0; i < MAX_NAMED_SAVES; i++) {
+    saves.push({ index: i, raw: readRawSave(namedSaveKey(i)) });
+  }
+  return saves;
+}
+
+function saveToNamedSlot(name) {
+  const cleanName = name.trim().slice(0, 32);
+  if (!cleanName) {
+    pushMessage("Enter a name before saving.");
+    return;
+  }
+  let targetIndex = -1;
+  for (let i = 0; i < MAX_NAMED_SAVES; i++) {
+    const raw = readRawSave(namedSaveKey(i));
+    if (!raw && targetIndex === -1) targetIndex = i;
+    if (raw?.name === cleanName) { targetIndex = i; break; }
+  }
+  if (targetIndex === -1) targetIndex = 0;
+  const savedAt = new Date().toISOString();
+  localStorage.setItem(namedSaveKey(targetIndex), JSON.stringify({ version: SAVE_VERSION, savedAt, name: cleanName, state }));
+  saveGame(false);
+  pushMessage(`Saved as "${cleanName}".`);
+  render();
+  openModal("save");
+}
+
+function loadFromNamedSlot(index) {
+  const raw = readRawSave(namedSaveKey(index));
+  if (!raw?.state) {
+    pushMessage("No save found in that slot.");
+    return;
+  }
+  saveGame(false);
+  state = hydrateState(raw.state);
+  lastSaveInfo = { status: `Loaded "${raw.name || "Saved Game"}"`, savedAt: raw.savedAt || null, error: "" };
+  pushMessage(`Continued from "${raw.name || "Saved Game"}".`);
+  closeModal();
+  render();
+}
+
+function deleteNamedSlot(index) {
+  const raw = readRawSave(namedSaveKey(index));
+  const label = raw?.name ? `"${raw.name}"` : "that save";
+  localStorage.removeItem(namedSaveKey(index));
+  pushMessage(`Deleted ${label}.`);
+  render();
+  openModal("save");
+}
+
+function startNewGame() {
+  saveGame(false);
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem(SAVE_BACKUP_KEY);
+  state = createNewState();
+  activeJournalId = "welcome";
+  lastSaveInfo = { status: "New game", savedAt: null, error: "" };
+  pushMessage("Welcome to Hebrew Homestead. Click a scene hotspot to begin.");
+  closeModal();
+  render();
 }
 
 function scheduleAutosave() {
@@ -2994,30 +3075,60 @@ function sleepThroughNight() {
 }
 
 function saveManagerMarkup() {
-  const primary = readStoredSave(SAVE_KEY);
   const backup = readStoredSave(SAVE_BACKUP_KEY);
   const exportText = JSON.stringify({ version: SAVE_VERSION, savedAt: new Date().toISOString(), state }, null, 2);
+  const namedSaves = getAllNamedSaves();
+  const currentSeason = seasons[state.seasonIndex] || "Spring";
+  const namedSlotsMarkup = namedSaves.map(({ index, raw }) => {
+    if (!raw) {
+      return `<article class="modal-card">
+        <h3>Empty Slot ${index + 1}</h3>
+        <p class="hint-text">No save in this slot.</p>
+      </article>`;
+    }
+    const savedDate = raw.savedAt ? new Date(raw.savedAt).toLocaleString() : "Unknown date";
+    const saveDay = raw.state?.day ?? "?";
+    const saveSeason = seasons[raw.state?.seasonIndex] ?? "?";
+    return `<article class="modal-card">
+      <h3>${escapeAttribute(raw.name)}</h3>
+      <p>Day ${saveDay} &middot; ${saveSeason}</p>
+      <p class="hint-text">${savedDate}</p>
+      <div class="save-actions">
+        <button type="button" data-named-load="${index}">Continue</button>
+        <button type="button" class="danger-action" data-named-delete="${index}">Delete</button>
+      </div>
+    </article>`;
+  }).join("");
   return `
-    <div class="card-grid">
-      <article class="modal-card">
-        <h3>Current Save</h3>
-        <p><strong>Status:</strong> ${lastSaveInfo.status}</p>
-        <p><strong>Last saved:</strong> ${lastSaveInfo.savedAt ? new Date(lastSaveInfo.savedAt).toLocaleString() : "Not yet"}</p>
-        ${lastSaveInfo.error ? `<p><strong>Last error:</strong> ${lastSaveInfo.error}</p>` : ""}
-        <button type="button" data-save-action="saveNow">Save Now</button>
-      </article>
-      <article class="modal-card">
-        <h3>Stored Copies</h3>
-        <p><strong>Primary:</strong> ${primary?.savedAt ? new Date(primary.savedAt).toLocaleString() : "No saved copy"}</p>
-        <p><strong>Backup:</strong> ${backup?.savedAt ? new Date(backup.savedAt).toLocaleString() : "No backup copy"}</p>
-        <button type="button" data-save-action="restoreBackup" ${backup ? "" : "disabled"}>Restore Backup</button>
-      </article>
+    <h3>Continue Game</h3>
+    <p class="hint-text">Load a previously saved game from any slot below.</p>
+    <div class="card-grid">${namedSlotsMarkup}</div>
+
+    <h3>Save As</h3>
+    <p class="hint-text">Save your current progress (Day ${state.day} &middot; ${currentSeason}) to a named slot.</p>
+    <div class="save-actions">
+      <input id="saveAsName" type="text" maxlength="32" placeholder="Enter a save name…" class="save-name-input">
+      <button type="button" data-save-action="saveAs">Save As</button>
     </div>
+
+    <h3>New Game</h3>
+    <p class="hint-text">Start a fresh homestead. Your current game is auto-saved first so you can still export it.</p>
+    <button type="button" class="danger-action" data-save-action="newGame">New Game</button>
+
+    <h3>Auto-Save</h3>
+    <p><strong>Status:</strong> ${lastSaveInfo.status}</p>
+    <p><strong>Last saved:</strong> ${lastSaveInfo.savedAt ? new Date(lastSaveInfo.savedAt).toLocaleString() : "Not yet"}</p>
+    ${lastSaveInfo.error ? `<p><strong>Error:</strong> ${lastSaveInfo.error}</p>` : ""}
+    <div class="save-actions">
+      <button type="button" data-save-action="saveNow">Save Now</button>
+      <button type="button" data-save-action="restoreBackup" ${backup ? "" : "disabled"}>Restore Backup</button>
+    </div>
+
     <h3>Export Save</h3>
-    <p class="hint-text">Keep this text somewhere safe if you want a manual backup outside this browser.</p>
+    <p class="hint-text">Copy this text to keep a manual backup outside this browser.</p>
     <textarea class="save-textarea" readonly>${escapeTextarea(exportText)}</textarea>
     <h3>Import Save</h3>
-    <p class="hint-text">Paste a Hebrew Homestead save export below, then import it. This replaces the current browser save.</p>
+    <p class="hint-text">Paste a Hebrew Homestead save export below, then import it.</p>
     <textarea id="importSaveText" class="save-textarea" placeholder="Paste exported save JSON here"></textarea>
     <div class="save-actions">
       <button type="button" data-save-action="importSave">Import Pasted Save</button>
@@ -3036,6 +3147,23 @@ function bindSaveManager() {
       }
       if (action === "restoreBackup") restoreBackupSave();
       if (action === "importSave") importPastedSave();
+      if (action === "saveAs") {
+        const name = document.getElementById("saveAsName")?.value || "";
+        saveToNamedSlot(name);
+      }
+      if (action === "newGame") {
+        if (confirm("Start a new game? Your current progress will be auto-saved first.")) {
+          startNewGame();
+        }
+      }
+    });
+  });
+  document.querySelectorAll("[data-named-load]").forEach((button) => {
+    button.addEventListener("click", () => loadFromNamedSlot(Number(button.dataset.namedLoad)));
+  });
+  document.querySelectorAll("[data-named-delete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (confirm("Delete this saved game?")) deleteNamedSlot(Number(button.dataset.namedDelete));
     });
   });
 }

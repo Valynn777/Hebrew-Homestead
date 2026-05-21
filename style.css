@@ -1321,6 +1321,17 @@ small {
   margin-top: 10px;
 }
 
+.save-name-input {
+  flex: 1 1 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: #fffdf6;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
 .entry-layout {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
