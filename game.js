@@ -241,9 +241,9 @@ const scenes = {
       hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath"),
       hs("reflection", "Read Sabbath Reflection", 34, 67, 30, 17, "sabbathReflection"),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" }),
-      hs("worship", "Worship and Celebrate", 10, 62, 22, 16, "sabbathWorship", { sabbathOnly: true }),
-      hs("gathering", "Host a Gathering", 38, 62, 22, 16, "sabbathGathering", { sabbathOnly: true }),
-      hs("stroll", "Take a Sabbath Stroll", 67, 62, 22, 16, "sabbathStroll", { sabbathOnly: true })
+      hs("worship", "Worship and Celebrate", 10, 62, 22, 16, "sabbathWorship"),
+      hs("gathering", "Host a Gathering", 38, 62, 22, 16, "sabbathGathering"),
+      hs("stroll", "Take a Sabbath Stroll", 67, 62, 22, 16, "sabbathStroll")
     ]
   }
 };

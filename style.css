@@ -1,5 +1,5 @@
 :root {
-  --topbar-h: 100px;
+  --topbar-h: 88px;
   --ink: #20332a;
   --muted: #5e7567;
   --paper: #f8f3e7;
@@ -1504,7 +1504,7 @@ small {
 }
 
 @media (max-width: 740px) {
-  :root { --topbar-h: 88px; }
+  :root { --topbar-h: 76px; }
 
   .app-shell {
     padding: 8px;
@@ -1573,7 +1573,7 @@ small {
 
 /* Landscape mobile: phones rotated (viewport height ≤ 500px) */
 @media (max-height: 500px) {
-  :root { --topbar-h: 48px; }
+  :root { --topbar-h: 38px; }
 
   .app-shell {
     padding: 5px 10px;
