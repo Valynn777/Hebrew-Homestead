@@ -50,11 +50,12 @@ button:disabled {
 
 .app-shell {
   width: min(1760px, 100%);
-  min-height: 100svh;
+  height: 100svh;
   margin: 0 auto;
   padding: 14px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .topbar {
@@ -103,6 +104,7 @@ small {
   display: block;
   flex: 1;
   min-height: 0;
+  container-type: size;
 }
 
 .scene-shell {
@@ -112,7 +114,7 @@ small {
 
 .scene-stage {
   position: relative;
-  width: min(100%, calc((100svh - 126px) * 1.777));
+  width: min(100%, calc(100cqh * 1.7778));
   min-height: 0;
   margin: 0 auto;
   aspect-ratio: 1672 / 941;
@@ -1379,12 +1381,6 @@ small {
   .scene-actions button {
     flex: 0 0 auto;
     min-height: 44px;
-  }
-
-  .scene-stage {
-    width: min(100%, calc((100svh - 156px) * 1.777));
-    min-height: 0;
-    aspect-ratio: 1672 / 941;
   }
 
   .hotspot {
