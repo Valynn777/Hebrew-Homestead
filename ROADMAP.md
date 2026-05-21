@@ -18,6 +18,8 @@
 - First-pass garden animations for planting, watering, soil quality, crop sway, weeds, harvest, compost steam, seasonal tint, and small ambient details
 - Food quality tracking for produce, fish, meat, animal products, and prepared meals
 - Counter prep before stove cooking for higher-quality food
+- Learning-by-doing skill growth for gardening, animal care, cooking, crafting, and gathering
+- Bedroom dresser Character & Clothing panel with skill stats, focused clothing, and clothing improvements
 - Well water gathering fills household water and garden watering can together
 - Laundry washing at the well grants a Clean Laundry production and harvest buff
 - Active buffs display as colored scene emblems
@@ -62,6 +64,7 @@ Current prototype goals:
 - Better shop pricing, sell limits, and honest-measures trade lessons
 - Stewardship limits for clean wild game and fish
 - Upgrade paths for forest tools, bows, arrows, and fishing gear
+- More clothing options and deeper non-level-based mastery effects
 - Better order delivery feedback
 - Save migration support
 

@@ -16,9 +16,11 @@ The player navigates between illustrated homestead scenes by clicking hotspots. 
 6. Tend crop beds in the garden.
 7. Care for clean barn animals.
 8. Cook clean foods in the kitchen.
-9. Read short journal entries.
-10. Prepare for Sabbath on Preparation Day.
-11. Enter Sabbath Rest, then begin the next work day with Shalom Rest.
+9. Grow practical skills through repeated work rather than formal level-up menus.
+10. Review character stats and improve clothing at the bedroom dresser.
+11. Read short journal entries.
+12. Prepare for Sabbath on Preparation Day.
+13. Enter Sabbath Rest, then begin the next work day with Shalom Rest.
 
 ## Current Mechanics
 
@@ -28,6 +30,9 @@ The player navigates between illustrated homestead scenes by clicking hotspots. 
 - Clicking a hotspot navigates, opens a modal, gathers resources, tends crops, cooks, crafts, orders supplies, rests, or completes Sabbath preparation.
 - H toggles hotspot debug borders for placement tuning.
 - The bedroom bed offers a once-per-day nap or evening sleep-through-night option. Full sleep restores stamina and energy and grants a work-day rested boost; living room/cabin short rests are smaller and limited.
+- The bedroom dresser opens Character & Clothing, where the player can see practical skill growth and choose clothing.
+- Skills grow quietly through use: gardening, animal care, cooking, crafting, and gathering improve quality for related produce, animal harvests, cooked food, crafted materials, fish, meat, and gathered herbs.
+- Clothing options focus on different kinds of work and can be improved with cloth. Matching clothing helps practice build more quickly, and high-rank clothing can support quality gains.
 - The bathroom is reached from the living room and offers bathing, hand washing, and teeth brushing.
 - Bathing grants a Relaxed buff and a small stamina recovery. Washing hands grants a Clean Hands buff for cooking quality. Brushing teeth grants a Fresh Start buff for upcoming harvest and production yields.
 - The kitchen uses a pantry doorway for dry storage and a separate Ice Box panel for clean dairy and refrigerated prepared foods.
@@ -106,7 +111,9 @@ Each hotspot has:
 
 - Scenes: scene objects with hotspot arrays.
 - Inventory: item counts, including water, watering can water, wood, stone, herbs, crops, prepared food, plant matter, coins, seeds, clean dairy, refrigerated foods, clean fish, venison, eggs, milk, wool, feathers, manure, fertilizer, flax, hay, feed, clean meats, hides, fur, arrows, and supplies.
-- Quality inventory: Standard, Good, and Excellent counts for tracked clean food items.
+- Quality inventory: Standard, Good, and Excellent counts for tracked clean food and crafted material items.
+- Skills: practice points for gardening, animal care, cooking, crafting, and gathering.
+- Clothing: active outfit plus clothing rank for everyday clothes and focused work clothing.
 - Buffs: active emblem-backed boosts such as Shalom Rest, Well Rested, Refreshed, Settled, Clean Laundry, Relaxed, Clean Hands, and Fresh Start.
 - Tools: owned flags for hands, basket, watering can, basic axe, pickaxe, fishing pole, fishing net, bow, bucket, shears, hoe, drying rack, compost bin, garden bed, and Sabbath basket.
 - Barn animals: grouped animal counts and daily care flags for fed, watered, cleaned, and product-collected status.
@@ -117,7 +124,7 @@ Each hotspot has:
 - Orders: pending fictional supply orders with item id, amount, and arrival day.
 - Sabbath preparation: task ids for water, clean food, herbs, cottage tidying, tools, and Sabbath basket.
 - Journal entries: short title/body entries with unlock flags.
-- Save data: current scene, day, time, season, weather, inventory, quality inventory, tools, crops, barn animals, orders, Sabbath prep, rest buffs, active buffs, prepped food, journal unlocks, and messages.
+- Save data: current scene, day, time, season, weather, inventory, quality inventory, skills, clothing, tools, crops, barn animals, orders, Sabbath prep, rest buffs, active buffs, prepped food, journal unlocks, and messages.
 
 ## Version 1 Crops
 

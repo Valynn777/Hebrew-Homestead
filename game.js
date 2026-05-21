@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const SAVE_VERSION = 8;
+const SAVE_VERSION = 9;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
 
@@ -78,7 +78,7 @@ const scenes = {
     background: sceneImages.bedroom,
     hotspots: [
       hs("bed", "Bed", 26, 35, 48, 34, "modal", { modal: "bedRest" }),
-      hs("dresser", "Dresser", 80, 36, 15, 26, "modal", { modal: "inventory" }),
+      hs("dresser", "Dresser", 80, 36, 15, 26, "modal", { modal: "character" }),
       hs("back", "Back to Living Room", 0, 13, 14, 48, "navigate", { target: "livingRoom" })
     ]
   },
@@ -692,19 +692,6 @@ function entry(id, title, body) {
   return { id, title, body };
 }
 
-let state = createNewState();
-let activeJournalId = "welcome";
-let messageTimeout = null;
-let effectTimeout = null;
-let pendingSceneEffect = null;
-let autosaveTimer = null;
-let isLoadingSave = false;
-let isWritingSave = false;
-let lastSaveInfo = { status: "Not saved yet", savedAt: null, error: "" };
-let hiddenTesterBuffer = "";
-let titleTapCount = 0;
-let lastTitleTap = 0;
-
 const TESTER_CODE = "blessing";
 const REST_LIMITS = { shortRest: 2, nap: 1 };
 const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
@@ -733,6 +720,80 @@ const BUFF_DEFINITIONS = {
     detail: "Brushing teeth boosts upcoming harvest and production yields."
   }
 };
+const SKILL_STAGES = [
+  { threshold: 0, label: "Learning" },
+  { threshold: 8, label: "Practiced" },
+  { threshold: 24, label: "Skilled" },
+  { threshold: 48, label: "Wise" }
+];
+const SKILL_DEFINITIONS = {
+  gardening: {
+    label: "Gardening",
+    detail: "Care with planting, watering, soil preparation, weeding, and harvest."
+  },
+  animalCare: {
+    label: "Animal Care",
+    detail: "Gentle, consistent feeding, watering, cleaning, gathering, and harvest care."
+  },
+  cooking: {
+    label: "Cooking",
+    detail: "Kitchen practice with prep, clean ingredients, and stove work."
+  },
+  crafting: {
+    label: "Crafting",
+    detail: "Patient handwork for tools, supplies, cloth, feed, and useful goods."
+  },
+  gathering: {
+    label: "Gathering",
+    detail: "Stewardship in the forest, water places, fishing, herbs, wood, and stone."
+  }
+};
+const CLOTHING_DEFINITIONS = {
+  everyday: {
+    label: "Everyday Clothes",
+    focus: null,
+    detail: "Simple work clothes for ordinary homestead tasks."
+  },
+  gardenApron: {
+    label: "Garden Apron",
+    focus: "gardening",
+    detail: "Helps gardening practice settle in more quickly."
+  },
+  kitchenApron: {
+    label: "Kitchen Apron",
+    focus: "cooking",
+    detail: "Keeps kitchen work orderly and supports better food preparation."
+  },
+  barnCoat: {
+    label: "Barn Coat",
+    focus: "animalCare",
+    detail: "Keeps animal chores steady, clean, and careful."
+  },
+  workApron: {
+    label: "Work Apron",
+    focus: "crafting",
+    detail: "Useful pockets and ties support focused handwork."
+  },
+  fieldCloak: {
+    label: "Field Cloak",
+    focus: "gathering",
+    detail: "Good outerwear for forest, water, and field work."
+  }
+};
+const CRAFT_QUALITY_ITEMS = new Set(["feed", "hay", "cloth", "fertilizer", "arrows"]);
+
+let state = createNewState();
+let activeJournalId = "welcome";
+let messageTimeout = null;
+let effectTimeout = null;
+let pendingSceneEffect = null;
+let autosaveTimer = null;
+let isLoadingSave = false;
+let isWritingSave = false;
+let lastSaveInfo = { status: "Not saved yet", savedAt: null, error: "" };
+let hiddenTesterBuffer = "";
+let titleTapCount = 0;
+let lastTitleTap = 0;
 
 function createNewState() {
   return {
@@ -745,6 +806,8 @@ function createNewState() {
     energy: 100,
     inventory: { ...starterInventory },
     qualityInventory: {},
+    skills: createSkills(),
+    clothing: createClothing(),
     tools: { ...starterTools },
     upgrades: { tractor: false },
     crops: createGardenBeds(),
@@ -808,6 +871,17 @@ function createBuffs() {
   return { cleanLaundry: 0, relaxed: 0, cleanHands: 0, freshStart: 0 };
 }
 
+function createSkills() {
+  return Object.fromEntries(Object.keys(SKILL_DEFINITIONS).map((key) => [key, 0]));
+}
+
+function createClothing() {
+  return {
+    active: "everyday",
+    items: Object.fromEntries(Object.keys(CLOTHING_DEFINITIONS).map((key) => [key, 1]))
+  };
+}
+
 function loadGame() {
   isLoadingSave = true;
   const loaded = readStoredSave(SAVE_KEY) || readStoredSave(SAVE_BACKUP_KEY);
@@ -838,6 +912,8 @@ function hydrateState(savedState) {
     ...savedState,
     inventory: { ...starterInventory, ...(savedState.inventory || {}) },
     qualityInventory: hydrateQualityInventory(savedState),
+    skills: { ...createSkills(), ...(savedState.skills || {}) },
+    clothing: mergeClothing(savedState.clothing || {}),
     tools: { ...starterTools, ...(savedState.tools || {}) },
     upgrades: { tractor: false, ...(savedState.upgrades || {}) },
     crops: mergeGardenBeds(savedState.crops || {}),
@@ -860,6 +936,15 @@ function mergeBarnAnimals(savedAnimals) {
     animal,
     { ...data, ...(savedAnimals[animal] || {}) }
   ]));
+}
+
+function mergeClothing(savedClothing) {
+  const base = createClothing();
+  const active = CLOTHING_DEFINITIONS[savedClothing.active] ? savedClothing.active : base.active;
+  return {
+    active,
+    items: { ...base.items, ...(savedClothing.items || {}) }
+  };
 }
 
 function hydrateQualityInventory(savedState) {
@@ -994,7 +1079,7 @@ function hasRestedStaminaBoost() {
 }
 
 function isQualityTracked(key) {
-  return Boolean(edibleItems[key]);
+  return Boolean(edibleItems[key]) || CRAFT_QUALITY_ITEMS.has(key);
 }
 
 function qualityItemTotal(bucket = {}) {
@@ -1062,6 +1147,69 @@ function qualityFromSpent(spentByItem) {
     count += spent.amount;
   });
   return count ? qualityFromScore(score / count) : "standard";
+}
+
+function skillStage(skillId) {
+  const points = state.skills?.[skillId] || 0;
+  return SKILL_STAGES.reduce((active, stage) => points >= stage.threshold ? stage : active, SKILL_STAGES[0]);
+}
+
+function nextSkillThreshold(skillId) {
+  const points = state.skills?.[skillId] || 0;
+  return SKILL_STAGES.find((stage) => stage.threshold > points)?.threshold || null;
+}
+
+function activeClothing() {
+  const clothingId = state.clothing?.active || "everyday";
+  return CLOTHING_DEFINITIONS[clothingId] ? clothingId : "everyday";
+}
+
+function activeClothingRank() {
+  const clothingId = activeClothing();
+  return state.clothing?.items?.[clothingId] || 1;
+}
+
+function clothingFocusMatches(skillId) {
+  const clothing = CLOTHING_DEFINITIONS[activeClothing()];
+  return clothing?.focus === skillId;
+}
+
+function learnFrom(skillId, amount = 1) {
+  if (!SKILL_DEFINITIONS[skillId]) return;
+  state.skills ||= createSkills();
+  const clothingBonus = clothingFocusMatches(skillId) ? activeClothingRank() - 1 : 0;
+  state.skills[skillId] = (state.skills[skillId] || 0) + amount + Math.max(0, clothingBonus);
+}
+
+function skillQualitySteps(skillId) {
+  const points = state.skills?.[skillId] || 0;
+  let steps = points >= 48 ? 2 : points >= 8 ? 1 : 0;
+  if (clothingFocusMatches(skillId) && activeClothingRank() >= 3) steps += 1;
+  return Math.min(2, steps);
+}
+
+function improveQualityByLearning(quality, skillId) {
+  let improved = quality;
+  for (let i = 0; i < skillQualitySteps(skillId); i += 1) {
+    improved = nextQuality(improved);
+  }
+  return improved;
+}
+
+function clothingImproveCost(id) {
+  const rank = state.clothing?.items?.[id] || 1;
+  if (rank >= 3) return null;
+  return { cloth: rank };
+}
+
+function canAffordCost(cost) {
+  if (!cost) return false;
+  return Object.entries(cost).every(([key, amount]) => (state.inventory[key] || 0) >= amount);
+}
+
+function clothingCostText(cost) {
+  if (!cost) return "Fully upgraded";
+  return Object.entries(cost).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
 }
 
 function qualityBreakdown(key) {
@@ -1334,6 +1482,7 @@ function gatherWater() {
   if (state.tools.wateringCan) {
     state.inventory.wateringCanWater = WATERING_CAN_CAPACITY;
   }
+  learnFrom("gathering");
   markPrep("gatherWater");
   advanceTime(15);
   const canText = state.tools.wateringCan && beforeCan < WATERING_CAN_CAPACITY ? " The watering can was topped off for the garden." : "";
@@ -1342,6 +1491,7 @@ function gatherWater() {
 
 function fillWaterJar() {
   addItem("water", 2);
+  learnFrom("gathering");
   markPrep("gatherWater");
   advanceTime(10);
   pushMessage("Filled the water jar.");
@@ -1413,14 +1563,17 @@ function brushTeeth() {
 
 function gatherHerbs() {
   if (!canDoLabor("gather") || !spendStamina(4)) return;
-  addItem("herbs", 2, "standard");
+  const quality = improveQualityByLearning("standard", "gathering");
+  addItem("herbs", 2, quality);
+  learnFrom("gathering");
   markPrep("gatherHerbs");
-  pushMessage("Gathered clean herbs. Herbal learning remains cautious and educational.");
+  pushMessage(`Gathered ${QUALITY_LABELS[quality]} clean herbs. Herbal learning remains cautious and educational.`);
 }
 
 function compostArea() {
   if (!canDoLabor("compost") || !spendStamina(3)) return;
   addItem("plantMatter", 1);
+  learnFrom("gathering");
   pushMessage("Collected clean plant matter for compost.");
 }
 
@@ -1447,6 +1600,7 @@ function refillWateringCan() {
 function forestGather(hotspot) {
   if (!canDoLabor("gather") || !spendStamina(hotspot.stamina)) return;
   addItem(hotspot.resource, hotspot.amount);
+  learnFrom("gathering");
   if (hotspot.prep) markPrep(hotspot.prep);
   pushMessage(`Gathered ${hotspot.amount} ${itemLabels[hotspot.resource]}.`);
 }
@@ -1459,6 +1613,7 @@ function chopSmallTree() {
   if (!canDoLabor("chop") || !spendStamina(12)) return;
   addItem("wood", 4);
   addItem("logs", 1);
+  learnFrom("gathering");
   pushMessage("Used the basic axe to chop a small tree and gather extra wood.");
 }
 
@@ -1470,6 +1625,7 @@ function harvestTrees() {
   if (!canDoLabor("chop") || !spendStamina(12)) return;
   addItem("wood", 5);
   addItem("logs", 2);
+  learnFrom("gathering");
   pushMessage("Used the basic axe to harvest wood from the forest trees.");
 }
 
@@ -1478,11 +1634,13 @@ function stonePile() {
   if (state.tools.pickaxe) {
     if (!spendStamina(8)) return;
     addItem("stone", 4);
+    learnFrom("gathering");
     pushMessage("Used the pickaxe to gather stone from the forest pile.");
     return;
   }
   if (!spendStamina(5)) return;
   addItem("stone", 1);
+  learnFrom("gathering");
   pushMessage("Picked up loose stones by hand. A pickaxe would gather more.");
 }
 
@@ -1492,9 +1650,10 @@ function fishPond() {
     return;
   }
   if (!canDoLabor("fish") || !spendStamina(state.tools.fishingNet ? 6 : 8)) return;
-  const quality = state.tools.fishingNet ? "good" : "standard";
+  const quality = improveQualityByLearning(state.tools.fishingNet ? "good" : "standard", "gathering");
   const bonus = consumeProductionBuff();
   addItem("cleanFish", (state.tools.fishingNet ? 2 : 1) + bonus, quality);
+  learnFrom("gathering");
   pushMessage(`Caught ${QUALITY_LABELS[quality]} clean fish from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
 
@@ -1508,12 +1667,15 @@ function huntDeer() {
     return;
   }
   if (!canDoLabor("hunt") || !spendStamina(14)) return;
+  spendQualityItem("arrows", 1);
   state.inventory.arrows -= 1;
+  const quality = improveQualityByLearning("good", "gathering");
   const bonus = consumeProductionBuff();
-  addItem("venison", 2 + bonus, "good");
+  addItem("venison", 2 + bonus, quality);
   addItem("hide", 1);
   addItem("fur", 1);
-  pushMessage(`Harvested clean wild game with care: good venison, hide, and fur were added.${bonus ? " Clean Laundry added 1 extra venison." : ""}`);
+  learnFrom("gathering");
+  pushMessage(`Harvested clean wild game with care: ${QUALITY_LABELS[quality]} venison, hide, and fur were added.${bonus ? " Clean Laundry added 1 extra venison." : ""}`);
 }
 
 function setAsideSabbathBasket() {
@@ -1605,9 +1767,13 @@ function hasAnimalFeed(amount) {
 
 function spendAnimalFeed(amount) {
   const feedUsed = Math.min(state.inventory.feed || 0, amount);
+  spendQualityItem("feed", feedUsed);
   state.inventory.feed -= feedUsed;
   const remaining = amount - feedUsed;
-  if (remaining > 0) state.inventory.hay -= remaining;
+  if (remaining > 0) {
+    spendQualityItem("hay", remaining);
+    state.inventory.hay -= remaining;
+  }
 }
 
 function feedAnimal(animalId) {
@@ -1624,6 +1790,7 @@ function feedAnimal(animalId) {
   if (!canDoLabor("animalCare") || !spendStamina(2)) return;
   spendAnimalFeed(catalog.feedNeed);
   group.fedToday = true;
+  learnFrom("animalCare");
   closeModal();
   pushMessage(`${catalog.name} are fed.`);
 }
@@ -1637,6 +1804,7 @@ function cleanAnimal(animalId) {
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
   group.cleanedToday = true;
+  learnFrom("animalCare");
   triggerSceneEffect("tidy");
   closeModal();
   pushMessage(`${catalog.name} area cleaned.`);
@@ -1666,10 +1834,11 @@ function collectAnimalProduct(animalId) {
     return;
   }
   if (!canDoLabor("animalProduct") || !spendStamina(4)) return;
-  const quality = group.cleanedToday ? "good" : "standard";
+  const quality = improveQualityByLearning(group.cleanedToday ? "good" : "standard", "animalCare");
   const bonus = consumeProductionBuff();
   addItem(catalog.product, Math.max(1, group.count * catalog.productAmount) + bonus, quality);
   group.productCollectedToday = true;
+  learnFrom("animalCare");
   closeModal();
   pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.${bonus ? " Clean Laundry added 1 extra." : ""}`);
 }
@@ -1687,6 +1856,7 @@ function collectChickenFeathers() {
   if (!canDoLabor("animalProduct") || !spendStamina(2)) return;
   addItem("feathers", Math.max(1, group.count));
   group.feathersCollectedToday = true;
+  learnFrom("animalCare");
   closeModal();
   pushMessage("Gathered loose chicken feathers for crafting.");
 }
@@ -1700,10 +1870,12 @@ function harvestAnimal(animalId) {
   }
   if (!canDoLabor("animalHarvest") || !spendStamina(10)) return;
   group.count -= 1;
-  const quality = group.fedToday && group.wateredToday && group.cleanedToday ? "excellent" : group.fedToday || group.wateredToday ? "good" : "standard";
+  const baseQuality = group.fedToday && group.wateredToday && group.cleanedToday ? "excellent" : group.fedToday || group.wateredToday ? "good" : "standard";
+  const quality = improveQualityByLearning(baseQuality, "animalCare");
   const bonus = consumeProductionBuff();
   addItem(catalog.meatItem, catalog.meatAmount + bonus, quality);
   if (catalog.secondaryItem) addItem(catalog.secondaryItem, catalog.secondaryAmount);
+  learnFrom("animalCare");
   closeModal();
   pushMessage(`Harvested one ${catalog.singular.toLowerCase()} with care. ${QUALITY_LABELS[quality]} clean meat was prepared without blood.${bonus ? " Clean Laundry added 1 extra meat." : ""}`);
 }
@@ -1753,6 +1925,7 @@ function waterBarnAnimals() {
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.wateredToday = true;
   });
+  learnFrom("animalCare");
   markPrep("gatherWater");
   closeModal();
   pushMessage("All barn animals were watered.");
@@ -1776,6 +1949,7 @@ function addFeedTrough() {
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.fedToday = true;
   });
+  learnFrom("animalCare");
   closeModal();
   pushMessage("Feed was added to the trough. All animal groups are fed.");
 }
@@ -1795,6 +1969,7 @@ function addWaterTrough() {
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.wateredToday = true;
   });
+  learnFrom("animalCare");
   markPrep("gatherWater");
   closeModal();
   pushMessage("Water was added to the trough. All animals are watered.");
@@ -1811,6 +1986,7 @@ function cleanBarnForManure() {
     if (group.count > 0) group.cleanedToday = true;
   });
   addItem("manure", Math.max(1, Math.ceil(totalAnimals / 2)));
+  learnFrom("animalCare");
   triggerSceneEffect("tidy");
   closeModal();
   pushMessage("The barn was cleaned and manure was collected for fertilizer.");
@@ -1953,6 +2129,7 @@ function plantCrop(cropId, cropType) {
   state.inventory[catalog.seedItem] -= 1;
   bed.plantings.push({ ...emptyCrop(cropType), growthStage: 1 });
   bed.hasWeeds = false;
+  learnFrom("gardening");
   closeModal();
   triggerSceneEffect("plant", cropId);
   pushMessage(`Planted clean ${catalog.name}.`);
@@ -1970,6 +2147,7 @@ function waterCrop(cropId) {
   state.inventory.wateringCanWater -= 1;
   bed.wateredToday = true;
   spendStamina(2);
+  learnFrom("gardening");
   closeModal();
   triggerSceneEffect("waterCrop", cropId);
   pushMessage(`${bed.name} watered.`);
@@ -1985,6 +2163,7 @@ function weedCrop(cropId) {
   bed.hasWeeds = false;
   bed.weededToday = true;
   addItem("plantMatter", 1);
+  learnFrom("gardening");
   closeModal();
   triggerSceneEffect("weed", cropId);
   pushMessage(`${bed.name} weeded. Plant matter was collected for compost.`);
@@ -2004,6 +2183,7 @@ function compostCropBed(cropId) {
   if (!canDoLabor("compost") || !spendStamina(2)) return;
   state.inventory.plantMatter -= 1;
   bed.composted = true;
+  learnFrom("gardening");
   triggerSceneEffect("compost", cropId);
   closeModal();
   pushMessage(`${bed.name} has compost worked into the soil.`);
@@ -2021,8 +2201,10 @@ function fertilizeCrop(cropId) {
     return;
   }
   if (!canDoLabor("fertilize") || !spendStamina(2)) return;
+  spendQualityItem("fertilizer", 1);
   state.inventory.fertilizer -= 1;
   bed.fertilized = true;
+  learnFrom("gardening");
   closeModal();
   triggerSceneEffect("compost", cropId);
   pushMessage(`${bed.name} fertilized.`);
@@ -2036,7 +2218,7 @@ function harvestCrop(cropId) {
   }
   if (!canDoLabor("harvest") || !spendStamina(5)) return;
   const ready = bed.plantings.filter((planting) => planting.readyToHarvest);
-  const quality = bed.fertilized ? "excellent" : bed.composted ? "good" : "standard";
+  const quality = improveQualityByLearning(bed.fertilized ? "excellent" : bed.composted ? "good" : "standard", "gardening");
   const bonus = consumeProductionBuff();
   ready.forEach((planting) => {
     const catalog = cropTypes[planting.cropType];
@@ -2047,6 +2229,7 @@ function harvestCrop(cropId) {
     addItem(firstCatalog.harvestItem, bonus, quality);
   }
   addItem("plantMatter", 1);
+  learnFrom("gardening", ready.length);
   bed.plantings = bed.plantings.filter((planting) => !planting.readyToHarvest);
   if (!bed.plantings.length) {
     bed.wateredToday = false;
@@ -2075,13 +2258,15 @@ function craftItem(id) {
     pushMessage(`Not enough materials for ${item.name}.`);
     return;
   }
-  spendIngredients(item.ingredients);
+  const spent = spendIngredients(item.ingredients);
+  const quality = improveQualityByLearning(qualityFromSpent(spent), "crafting");
   if (item.type === "tool") {
     state.tools[id] = true;
   } else {
-    Object.entries(item.bonus || { [id]: 1 }).forEach(([key, value]) => addItem(key, value));
+    Object.entries(item.bonus || { [id]: 1 }).forEach(([key, value]) => addItem(key, value, quality));
   }
-  pushMessage(`Crafted ${item.name}.`);
+  learnFrom("crafting");
+  pushMessage(`Crafted ${item.type === "tool" ? item.name : `${QUALITY_LABELS[quality]} ${item.name}`}.`);
   render();
   openModal("crafting");
 }
@@ -2103,9 +2288,10 @@ function prepRecipe(id) {
   }
   if (!spendStamina(2)) return;
   const spent = spendIngredients(item.ingredients);
-  const quality = qualityFromSpent(spent);
+  const quality = improveQualityByLearning(qualityFromSpent(spent), "cooking");
   state.preppedFood = { recipeId: item.id, quality };
   state.kitchenChores.counters = true;
+  learnFrom("cooking");
   closeModal();
   triggerSceneEffect("prep");
   pushMessage(`${item.name} is prepped on the counter at ${QUALITY_LABELS[quality]} quality. Move to the stove to cook it higher.`);
@@ -2140,12 +2326,13 @@ function cookPreppedFood() {
 }
 
 function finishCookedRecipe(item, quality, mode) {
-  quality = improveQualityWithBuff(quality);
+  quality = improveQualityByLearning(improveQualityWithBuff(quality), "cooking");
   addItem(item.id, 1, quality);
   Object.entries(item.bonus || {}).forEach(([key, value]) => addItem(key, value, quality));
   markPrep("prepareFood");
   state.kitchenChores.dishes = true;
   if (mode === "direct") state.kitchenChores.counters = true;
+  learnFrom("cooking", mode === "prepped" ? 2 : 1);
   closeModal();
   triggerSceneEffect("cook");
   pushMessage(`Prepared ${QUALITY_LABELS[quality]} clean food: ${item.name}.`);
@@ -2312,6 +2499,11 @@ function openModal(type, titleOverride) {
     modalTitle.textContent = "Owned Tools";
     modalBody.innerHTML = toolsMarkup();
   }
+  if (type === "character") {
+    modalTitle.textContent = "Character & Clothing";
+    modalBody.innerHTML = characterMarkup();
+    bindCharacterButtons();
+  }
   if (type === "crafting") {
     modalTitle.textContent = "Crafting";
     modalBody.innerHTML = recipeMarkup(craftingRecipes, "craft");
@@ -2444,6 +2636,84 @@ function toolsMarkup() {
   return `<div class="tool-list">${Object.entries(toolLabels).map(([key, label]) => `
     <div class="tool-item ${state.tools[key] ? "owned" : ""}"><strong>${label}</strong><br><small>${state.tools[key] ? "Owned" : "Not owned yet"}</small></div>
   `).join("")}</div>`;
+}
+
+function characterMarkup() {
+  const current = activeClothing();
+  const currentClothing = CLOTHING_DEFINITIONS[current];
+  return `
+    <div class="panel-section">
+      <h3>Current Clothing</h3>
+      <p><strong>${currentClothing.label}</strong> &middot; Rank ${activeClothingRank()}</p>
+      <p class="hint-text">${currentClothing.detail}</p>
+    </div>
+    <h3>Skills</h3>
+    ${skillDetailsMarkup()}
+    <h3>Clothing</h3>
+    <div class="card-grid">${Object.keys(CLOTHING_DEFINITIONS).map(clothingCard).join("")}</div>
+  `;
+}
+
+function skillDetailsMarkup() {
+  return `<div class="prep-list">${Object.entries(SKILL_DEFINITIONS).map(([id, skill]) => {
+    const points = state.skills?.[id] || 0;
+    const next = nextSkillThreshold(id);
+    const stage = skillStage(id);
+    const qualityText = skillQualitySteps(id) > 0 ? `${skillQualitySteps(id)} quality step${skillQualitySteps(id) === 1 ? "" : "s"}` : "quality growth pending";
+    return `<div class="prep-item">
+      <span>${skill.label}<br><small>${stage.label} &middot; ${points}${next ? `/${next}` : ""} practice &middot; ${skill.detail}</small></span>
+      <strong>${qualityText}</strong>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function clothingCard(id) {
+  const clothing = CLOTHING_DEFINITIONS[id];
+  const rank = state.clothing?.items?.[id] || 1;
+  const cost = clothingImproveCost(id);
+  const focus = clothing.focus ? SKILL_DEFINITIONS[clothing.focus]?.label : "General";
+  const active = activeClothing() === id;
+  return `<article class="modal-card">
+    <h3>${clothing.label}</h3>
+    <p>${clothing.detail}</p>
+    <p><strong>Focus:</strong> ${focus}</p>
+    <p><strong>Rank:</strong> ${rank}/3</p>
+    <p><strong>Improve:</strong> ${clothingCostText(cost)}</p>
+    <button type="button" data-equip-clothing="${id}" ${active ? "disabled" : ""}>${active ? "Wearing" : "Wear"}</button>
+    <button type="button" data-improve-clothing="${id}" ${!cost || !canAffordCost(cost) ? "disabled" : ""}>${cost ? "Improve" : "Fully Improved"}</button>
+  </article>`;
+}
+
+function bindCharacterButtons() {
+  document.querySelectorAll("[data-equip-clothing]").forEach((button) => {
+    button.addEventListener("click", () => equipClothing(button.dataset.equipClothing));
+  });
+  document.querySelectorAll("[data-improve-clothing]").forEach((button) => {
+    button.addEventListener("click", () => improveClothing(button.dataset.improveClothing));
+  });
+}
+
+function equipClothing(id) {
+  if (!CLOTHING_DEFINITIONS[id]) return;
+  state.clothing.active = id;
+  pushMessage(`${CLOTHING_DEFINITIONS[id].label} selected.`);
+  render();
+  openModal("character");
+}
+
+function improveClothing(id) {
+  if (!CLOTHING_DEFINITIONS[id]) return;
+  const cost = clothingImproveCost(id);
+  if (!cost || !canAffordCost(cost)) {
+    pushMessage("More cloth is needed before improving this clothing.");
+    return;
+  }
+  spendIngredients(cost);
+  state.clothing.items[id] = Math.min(3, (state.clothing.items[id] || 1) + 1);
+  learnFrom("crafting", 2);
+  pushMessage(`${CLOTHING_DEFINITIONS[id].label} improved to rank ${state.clothing.items[id]}.`);
+  render();
+  openModal("character");
 }
 
 function recipeMarkup(list, type) {
@@ -3048,6 +3318,7 @@ function statusMarkup() {
     ["Water", state.inventory.water],
     ["Sabbath", sabbathStatus()],
     ["Shalom", state.shalomRestDays > 0 ? "Active" : "None"],
+    ["Clothing", CLOTHING_DEFINITIONS[activeClothing()].label],
     ["Rest Buffs", restBuffSummary()],
     ["Active Buffs", activeBuffs().map((buff) => buff.label).join(", ") || "None"],
     ["Rest Uses", restUsesSummary()]
@@ -3057,6 +3328,8 @@ function statusMarkup() {
   `).join("")}</div>
   <h3>Buff Effects</h3>
   ${buffDetailsMarkup()}
+  <h3>Skills</h3>
+  ${skillDetailsMarkup()}
   <h3>Goals</h3>
   <ul class="goal-list">${goals().map((goal) => `<li>${goal}</li>`).join("")}</ul>
   <h3>Barn Animals</h3>
