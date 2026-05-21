@@ -1,4 +1,5 @@
 :root {
+  --topbar-h: 100px;
   --ink: #20332a;
   --muted: #5e7567;
   --paper: #f8f3e7;
@@ -104,7 +105,6 @@ small {
   display: block;
   flex: 1;
   min-height: 0;
-  container-type: size;
 }
 
 .scene-shell {
@@ -114,7 +114,7 @@ small {
 
 .scene-stage {
   position: relative;
-  width: min(100%, calc(100cqh * 1.7778));
+  width: min(100%, calc((100svh - var(--topbar-h)) * 1.7778));
   min-height: 0;
   margin: 0 auto;
   aspect-ratio: 1672 / 941;
@@ -1504,6 +1504,8 @@ small {
 }
 
 @media (max-width: 740px) {
+  :root { --topbar-h: 88px; }
+
   .app-shell {
     padding: 8px;
   }
@@ -1569,8 +1571,10 @@ small {
   }
 }
 
-/* Landscape mobile: phones rotated sideways (height ≤ 500px) */
+/* Landscape mobile: phones rotated (viewport height ≤ 500px) */
 @media (max-height: 500px) {
+  :root { --topbar-h: 48px; }
+
   .app-shell {
     padding: 5px 10px;
   }
@@ -1617,26 +1621,51 @@ small {
   }
 }
 
-/* Portrait orientation hint for mobile */
+/* Portrait orientation overlay */
 .landscape-hint {
   display: none;
 }
 
-@media (orientation: portrait) and (max-width: 768px) {
+@media (orientation: portrait) and (max-width: 900px) {
   .landscape-hint {
-    display: block;
+    display: flex;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(30, 22, 10, 0.88);
-    color: rgba(255, 248, 220, 0.95);
+    inset: 0;
+    z-index: 500;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: rgba(24, 17, 6, 0.93);
+    color: #fff8e0;
     text-align: center;
-    padding: 8px 16px;
-    font-size: 0.82rem;
-    z-index: 200;
-    pointer-events: none;
+    padding: 32px 24px;
+    cursor: pointer;
   }
+
+  .landscape-hint .hint-icon {
+    font-size: 3.5rem;
+    display: block;
+    animation: rotateHint 2s ease-in-out infinite;
+  }
+
+  .landscape-hint .hint-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .landscape-hint .hint-sub {
+    font-size: 0.9rem;
+    opacity: 0.75;
+    margin: 0;
+  }
+}
+
+@keyframes rotateHint {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(90deg); }
+  60%       { transform: rotate(90deg); }
 }
 
 @keyframes smokeDrift {

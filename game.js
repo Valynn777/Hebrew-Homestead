@@ -4269,6 +4269,10 @@ function bindEvents() {
   document.getElementById("nextDayBtn").addEventListener("click", nextDay);
   document.getElementById("resetSaveBtn").addEventListener("click", resetSave);
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+  const landscapeHint = document.getElementById("landscapeHint");
+  if (landscapeHint) {
+    landscapeHint.addEventListener("click", () => { landscapeHint.style.display = "none"; });
+  }
   document.getElementById("modalBackdrop").addEventListener("click", (event) => {
     if (event.target.id === "modalBackdrop") closeModal();
   });
