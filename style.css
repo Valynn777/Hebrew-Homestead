@@ -476,6 +476,16 @@ small {
     0 7px 0 -2px rgba(255, 255, 255, 0.9);
 }
 
+.buff-nourished {
+  background: linear-gradient(145deg, rgba(255, 247, 220, 0.95), rgba(197, 139, 63, 0.88));
+}
+
+.buff-nourished .buff-icon {
+  border-radius: 50% 40% 50% 40%;
+  background: radial-gradient(ellipse at 40% 35%, #fff4c2 30%, #e8a83c 100%);
+  box-shadow: 0 0 6px 1px rgba(232, 168, 60, 0.55);
+}
+
 .bed-effect {
   position: absolute;
   left: var(--fx-x);
@@ -1343,8 +1353,21 @@ small {
 .prep-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
 }
+
+.eat-btn {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  background: var(--leaf);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.eat-btn:hover { background: var(--leaf-dark); }
 
 .tool-item.owned,
 .prep-item.done {

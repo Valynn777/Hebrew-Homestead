@@ -675,6 +675,16 @@ const cookingRecipes = [
   recipe("salmonMeal", "Salmon Meal", { salmon: 1, herbs: 1, water: 1 }, "Winter salmon with fins and scales, prepared as a clean meal.", "food", { preparedFood: 1 })
 ];
 
+const FOOD_EAT_VALUES = {
+  preparedFood: { stamina: 30, energy: 5,  nourished: 3 },
+  eggs:         { stamina: 12, energy: 2,  nourished: 0 },
+  milk:         { stamina: 10, energy: 5,  nourished: 0 },
+  honey:        { stamina: 15, energy: 5,  nourished: 1 },
+  figs:         { stamina: 12, energy: 2,  nourished: 0 },
+  grapes:       { stamina: 10, energy: 2,  nourished: 0 },
+  cucumbers:    { stamina: 8,  energy: 2,  nourished: 0 },
+};
+
 function recipe(id, name, ingredients, description, type, bonus = {}) {
   return { id, name, ingredients, description, type, cleanStatus: "clean", bonus };
 }
@@ -899,6 +909,7 @@ function entry(id, title, body) {
 
 const TESTER_CODE = "blessing";
 const REST_LIMITS = { shortRest: 2, nap: 1 };
+const REST_COOLDOWN_MINUTES = 360;
 const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
 const QUALITY_ORDER = ["standard", "good", "excellent"];
 const QUALITY_LABELS = { standard: "Standard", good: "Good", excellent: "Excellent" };
@@ -923,6 +934,11 @@ const BUFF_DEFINITIONS = {
     label: "Fresh Start",
     className: "buff-fresh",
     detail: "Brushing teeth boosts upcoming harvest and production yields."
+  },
+  nourished: {
+    label: "Nourished",
+    className: "buff-nourished",
+    detail: "A satisfying meal gives a small stamina discount on upcoming labor."
   }
 };
 const SKILL_STAGES = [
@@ -1032,6 +1048,7 @@ function createNewState() {
     communityOrders: [],
     nextOrderId: 1,
     sabbathActivities: { worshipped: false, strolled: false, gathered: false },
+    lastRestMinute: -400,
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
     messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."]
   };
@@ -1076,7 +1093,7 @@ function createDailyRest() {
 }
 
 function createBuffs() {
-  return { cleanLaundry: 0, relaxed: 0, cleanHands: 0, freshStart: 0 };
+  return { cleanLaundry: 0, relaxed: 0, cleanHands: 0, freshStart: 0, nourished: 0 };
 }
 
 function createSkills() {
@@ -1137,6 +1154,7 @@ function hydrateState(savedState) {
     communityOrders: savedState.communityOrders || [],
     nextOrderId: savedState.nextOrderId || 1,
     sabbathActivities: { worshipped: false, strolled: false, gathered: false, ...(savedState.sabbathActivities || {}) },
+    lastRestMinute: savedState.lastRestMinute ?? -400,
     messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."]
   };
 }
@@ -1518,6 +1536,7 @@ function restStaminaDiscount() {
   if ((state.restBuffs?.refreshed || 0) > 0) discount += 2;
   else if ((state.restBuffs?.settled || 0) > 0) discount += 1;
   if ((state.buffs?.relaxed || 0) > 0) discount += 1;
+  if ((state.buffs?.nourished || 0) > 0) discount += 1;
   return Math.min(3, discount);
 }
 
@@ -1528,6 +1547,7 @@ function consumeRestBuffUse() {
     state.restBuffs.settled -= 1;
   }
   if ((state.buffs?.relaxed || 0) > 0) state.buffs.relaxed -= 1;
+  if ((state.buffs?.nourished || 0) > 0) state.buffs.nourished -= 1;
 }
 
 function restBuffSummary() {
@@ -1539,9 +1559,17 @@ function restBuffSummary() {
 }
 
 function restUsesSummary() {
-  const shortLeft = Math.max(0, REST_LIMITS.shortRest - (state.dailyRest?.shortRest || 0));
+  const now = absoluteMinute();
+  const elapsed = now - (state.lastRestMinute ?? -400);
   const napLeft = Math.max(0, REST_LIMITS.nap - (state.dailyRest?.nap || 0));
-  return `${shortLeft} short, ${napLeft} nap`;
+  if (elapsed >= REST_COOLDOWN_MINUTES) {
+    return `Short rest ready, ${napLeft} nap`;
+  }
+  const remaining = REST_COOLDOWN_MINUTES - elapsed;
+  const hrs = Math.floor(remaining / 60);
+  const mins = remaining % 60;
+  const waitText = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+  return `Short rest in ${waitText}, ${napLeft} nap`;
 }
 
 function activeBuffs() {
@@ -1688,21 +1716,57 @@ function restAtCabin() {
     pushMessage("Short rest is available in the Cabin Entry or Living Room. Deeper sleep is available in the Bedroom.");
     return;
   }
-  if ((state.dailyRest?.shortRest || 0) >= REST_LIMITS.shortRest) {
-    pushMessage("You have already taken your short rests for today. A bed nap or evening sleep will restore more.");
+  const now = absoluteMinute();
+  const elapsed = now - (state.lastRestMinute ?? -400);
+  if (elapsed < REST_COOLDOWN_MINUTES) {
+    const remaining = REST_COOLDOWN_MINUTES - elapsed;
+    const hrs = Math.floor(remaining / 60);
+    const mins = remaining % 60;
+    const waitText = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+    pushMessage(`You rested recently. Rest will be available again in about ${waitText} of in-game time.`);
     return;
   }
   if (state.minute + 45 >= 21 * 60) {
     pushMessage("It is too late for a short rest. Sleep through the night from the bedroom instead.");
     return;
   }
-  state.dailyRest.shortRest += 1;
+  state.lastRestMinute = now;
   state.energy = Math.min(100, state.energy + 10);
   state.stamina = Math.min(100, state.stamina + 20);
   state.restBuffs.settled = Math.max(state.restBuffs.settled || 0, 2);
   triggerSceneEffect("rest");
   advanceTime(45);
   pushMessage("You took a short rest and feel settled. The next two labor actions cost 1 less stamina.");
+}
+
+function eatFood(itemKey) {
+  const values = FOOD_EAT_VALUES[itemKey];
+  if (!values) return;
+  if ((state.inventory[itemKey] || 0) < 1) {
+    pushMessage(`You have no ${itemLabels[itemKey] || itemKey} to eat.`);
+    return;
+  }
+  if (state.stamina >= 95 && state.energy >= 100) {
+    pushMessage("You are already well fed and full of energy — no need to eat right now.");
+    return;
+  }
+  const spent = spendQualityItem(itemKey, 1);
+  state.inventory[itemKey] = Math.max(0, (state.inventory[itemKey] || 0) - 1);
+  const bestQuality = spent.length ? spent[spent.length - 1].quality : "standard";
+  const qualityBonus = bestQuality === "excellent" ? 10 : bestQuality === "good" ? 5 : 0;
+  const staminaGain = Math.min(100 - state.stamina, values.stamina + qualityBonus);
+  const energyGain = Math.min(100 - state.energy, values.energy);
+  state.stamina = Math.min(100, state.stamina + staminaGain);
+  state.energy = Math.min(100, state.energy + energyGain);
+  if (values.nourished > 0) {
+    state.buffs.nourished = (state.buffs.nourished || 0) + values.nourished;
+  }
+  advanceTime(10);
+  const qualityNote = qualityBonus > 0 ? ` The ${QUALITY_LABELS[bestQuality].toLowerCase()} quality made it especially nourishing.` : "";
+  const buffNote = values.nourished > 0 ? ` You feel nourished — the next ${values.nourished} labor actions cost 1 less stamina.` : "";
+  pushMessage(`You ate ${itemLabels[itemKey] || itemKey} and restored ${staminaGain} stamina.${qualityNote}${buffNote}`);
+  render();
+  openModal("inventory");
 }
 
 function tidyCottage() {
@@ -2835,6 +2899,10 @@ function addItem(key, amount, quality = "standard") {
   addQualityItem(key, amount, quality);
 }
 
+function absoluteMinute() {
+  return (state.day - 1) * 840 + Math.max(0, state.minute - 420);
+}
+
 function advanceTime(minutes) {
   state.minute += minutes;
   if (state.minute >= 21 * 60) nextDay();
@@ -2943,6 +3011,9 @@ function openModal(type, titleOverride) {
   if (type === "inventory") {
     modalTitle.textContent = titleOverride || "Inventory";
     modalBody.innerHTML = inventoryMarkup(true);
+    document.querySelectorAll("[data-eat-item]").forEach((btn) => {
+      btn.addEventListener("click", () => eatFood(btn.dataset.eatItem));
+    });
   }
   if (type === "tools") {
     modalTitle.textContent = "Owned Tools";
@@ -3085,7 +3156,10 @@ function inventoryMarkup(includeAll = false) {
 
 function inventoryItemMarkup(key, amount) {
   const breakdown = qualityBreakdown(key);
-  return `<div class="inventory-item"><span>${itemLabels[key] || key}${breakdown ? `<br><small>${breakdown}</small>` : ""}</span><strong>${amount}</strong></div>`;
+  const eatBtn = FOOD_EAT_VALUES[key] && amount > 0
+    ? `<button type="button" class="eat-btn" data-eat-item="${key}">Eat</button>`
+    : "";
+  return `<div class="inventory-item"><span>${itemLabels[key] || key}${breakdown ? `<br><small>${breakdown}</small>` : ""}</span><strong>${amount}</strong>${eatBtn}</div>`;
 }
 
 function toolsMarkup() {
