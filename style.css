@@ -876,7 +876,7 @@ small {
   box-shadow:
     0 4px 14px rgba(18, 12, 5, 0.22),
     0 1px 4px rgba(18, 12, 5, 0.14);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .crop-bed-visual.healthy {
@@ -948,6 +948,33 @@ small {
 .crop-patch.ready {
   filter: drop-shadow(0 0 7px rgba(255, 226, 140, 0.60));
 }
+
+/* SVG plant sprite overlays */
+.plant-sprite {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  height: var(--sprite-h, 100%);
+  width: auto;
+  max-width: 130%;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  z-index: 4;
+  animation: plantSway var(--sway-dur, 4s) ease-in-out var(--delay, 0s) infinite;
+  image-rendering: auto;
+}
+
+.plant-sprite.ready {
+  filter: drop-shadow(0 0 5px rgba(255, 215, 80, 0.70));
+  --sway-dur: 2.5s;
+}
+
+@keyframes plantSway {
+  0%, 100% { transform: translateX(-50%) rotate(1.5deg); }
+  50%       { transform: translateX(-50%) rotate(-1.5deg); }
+}
+
 
 .crop-patch.barley::before {
   background:

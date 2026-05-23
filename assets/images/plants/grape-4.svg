@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <ellipse cx="50" cy="89" rx="24" ry="7" fill="#7a5c22"/>
+  <path d="M50 87 Q36 74 18 60 Q8 52 6 40" stroke="#5a4020" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M50 87 Q64 74 82 60 Q92 52 94 40" stroke="#5a4020" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M6 40 Q-4 28 6 18 Q16 8 24 22 Q22 32 6 40" fill="#2a8018"/>
+  <path d="M94 40 Q104 28 94 18 Q84 8 76 22 Q78 32 94 40" fill="#2a8018"/>
+  <path d="M18 60 Q4 50 8 38 Q14 26 26 38 Q26 50 18 60" fill="#3a9018"/>
+  <path d="M82 60 Q96 50 92 38 Q86 26 74 38 Q74 50 82 60" fill="#3a9018"/>
+  <path d="M50 74 Q32 62 34 50 Q38 36 50 48 Q62 36 66 50 Q68 62 50 74" fill="#4aac20"/>
+  <!-- grape cluster hanging -->
+  <line x1="50" y1="56" x2="50" y2="44" stroke="#5a4020" stroke-width="1.5"/>
+  <circle cx="50" cy="44" r="4" fill="#6B2E8A"/>
+  <circle cx="44" cy="49" r="4" fill="#7B3EA0"/>
+  <circle cx="56" cy="49" r="4" fill="#6B2E8A"/>
+  <circle cx="47" cy="55" r="4" fill="#7B3EA0"/>
+  <circle cx="53" cy="55" r="4" fill="#6B2E8A"/>
+  <circle cx="50" cy="61" r="3.5" fill="#7B3EA0"/>
+  <!-- leaf at cluster top -->
+  <path d="M46 42 Q42 36 48 34 Q50 40 46 42" fill="#3a9018"/>
+</svg>

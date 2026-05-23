@@ -4713,16 +4713,29 @@ function cropBedObjects(sceneId) {
     .join("");
 }
 
+function plantSpriteFile(cropType, stage) {
+  const cat = { barley: "grain", wheat: "grain", lentils: "legume", cucumbers: "cucumber",
+    onions: "allium", garlic: "allium", leeks: "allium", figs: "fig", grapes: "grape",
+    hyssop: "herb", mint: "herb", cumin: "herb", coriander: "herb", dill: "herb" }[cropType] || "herb";
+  return `assets/images/plants/${cat}-${stage}.svg`;
+}
+
+
 function cropBedObject(bedId, bedMeta) {
   const bed = state.crops[bedId];
   if (!bed) return "";
   const soilClass = bed.wateredToday ? "watered" : bed.fertilized || bed.composted ? "healthy" : bed.hasWeeds ? "overgrown" : "dry";
+  const spriteHeights = ["40%", "65%", "100%", "145%", "190%"];
   const plantings = (bed.plantings || []).slice(0, 5).map((planting, index) => {
     const crop = cropTypes[planting.cropType];
     const total = Math.min(bed.plantings.length, 5);
     const rowTop = 28 + index * (42 / Math.max(total, 1));
     const rowHeight = Math.max(12, Math.min(28, 40 / Math.max(total, 1)));
-    return `<span class="crop-patch ${planting.cropType} stage-${planting.growthStage} ${planting.readyToHarvest ? "ready" : ""}" style="--i:${index}; --row-top:${rowTop}%; --row-h:${rowHeight}%;" title="${crop.name}"></span>`;
+    const spriteH = spriteHeights[planting.growthStage] ?? "190%";
+    const readyCls = planting.readyToHarvest ? " ready" : "";
+    const patch = `<span class="crop-patch ${planting.cropType} stage-${planting.growthStage}${readyCls}" style="--i:${index}; --row-top:${rowTop}%; --row-h:${rowHeight}%;" title="${crop.name}"></span>`;
+    const sprite = `<img class="plant-sprite${readyCls}" src="${plantSpriteFile(planting.cropType, planting.growthStage)}" alt="" aria-hidden="true" style="--sprite-h:${spriteH}; --delay:${(index * 0.65).toFixed(2)}s; bottom:calc(100% - ${rowTop + rowHeight / 2}%);">`;
+    return patch + sprite;
   }).join("");
   return `
     <span class="crop-bed-visual ${bedId} ${soilClass}" style="--x:${bedMeta.x}%; --y:${bedMeta.y}%; --w:${bedMeta.w || 17}%; --h:${bedMeta.h || 12}%; --angle:${bedMeta.angle || 0}deg;${bedMeta.clip ? ` clip-path:${bedMeta.clip};` : ""}">

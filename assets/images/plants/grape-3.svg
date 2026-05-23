@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <ellipse cx="50" cy="89" rx="24" ry="7" fill="#7a5c22"/>
+  <path d="M50 87 Q38 76 22 64 Q14 56 12 46" stroke="#5a4020" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M50 87 Q62 76 78 64 Q86 56 88 46" stroke="#5a4020" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M12 46 Q0 36 8 26 Q16 16 24 28 Q22 38 12 46" fill="#2a8018"/>
+  <path d="M88 46 Q100 36 92 26 Q84 16 76 28 Q78 38 88 46" fill="#2a8018"/>
+  <path d="M22 64 Q8 56 12 46 Q18 36 28 46 Q28 56 22 64" fill="#3a9018"/>
+  <path d="M78 64 Q92 56 88 46 Q82 36 72 46 Q72 56 78 64" fill="#3a9018"/>
+  <path d="M50 76 Q34 66 36 54 Q40 42 50 52 Q60 42 64 54 Q66 66 50 76" fill="#4aac20"/>
+  <!-- tendrils -->
+  <path d="M26 58 Q20 50 24 44" stroke="#5a4020" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M74 58 Q80 50 76 44" stroke="#5a4020" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+</svg>

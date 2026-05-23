@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <ellipse cx="50" cy="88" rx="24" ry="7" fill="#7a5c22"/>
+  <!-- onion bulges at soil line -->
+  <ellipse cx="38" cy="86" rx="5" ry="6" fill="#c8a870"/>
+  <ellipse cx="50" cy="86" rx="5.5" ry="7" fill="#d4b478"/>
+  <ellipse cx="62" cy="86" rx="5" ry="6" fill="#c8a870"/>
+  <!-- strap leaves fanning out -->
+  <path d="M34 84 Q24 70 22 52 Q21 40 26 30" stroke="#2a7010" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <path d="M40 84 Q32 70 32 52 Q32 40 36 30" stroke="#2a7010" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M50 84 Q50 68 50 50 Q50 38 50 28" stroke="#38a018" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+  <path d="M60 84 Q68 70 68 52 Q68 40 64 30" stroke="#2a7010" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M66 84 Q76 70 78 52 Q79 40 74 30" stroke="#2a7010" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+</svg>
