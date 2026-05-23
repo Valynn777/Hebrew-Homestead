@@ -240,12 +240,14 @@ const scenes = {
     hotspots: [
       hs("prep", "View Sabbath Preparation", 10, 38, 25, 19, "modal", { modal: "sabbathPrep" }),
       hs("basket", "Set Aside Sabbath Basket", 39, 41, 23, 20, "setSabbathBasket"),
-      hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath"),
+      hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath", { prepOnly: true }),
+
       hs("reflection", "Read Sabbath Reflection", 34, 67, 30, 17, "sabbathReflection"),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" }),
       hs("worship", "Worship and Celebrate", 10, 62, 22, 16, "sabbathWorship"),
       hs("gathering", "Host a Gathering", 38, 62, 22, 16, "sabbathGathering"),
-      hs("stroll", "Take a Sabbath Stroll", 67, 62, 22, 16, "sabbathStroll")
+      hs("stroll", "Take a Sabbath Stroll", 67, 62, 22, 16, "sabbathStroll"),
+      hs("endSabbath", "End Sabbath Rest", 66, 38, 23, 20, "endSabbath", { sabbathOnly: true })
     ]
   }
 };
@@ -1914,6 +1916,7 @@ function handleHotspot(hotspot) {
   if (action === "gatherWater") gatherWater();
   if (action === "fillWaterJar") fillWaterJar();
   if (action === "enterSabbath") enterSabbathRest();
+  if (action === "endSabbath") endSabbathRest();
   if (action === "sabbathReflection") sabbathReflection();
   if (action === "sabbathWorship") sabbathWorshipAction();
   if (action === "sabbathStroll") sabbathStrollAction();
@@ -2506,6 +2509,14 @@ function enterSabbathRest() {
   state.currentScene = "sabbath";
   state.minute = 18 * 60;
   pushMessage("Sabbath rest begins. Ordinary labor pauses; delight and restoration remain.");
+}
+
+function endSabbathRest() {
+  if (!isSabbath()) {
+    pushMessage("Sabbath rest is not currently active.");
+    return;
+  }
+  nextDay();
 }
 
 function sabbathWorshipAction() {
@@ -4520,6 +4531,7 @@ function renderScene() {
 function visibleHotspots(scene) {
   return scene.hotspots.filter((hotspot) => {
     if (hotspot.sabbathOnly) return isSabbath();
+    if (hotspot.prepOnly) return isPreparationDay();
     if (hotspot.action === "cleanRoomChore") return Boolean(state.roomChores?.[hotspot.room]?.[hotspot.chore]);
     if (hotspot.action === "washDishes") return Boolean(state.kitchenChores?.dishes);
     if (hotspot.action === "cleanCounters") return Boolean(state.kitchenChores?.counters);
