@@ -4024,14 +4024,15 @@ function sleepThroughNight() {
     return;
   }
   closeModal();
-  nextDay();
-  state.stamina = 100;
-  state.energy = 100;
-  state.restedBuffDays = 1;
-  triggerSceneEffect("rest");
-  pushMessage("You slept through the night and woke well rested. Labor costs 1 less stamina today.");
-  saveGame(false);
-  render();
+  showDaySummary(() => {
+    state.stamina = 100;
+    state.energy = 100;
+    state.restedBuffDays = 1;
+    triggerSceneEffect("rest");
+    pushMessage("You slept through the night and woke well rested. Labor costs 1 less stamina today.");
+    saveGame(false);
+    render();
+  });
 }
 
 function saveManagerMarkup() {
@@ -4881,12 +4882,13 @@ function renderGoalStrip() {
   }).join("");
 }
 
-function showDaySummary() {
+function showDaySummary(afterNextDay = null) {
   const markup = daySummaryMarkup();
   openCustomModal(`End of Day ${state.day}`, markup);
   document.getElementById("beginNewDayBtn")?.addEventListener("click", () => {
     closeModal();
     nextDay();
+    if (afterNextDay) afterNextDay();
   });
 }
 
