@@ -287,7 +287,49 @@ small {
   bottom: 28px;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+}
+
+.vital-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,250,240,0.88);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  color: var(--ink);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+
+.vital-bar .vb-time {
+  font-weight: 600;
+  color: var(--leaf-dark);
+}
+
+.vital-bar .vb-stamina {
+  color: var(--muted);
+}
+
+.vital-bar .vb-stamina-bar {
+  display: inline-block;
+  width: 52px;
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+.vital-bar .vb-stamina-fill {
+  display: block;
+  height: 100%;
+  background: var(--leaf);
+  border-radius: 3px;
+  transition: width 0.4s ease;
 }
 
 .message-bar {

@@ -1163,6 +1163,9 @@ let lastSaveInfo = { status: "Not saved yet", savedAt: null, error: "" };
 let hiddenTesterBuffer = "";
 let titleTapCount = 0;
 let lastTitleTap = 0;
+let gameTick = null;
+const GAME_TICK_MS = 3000;        // 3 real seconds = 1 game minute
+const STAMINA_REGEN_PER_TICK = 0.1; // ~10 stamina per 5 min; full regen from 0 in ~17 min
 
 const DAILY_GOAL_POOL = [
   { id: "waterCrops2",   category: "garden",      label: "Water 2 crop beds",            reward: 3, check: (s) => s.dailyStats.cropsWatered >= 2 },
@@ -1258,7 +1261,8 @@ function createNewState() {
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
     messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."],
     dailyStats: createDailyStats(),
-    dailyGoals: []
+    dailyGoals: [],
+    staminaFrac: 0
   };
 }
 
@@ -1365,7 +1369,8 @@ function hydrateState(savedState) {
     lastRestMinute: savedState.lastRestMinute ?? -400,
     messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."],
     dailyStats: { ...createDailyStats(), ...(savedState.dailyStats || {}) },
-    dailyGoals: savedState.dailyGoals || []
+    dailyGoals: savedState.dailyGoals || [],
+    staminaFrac: savedState.staminaFrac || 0
   };
 }
 
@@ -3384,7 +3389,11 @@ function absoluteMinute() {
 
 function advanceTime(minutes) {
   state.minute += minutes;
-  if (state.minute >= 21 * 60) nextDay();
+  if (state.minute >= 21 * 60) {
+    state.minute = 21 * 60;
+    if (state.isSabbathRest) nextDay();
+    else state.pendingDaySummary = true;
+  }
 }
 
 function nextDay() {
@@ -4380,11 +4389,33 @@ function sabbathPrepMarkup() {
 }
 
 function render() {
+  if (state.pendingDaySummary) {
+    state.pendingDaySummary = false;
+    renderScene();
+    renderVitalBar();
+    checkDailyGoals();
+    renderGoalStrip();
+    showDaySummary();
+    return;
+  }
   renderScene();
+  renderVitalBar();
   const messageBar = document.getElementById("messageBar");
   if (messageBar) messageBar.textContent = state.messages[0] || "";
   checkDailyGoals();
   renderGoalStrip();
+}
+
+function renderVitalBar() {
+  const bar = document.getElementById("vitalBar");
+  if (!bar) return;
+  const pct = Math.round(state.stamina);
+  bar.innerHTML = `
+    <span class="vb-time">${formatTime(state.minute)}</span>
+    <span class="vb-stamina">
+      <span class="vb-stamina-bar"><span class="vb-stamina-fill" style="width:${pct}%"></span></span>
+      ${pct}%
+    </span>`;
 }
 
 function statusMarkup() {
@@ -4939,6 +4970,38 @@ function showToast(message) {
   }, 4200);
 }
 
+function startGameTick() {
+  if (gameTick) clearInterval(gameTick);
+  gameTick = setInterval(onGameTick, GAME_TICK_MS);
+}
+
+function onGameTick() {
+  // Pause while any modal is open
+  if (!document.getElementById("modalBackdrop")?.classList.contains("hidden")) return;
+  // Pause during Sabbath rest
+  if (state.isSabbathRest) return;
+
+  // Advance time by 1 game minute
+  state.minute += 1;
+  if (state.minute >= 21 * 60) {
+    state.minute = 21 * 60;
+    showDaySummary();
+    return;
+  }
+
+  // Passive stamina regen
+  if (state.stamina < 100) {
+    state.staminaFrac = (state.staminaFrac || 0) + STAMINA_REGEN_PER_TICK;
+    if (state.staminaFrac >= 1) {
+      const gain = Math.floor(state.staminaFrac);
+      state.stamina = Math.min(100, state.stamina + gain);
+      state.staminaFrac -= gain;
+    }
+  }
+
+  render();
+}
+
 function bindEvents() {
   document.querySelector(".topbar h1")?.addEventListener("click", handleTitleTesterTap);
   document.getElementById("statusBtn").addEventListener("click", () => openModal("status"));
@@ -5034,6 +5097,7 @@ function init() {
   if (!state.dailyGoals?.length) generateDailyGoals();
   bindEvents();
   render();
+  startGameTick();
 }
 
 init();
