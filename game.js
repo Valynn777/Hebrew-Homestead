@@ -1164,6 +1164,64 @@ let hiddenTesterBuffer = "";
 let titleTapCount = 0;
 let lastTitleTap = 0;
 
+const DAILY_GOAL_POOL = [
+  { id: "waterCrops2",   category: "garden",      label: "Water 2 crop beds",            reward: 3, check: (s) => s.dailyStats.cropsWatered >= 2 },
+  { id: "harvest1",      category: "garden",      label: "Harvest a ready crop",          reward: 4, check: (s) => s.dailyStats.cropsHarvested >= 1 },
+  { id: "plant2",        category: "garden",      label: "Plant 2 crop beds",             reward: 3, check: (s) => s.dailyStats.cropsPlanted >= 2 },
+  { id: "weed1",         category: "garden",      label: "Clear weeds from a bed",        reward: 2, check: (s) => s.dailyStats.cropsWeeded >= 1 },
+  { id: "careAnimals2",  category: "animals",     label: "Care for 2 animal groups",      reward: 4, check: (s) => s.dailyStats.animalGroupsCared >= 2 },
+  { id: "collectProd2",  category: "animals",     label: "Collect from 2 animal groups",  reward: 4, check: (s) => s.dailyStats.animalProductsCollected >= 2 },
+  { id: "treatAnimal1",  category: "animals",     label: "Heal an ailing animal",         reward: 6, check: (s) => s.dailyStats.animalsTreated >= 1 },
+  { id: "cookMeal1",     category: "kitchen",     label: "Cook a meal",                   reward: 3, check: (s) => s.dailyStats.mealsCooked >= 1 },
+  { id: "cookMeal2",     category: "kitchen",     label: "Cook 2 meals",                  reward: 5, check: (s) => s.dailyStats.mealsCooked >= 2 },
+  { id: "craft1",        category: "craft",       label: "Craft an item",                 reward: 4, check: (s) => s.dailyStats.itemsCrafted >= 1 },
+  { id: "fish1",         category: "gather",      label: "Catch a fish",                  reward: 4, check: (s) => s.dailyStats.fishCaught >= 1 },
+  { id: "hunt1",         category: "gather",      label: "Hunt wild game",                reward: 5, check: (s) => s.dailyStats.deerHunted >= 1 },
+  { id: "gatherWood1",   category: "gather",      label: "Gather wood from the forest",   reward: 3, check: (s) => s.dailyStats.woodGathered >= 1 },
+  { id: "gatherWater1",  category: "gather",      label: "Gather water from the well",    reward: 2, check: (s) => s.dailyStats.waterGathered >= 1 },
+  { id: "gatherHay1",    category: "gather",      label: "Gather hay for the animals",    reward: 3, check: (s) => s.dailyStats.hayGathered >= 1 },
+  { id: "fillOrder1",    category: "community",   label: "Fill a community order",        reward: 5, check: (s) => s.dailyStats.ordersFilled >= 1 },
+  { id: "chores3",       category: "stewardship", label: "Complete 3 household chores",   reward: 3, check: (s) => s.dailyStats.choresCompleted >= 3 },
+  { id: "earnCoins10",   category: "community",   label: "Earn 10 coins today",           reward: 4, check: (s) => s.dailyStats.coinsEarned >= 10 },
+];
+
+const SUMMARY_VERSES = [
+  { text: "Whatever you do, work at it with all your heart, as working for the Lord.", ref: "Colossians 3:23" },
+  { text: "Six days you shall labor and do all your work.", ref: "Exodus 20:9" },
+  { text: "The land will yield its fruit, and you will eat your fill and live there in safety.", ref: "Leviticus 25:19" },
+  { text: "The plans of the diligent lead to profit as surely as haste leads to poverty.", ref: "Proverbs 21:5" },
+  { text: "Go to the ant, you sluggard; consider its ways and be wise!", ref: "Proverbs 6:6" },
+  { text: "He who gathers crops in summer is a prudent son.", ref: "Proverbs 10:5" },
+  { text: "The Lord will open the heavens, the storehouse of his bounty, to send rain on your land in season.", ref: "Deuteronomy 28:12" },
+  { text: "A good person leaves an inheritance for their children's children.", ref: "Proverbs 13:22" },
+  { text: "The earth is the Lord's, and everything in it.", ref: "Psalm 24:1" },
+  { text: "Let us not become weary in doing good, for at the proper time we will reap a harvest.", ref: "Galatians 6:9" },
+  { text: "She sees that her trading is profitable, and her lamp does not go out at night.", ref: "Proverbs 31:18" },
+  { text: "By the sweat of your brow you will eat your food until you return to the ground.", ref: "Genesis 3:19" },
+];
+
+function createDailyStats() {
+  return {
+    cropsWatered: 0,
+    cropsHarvested: 0,
+    cropsPlanted: 0,
+    cropsWeeded: 0,
+    animalGroupsCared: 0,
+    animalProductsCollected: 0,
+    animalsTreated: 0,
+    mealsCooked: 0,
+    itemsCrafted: 0,
+    fishCaught: 0,
+    deerHunted: 0,
+    woodGathered: 0,
+    waterGathered: 0,
+    hayGathered: 0,
+    ordersFilled: 0,
+    choresCompleted: 0,
+    coinsEarned: 0,
+  };
+}
+
 function createNewState() {
   return {
     currentScene: "overview",
@@ -1198,7 +1256,9 @@ function createNewState() {
     sabbathActivities: { worshipped: false, strolled: false, gathered: false },
     lastRestMinute: -400,
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
-    messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."]
+    messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."],
+    dailyStats: createDailyStats(),
+    dailyGoals: []
   };
 }
 
@@ -1303,7 +1363,9 @@ function hydrateState(savedState) {
     nextOrderId: savedState.nextOrderId || 1,
     sabbathActivities: { worshipped: false, strolled: false, gathered: false, ...(savedState.sabbathActivities || {}) },
     lastRestMinute: savedState.lastRestMinute ?? -400,
-    messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."]
+    messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."],
+    dailyStats: { ...createDailyStats(), ...(savedState.dailyStats || {}) },
+    dailyGoals: savedState.dailyGoals || []
   };
 }
 
@@ -1938,6 +2000,7 @@ function cleanRoomChore(hotspot) {
   }
   if (!canDoLabor("tidy") || !spendStamina(2)) return;
   state.roomChores[room][chore] = false;
+  state.dailyStats.choresCompleted += 1;
   if (room === "cabin") markPrep("tidyCottage");
   triggerSceneEffect(effect);
   pushMessage(message);
@@ -1950,6 +2013,7 @@ function washDishes() {
   }
   if (!canDoLabor("tidy") || !spendStamina(2)) return;
   state.kitchenChores.dishes = false;
+  state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("wash");
   pushMessage("The dishes are washed and set in order.");
 }
@@ -1961,6 +2025,7 @@ function cleanCounters() {
   }
   if (!canDoLabor("tidy") || !spendStamina(2)) return;
   state.kitchenChores.counters = false;
+  state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("tidy");
   pushMessage("The counters are wiped clean.");
 }
@@ -1972,6 +2037,7 @@ function sweepKitchen() {
   }
   if (!canDoLabor("tidy") || !spendStamina(3)) return;
   state.kitchenChores.floor = false;
+  state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("tidy");
   pushMessage("The kitchen floor is swept and peaceful.");
 }
@@ -1991,6 +2057,7 @@ function gatherWater() {
   learnFrom("gathering");
   markPrep("gatherWater");
   advanceTime(15);
+  state.dailyStats.waterGathered += 1;
   const canText = state.tools.wateringCan && beforeCan < WATERING_CAN_CAPACITY ? " The watering can was topped off for the garden." : "";
   pushMessage(`Gathered water for the kitchen, animals, Sabbath preparation, and household needs.${canText}`);
 }
@@ -2108,6 +2175,7 @@ function gatherHay(hotspot) {
   addItem("hay", hotspot.amount);
   addItem("plantMatter", 1);
   learnFrom("gathering");
+  state.dailyStats.hayGathered += 1;
   triggerSceneEffect("gather");
   pushMessage(`Gathered ${hotspot.amount} hay and some plant matter from the ${hotspot.source}.`);
 }
@@ -2129,6 +2197,7 @@ function chopSmallTree() {
   addItem("wood", 4);
   addItem("logs", 1);
   learnFrom("gathering");
+  state.dailyStats.woodGathered += 1;
   pushMessage("Used the basic axe to chop a small tree and gather extra wood.");
 }
 
@@ -2141,6 +2210,7 @@ function harvestTrees() {
   addItem("wood", 5);
   addItem("logs", 2);
   learnFrom("gathering");
+  state.dailyStats.woodGathered += 1;
   pushMessage("Used the basic axe to harvest wood from the forest trees.");
 }
 
@@ -2233,6 +2303,7 @@ function mgReel() {
   const amount = (state.tools.fishingNet ? 2 : 1) + bonus;
   addItem(fishItem, amount, quality);
   learnFrom("gathering");
+  state.dailyStats.fishCaught += 1;
   document.getElementById("mgBobber").classList.remove("bite");
   document.getElementById("mgBobber").classList.add("caught");
   document.getElementById("mgReelBtn").disabled = true;
@@ -2375,6 +2446,7 @@ function mgShoot() {
     addItem("hide", 1);
     addItem("fur", 1);
     learnFrom("gathering");
+    state.dailyStats.deerHunted += 1;
     document.getElementById("mgHuntHint").textContent = "Clean shot. Wild game taken with care.";
     document.getElementById("mgDeer")?.classList.add("mg-deer-hit");
     setTimeout(() => {
@@ -2539,6 +2611,8 @@ function fulfillCommunityOrder(id) {
   spendIngredients(order.items);
   addItem("coins", order.reward);
   state.communityOrders = state.communityOrders.filter((o) => o.id !== id);
+  state.dailyStats.ordersFilled += 1;
+  state.dailyStats.coinsEarned += order.reward;
   pushMessage(`Order filled: "${order.label}". Received ${order.reward} coins!`);
   saveGame(false);
   render();
@@ -2640,6 +2714,7 @@ function treatAnimal(animalId) {
   const ailmentLabel = group.ailment.label;
   group.ailment = null;
   learnFrom("animalCare");
+  state.dailyStats.animalsTreated += 1;
   closeModal();
   pushMessage(`Applied ${itemLabels[remedyId]} to the ${catalog.name.toLowerCase()}. The ${ailmentLabel.toLowerCase()} has cleared. They should produce normally tomorrow.`);
 }
@@ -2683,6 +2758,7 @@ function feedAnimal(animalId) {
   spendAnimalFeed(catalog.feedNeed);
   group.fedToday = true;
   learnFrom("animalCare");
+  state.dailyStats.animalGroupsCared += 1;
   triggerSceneEffect("barnFeed");
   closeModal();
   pushMessage(`${catalog.name} are fed.`);
@@ -2736,6 +2812,7 @@ function collectAnimalProduct(animalId) {
   addItem(catalog.product, Math.max(1, group.count * catalog.productAmount) + bonus, quality);
   group.productCollectedToday = true;
   learnFrom("animalCare");
+  state.dailyStats.animalProductsCollected += 1;
   triggerSceneEffect("barnCollect");
   closeModal();
   pushMessage(`${catalog.productLabel} complete: ${QUALITY_LABELS[quality]} ${itemLabels[catalog.product]} added.${bonus ? " Clean Laundry added 1 extra." : ""}`);
@@ -2847,10 +2924,12 @@ function addFeedTrough() {
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
   spendAnimalFeed(needed);
+  const fedGroups = Object.values(state.barnAnimals).filter((group) => group.count > 0).length;
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.fedToday = true;
   });
   learnFrom("animalCare");
+  state.dailyStats.animalGroupsCared += fedGroups;
   triggerSceneEffect("barnFeed");
   closeModal();
   pushMessage("Feed was added to the trough. All animal groups are fed.");
@@ -3033,6 +3112,7 @@ function plantCrop(cropId, cropType) {
   bed.plantings.push({ ...emptyCrop(cropType), growthStage: 1 });
   bed.hasWeeds = false;
   learnFrom("gardening");
+  state.dailyStats.cropsPlanted += 1;
   closeModal();
   triggerSceneEffect("plant", cropId);
   pushMessage(`Planted clean ${catalog.name}.`);
@@ -3051,6 +3131,7 @@ function waterCrop(cropId) {
   bed.wateredToday = true;
   spendStamina(2);
   learnFrom("gardening");
+  state.dailyStats.cropsWatered += 1;
   closeModal();
   triggerSceneEffect("waterCrop", cropId);
   pushMessage(`${bed.name} watered.`);
@@ -3067,6 +3148,7 @@ function weedCrop(cropId) {
   bed.weededToday = true;
   addItem("plantMatter", 1);
   learnFrom("gardening");
+  state.dailyStats.cropsWeeded += 1;
   closeModal();
   triggerSceneEffect("weed", cropId);
   pushMessage(`${bed.name} weeded. Plant matter was collected for compost.`);
@@ -3134,6 +3216,7 @@ function harvestCrop(cropId) {
   }
   addItem("plantMatter", 1);
   learnFrom("gardening", ready.length);
+  state.dailyStats.cropsHarvested += ready.length;
   bed.plantings = bed.plantings.filter((planting) => !planting.readyToHarvest);
   if (!bed.plantings.length) {
     bed.wateredToday = false;
@@ -3170,6 +3253,7 @@ function craftItem(id) {
     Object.entries(item.bonus || { [id]: 1 }).forEach(([key, value]) => addItem(key, value, quality));
   }
   learnFrom("crafting");
+  state.dailyStats.itemsCrafted += 1;
   pushMessage(`Crafted ${item.type === "tool" ? item.name : `${QUALITY_LABELS[quality]} ${item.name}`}.`);
   render();
   openModal("crafting");
@@ -3237,6 +3321,7 @@ function finishCookedRecipe(item, quality, mode) {
   state.kitchenChores.dishes = true;
   if (mode === "direct") state.kitchenChores.counters = true;
   learnFrom("cooking", mode === "prepped" ? 2 : 1);
+  state.dailyStats.mealsCooked += 1;
   closeModal();
   triggerSceneEffect("cook");
   pushMessage(`Prepared ${QUALITY_LABELS[quality]} clean food: ${item.name}.`);
@@ -3335,6 +3420,8 @@ function nextDay() {
   }
 
   generateCommunityOrders();
+  state.dailyStats = createDailyStats();
+  generateDailyGoals();
 
   if (wasSabbathRest && previousWeekdayIndex === 6) {
     state.isSabbathRest = false;
@@ -4296,6 +4383,8 @@ function render() {
   renderScene();
   const messageBar = document.getElementById("messageBar");
   if (messageBar) messageBar.textContent = state.messages[0] || "";
+  checkDailyGoals();
+  renderGoalStrip();
 }
 
 function statusMarkup() {
@@ -4716,6 +4805,113 @@ function setSceneBackground(stage, scene) {
   image.src = scene.background;
 }
 
+function generateDailyGoals() {
+  if (isSabbath()) { state.dailyGoals = []; return; }
+  const eligible = DAILY_GOAL_POOL.filter((goal) => !goal.check(state));
+  const shuffled = eligible.sort(() => Math.random() - 0.5);
+  state.dailyGoals = shuffled.slice(0, 3).map((goal) => ({ id: goal.id, completed: false, rewarded: false }));
+}
+
+function resolveGoal(saved) {
+  const def = DAILY_GOAL_POOL.find((g) => g.id === saved.id);
+  if (!def) return null;
+  return { ...def, completed: saved.completed, rewarded: saved.rewarded };
+}
+
+function checkDailyGoals() {
+  if (!state.dailyGoals?.length) return;
+  state.dailyGoals.forEach((saved) => {
+    const goal = resolveGoal(saved);
+    if (!goal) return;
+    if (!saved.completed && goal.check(state)) {
+      saved.completed = true;
+    }
+    if (saved.completed && !saved.rewarded) {
+      saved.rewarded = true;
+      addItem("coins", goal.reward);
+      state.dailyStats.coinsEarned += goal.reward;
+      pushMessage(`Goal complete: "${goal.label}" — earned ${goal.reward} coins!`);
+    }
+  });
+}
+
+function renderGoalStrip() {
+  const strip = document.getElementById("goalStrip");
+  if (!strip) return;
+  if (!state.dailyGoals?.length) { strip.innerHTML = ""; return; }
+  strip.innerHTML = state.dailyGoals.map((saved) => {
+    const goal = resolveGoal(saved);
+    if (!goal) return "";
+    return `<div class="goal-item${saved.completed ? " goal-done" : ""}">
+      <span class="goal-check">${saved.completed ? "✓" : "○"}</span>
+      <span>${goal.label}</span>
+      <span class="goal-reward">+${goal.reward}¢</span>
+    </div>`;
+  }).join("");
+}
+
+function showDaySummary() {
+  const markup = daySummaryMarkup();
+  openCustomModal(`End of Day ${state.day}`, markup);
+  document.getElementById("beginNewDayBtn")?.addEventListener("click", () => {
+    closeModal();
+    nextDay();
+  });
+}
+
+function daySummaryMarkup() {
+  const s = state.dailyStats;
+  const goals = state.dailyGoals || [];
+  const verse = SUMMARY_VERSES[state.day % SUMMARY_VERSES.length];
+
+  const statItems = [
+    { val: s.cropsWatered,            label: "Beds Watered" },
+    { val: s.cropsHarvested,          label: "Harvests" },
+    { val: s.cropsPlanted,            label: "Seeds Planted" },
+    { val: s.mealsCooked,             label: "Meals Cooked" },
+    { val: s.itemsCrafted,            label: "Items Crafted" },
+    { val: s.animalProductsCollected, label: "Animal Products" },
+    { val: s.fishCaught,              label: "Fish Caught" },
+    { val: s.deerHunted,              label: "Deer Hunted" },
+    { val: s.ordersFilled,            label: "Orders Filled" },
+    { val: s.choresCompleted,         label: "Chores Done" },
+    { val: s.coinsEarned,             label: "Coins Earned" },
+  ].filter((item) => item.val > 0);
+
+  const statsHtml = statItems.length
+    ? `<div class="summary-stats">${statItems.map((item) => `
+        <div class="summary-stat">
+          <span class="stat-val">${item.val}</span>
+          <span class="stat-label">${item.label}</span>
+        </div>`).join("")}</div>`
+    : `<p class="hint-text">A quiet day on the homestead.</p>`;
+
+  const resolvedGoals = goals.map(resolveGoal).filter(Boolean);
+  const goalsHtml = resolvedGoals.length
+    ? `<div class="summary-goals">
+        <h4>Daily Goals</h4>
+        ${resolvedGoals.map((g) => `<div class="summary-goal-row">
+          <span class="sgr-check">${g.completed ? "✅" : "⬜"}</span>
+          <span>${g.label}</span>
+          <span class="sgr-reward">${g.completed ? `+${g.reward}¢` : `${g.reward}¢`}</span>
+        </div>`).join("")}
+      </div>`
+    : "";
+
+  const verseHtml = verse
+    ? `<blockquote class="summary-verse">"${verse.text}"<cite>— ${verse.ref}</cite></blockquote>`
+    : "";
+
+  return `<div class="day-summary-header">
+    <h3>Day ${state.day} Complete</h3>
+    <p>${weekdayName()} · ${seasons[state.seasonIndex]} · ${weatherCycle[state.weatherIndex]}</p>
+  </div>
+  ${statsHtml}
+  ${goalsHtml}
+  ${verseHtml}
+  <button class="summary-begin-btn" id="beginNewDayBtn" type="button">Begin Day ${state.day + 1}</button>`;
+}
+
 function goals() {
   const list = [];
   if (isPreparationDay()) list.push("Complete Sabbath preparation, then enter Sabbath Rest.");
@@ -4755,7 +4951,7 @@ function bindEvents() {
   document.getElementById("ordersBtn").addEventListener("click", () => openModal("orders"));
   document.getElementById("debugBtn").addEventListener("click", toggleDebug);
   document.getElementById("saveBtn").addEventListener("click", () => openModal("save"));
-  document.getElementById("nextDayBtn").addEventListener("click", nextDay);
+  document.getElementById("nextDayBtn").addEventListener("click", showDaySummary);
   document.getElementById("resetSaveBtn").addEventListener("click", resetSave);
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
   const landscapeHint = document.getElementById("landscapeHint");
@@ -4835,6 +5031,7 @@ function toggleDebug() {
 
 function init() {
   loadGame();
+  if (!state.dailyGoals?.length) generateDailyGoals();
   bindEvents();
   render();
 }
