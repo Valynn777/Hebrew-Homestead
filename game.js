@@ -267,11 +267,11 @@ const itemLabels = {
   cumin: "Cumin",
   coriander: "Coriander",
   dill: "Dill",
-  hyssopSeeds: "Hyssop Seeds",
-  mintSeeds: "Mint Seeds",
-  cuminSeeds: "Cumin Seeds",
-  corianderSeeds: "Coriander Seeds",
-  dillSeeds: "Dill Seeds",
+  hyssopSeeds: "Heirloom Hyssop Seed",
+  mintSeeds: "Heirloom Mint Seed",
+  cuminSeeds: "Heirloom Cumin Seed",
+  corianderSeeds: "Heirloom Coriander Seed",
+  dillSeeds: "Heirloom Dill Seed",
   hyssopRemedy: "Hyssop Remedy",
   mintTonic: "Mint Tonic",
   cuminPoultice: "Cumin Poultice",
@@ -283,9 +283,9 @@ const itemLabels = {
   preparedFood: "Prepared Food",
   plantMatter: "Plant Matter",
   coins: "Coins",
-  barleySeeds: "Barley Seeds",
-  lentilSeeds: "Lentil Seeds",
-  cucumberSeeds: "Cucumber Seeds",
+  barleySeeds: "Heirloom Barley Seed",
+  lentilSeeds: "Heirloom Lentil Seed",
+  cucumberSeeds: "Heirloom Cucumber Seed",
   jars: "Jars",
   lampOil: "Lamp Oil",
   cloth: "Cloth",
@@ -330,12 +330,12 @@ const itemLabels = {
   figs: "Figs",
   grapes: "Grapes",
   leeks: "Leeks",
-  wheatSeeds: "Wheat Seeds",
-  onionSeeds: "Onion Seeds",
-  garlicSeeds: "Garlic Seeds",
-  figSeedlings: "Fig Seedlings",
-  grapeSeedlings: "Grape Seedlings",
-  leekSeeds: "Leek Seeds",
+  wheatSeeds: "Heirloom Wheat Seed",
+  onionSeeds: "Heirloom Onion Seed",
+  garlicSeeds: "Heirloom Garlic Clove",
+  figSeedlings: "Heirloom Fig Cutting",
+  grapeSeedlings: "Heirloom Grape Cutting",
+  leekSeeds: "Heirloom Leek Seed",
   trout: "Trout",
   salmon: "Salmon",
   wheatBread: "Wheat Bread",
@@ -492,6 +492,7 @@ const cropTypes = {
     waterNeeds: "Water once each growing day.",
     seedItem: "barleySeeds",
     harvestItem: "barley",
+    seedYield: 8,
     gardeningNote: "Barley is a hardy clean grain that prefers cool spring weather and well-drained soil."
   },
   lentils: {
@@ -503,6 +504,7 @@ const cropTypes = {
     waterNeeds: "Keep evenly watered while sprouting.",
     seedItem: "lentilSeeds",
     harvestItem: "lentils",
+    seedYield: 6,
     gardeningNote: "Lentils are clean legumes that grow best in loose soil without soggy roots."
   },
   cucumbers: {
@@ -514,6 +516,7 @@ const cropTypes = {
     waterNeeds: "Needs steady moisture for crisp fruit.",
     seedItem: "cucumberSeeds",
     harvestItem: "cucumbers",
+    seedYield: 10,
     gardeningNote: "Cucumbers grow quickly in warmth and appreciate regular watering."
   },
   wheat: {
@@ -525,6 +528,7 @@ const cropTypes = {
     waterNeeds: "Water regularly while establishing. Reduce as stalks ripen.",
     seedItem: "wheatSeeds",
     harvestItem: "wheat",
+    seedYield: 8,
     gardeningNote: "Wheat is a clean grain sown in spring. It ripens in early summer and can be ground into flour or used whole."
   },
   onions: {
@@ -536,6 +540,7 @@ const cropTypes = {
     waterNeeds: "Keep moist while bulbs are forming.",
     seedItem: "onionSeeds",
     harvestItem: "onions",
+    seedYield: 6,
     gardeningNote: "Onions are clean vegetables that grow well in cool spring soil. They are a staple of the homestead table."
   },
   garlic: {
@@ -547,6 +552,7 @@ const cropTypes = {
     waterNeeds: "Water moderately; avoid waterlogged roots.",
     seedItem: "garlicSeeds",
     harvestItem: "garlic",
+    seedYield: 8,
     gardeningNote: "Garlic is planted in autumn and matures slowly through cooler weather. It is a clean, nourishing crop valued for flavour."
   },
   figs: {
@@ -558,6 +564,7 @@ const cropTypes = {
     waterNeeds: "Deep watering every few days is better than shallow daily watering.",
     seedItem: "figSeedlings",
     harvestItem: "figs",
+    seedYield: 4,
     gardeningNote: "Figs are a clean summer fruit mentioned throughout Scripture as a symbol of blessing and abundance."
   },
   grapes: {
@@ -569,6 +576,7 @@ const cropTypes = {
     waterNeeds: "Water deeply once established; grapes dislike wet feet.",
     seedItem: "grapeSeedlings",
     harvestItem: "grapes",
+    seedYield: 4,
     gardeningNote: "Grapes are a clean summer fruit central to biblical harvest celebrations. They can be eaten fresh or pressed for juice."
   },
   leeks: {
@@ -580,6 +588,7 @@ const cropTypes = {
     waterNeeds: "Keep soil consistently moist around the base.",
     seedItem: "leekSeeds",
     harvestItem: "leeks",
+    seedYield: 8,
     gardeningNote: "Leeks are a clean autumn vegetable with a mild flavour, good for soups and stews as the weather cools."
   },
   hyssop: {
@@ -591,6 +600,7 @@ const cropTypes = {
     waterNeeds: "Water moderately; hyssop prefers well-drained soil and does not like soggy roots.",
     seedItem: "hyssopSeeds",
     harvestItem: "hyssop",
+    seedYield: 10,
     gardeningNote: "Hyssop is mentioned in Scripture for purification rites (Psalm 51:7, Exodus 12:22). It grows well in spring with light watering and produces small bundles of aromatic leaves."
   },
   mint: {
@@ -602,6 +612,7 @@ const cropTypes = {
     waterNeeds: "Mint enjoys consistent moisture; keep soil evenly damp.",
     seedItem: "mintSeeds",
     harvestItem: "mint",
+    seedYield: 10,
     gardeningNote: "Mint is mentioned in Matthew 23:23 as a tithe herb. It spreads readily in summer warmth and produces fragrant leaves useful in cooking and animal care."
   },
   cumin: {
@@ -613,6 +624,7 @@ const cropTypes = {
     waterNeeds: "Water sparingly once established; cumin tolerates drier soil.",
     seedItem: "cuminSeeds",
     harvestItem: "cumin",
+    seedYield: 10,
     gardeningNote: "Cumin is mentioned in Isaiah 28:25-27 and Matthew 23:23. It grows slowly in summer heat and produces aromatic seeds valued for flavour and animal care."
   },
   coriander: {
@@ -624,6 +636,7 @@ const cropTypes = {
     waterNeeds: "Keep soil moist while germinating; reduce water once established.",
     seedItem: "corianderSeeds",
     harvestItem: "coriander",
+    seedYield: 10,
     gardeningNote: "Coriander seed is mentioned in Exodus 16:31 and Numbers 11:7, compared to manna in appearance. It grows quickly in cool spring soil and produces seeds used in cooking and remedy-making."
   },
   dill: {
@@ -635,6 +648,7 @@ const cropTypes = {
     waterNeeds: "Water regularly while young; dill is sensitive to drought at seedling stage.",
     seedItem: "dillSeeds",
     harvestItem: "dill",
+    seedYield: 10,
     gardeningNote: "Dill is mentioned in Matthew 23:23 among the tithe herbs of the Pharisees' gardens. It grows tall and feathery in spring and produces fragrant leaves and seeds good for calming animals."
   }
 };
@@ -950,7 +964,21 @@ const shopSellItems = [
   sellItem("corianderSalve", 6),
   sellItem("dillTonic", 6),
   sellItem("wood", 1),
-  sellItem("stone", 1)
+  sellItem("stone", 1),
+  sellItem("barleySeeds", 3),
+  sellItem("lentilSeeds", 3),
+  sellItem("cucumberSeeds", 4),
+  sellItem("wheatSeeds", 3),
+  sellItem("onionSeeds", 4),
+  sellItem("garlicSeeds", 4),
+  sellItem("figSeedlings", 6),
+  sellItem("grapeSeedlings", 6),
+  sellItem("leekSeeds", 4),
+  sellItem("hyssopSeeds", 5),
+  sellItem("mintSeeds", 5),
+  sellItem("cuminSeeds", 5),
+  sellItem("corianderSeeds", 5),
+  sellItem("dillSeeds", 5)
 ];
 
 function shopItem(id, name, cost, type, amount) {
@@ -1003,7 +1031,16 @@ const ORDER_POOL = [
   { tpl: "elderDigestive",   label: "Digestive Remedy for an Elder",      items: { corianderSalve: 1 },                                          reward: 14, days: 4 },
   { tpl: "calmingHousehold", label: "Calming Tonic for a Tired Household", items: { dillTonic: 1 },                                              reward: 14, days: 4 },
   { tpl: "healerBundle",     label: "Healer's Bundle",                    items: { hyssopRemedy: 1, dillTonic: 1 },                              reward: 26, days: 5 },
-  { tpl: "communityRemedyBasket", label: "Community Remedy Basket",       items: { hyssopRemedy: 1, mintTonic: 1, corianderSalve: 1 },           reward: 36, days: 7 }
+  { tpl: "communityRemedyBasket", label: "Community Remedy Basket",       items: { hyssopRemedy: 1, mintTonic: 1, corianderSalve: 1 },           reward: 36, days: 7 },
+  { tpl: "heirloomGrainSeeds",   label: "Heirloom Grain Seeds",          items: { barleySeeds: 5, wheatSeeds: 5 },                              reward: 22, days: 4 },
+  { tpl: "heirloomVegSeeds",     label: "Heirloom Vegetable Seed Pack",  items: { cucumberSeeds: 5, onionSeeds: 5 },                            reward: 26, days: 4 },
+  { tpl: "heirloomHerbSeeds",    label: "Heirloom Herb Seed Bundle",     items: { dillSeeds: 5, corianderSeeds: 5 },                            reward: 28, days: 5 },
+  { tpl: "heirloomSpiceSeeds",   label: "Heirloom Spice Seeds",          items: { cuminSeeds: 5, hyssopSeeds: 5 },                              reward: 28, days: 5 },
+  { tpl: "heirloomLegumeSeed",   label: "Heirloom Lentil Seeds",         items: { lentilSeeds: 8 },                                             reward: 16, days: 3 },
+  { tpl: "heirloomAlliumSeed",   label: "Heirloom Garlic and Leek Seeds", items: { garlicSeeds: 5, leekSeeds: 5 },                              reward: 26, days: 4 },
+  { tpl: "heirloomFruitCuttings", label: "Heirloom Fig and Grape Cuttings", items: { figSeedlings: 3, grapeSeedlings: 3 },                      reward: 34, days: 6 },
+  { tpl: "heirloomMintSeed",     label: "Fresh Mint Cuttings and Seed",  items: { mintSeeds: 8 },                                               reward: 24, days: 4 },
+  { tpl: "fullSeedCollection",   label: "Full Heirloom Seed Collection", items: { barleySeeds: 3, cucumberSeeds: 3, dillSeeds: 3, mintSeeds: 3 }, reward: 48, days: 7 }
 ];
 
 const sabbathTasks = [
@@ -1061,6 +1098,7 @@ const TESTER_CODE = "blessing";
 const REST_LIMITS = { shortRest: 2, nap: 1 };
 const REST_COOLDOWN_MINUTES = 360;
 const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
+const NIGHTFALL_MINUTE = 22 * 60;
 const QUALITY_ORDER = ["standard", "good", "excellent"];
 const QUALITY_LABELS = { standard: "Standard", good: "Good", excellent: "Excellent" };
 const WATERING_CAN_CAPACITY = 6;
@@ -1846,12 +1884,12 @@ function canDoLabor(action) {
   return false;
 }
 
-function spendStamina(amount) {
+function spendStamina(amount, timeCost = 20) {
   const cost = Math.max(1, amount - restStaminaDiscount());
   if (!hasStamina(amount)) return false;
   state.stamina -= cost;
   consumeRestBuffUse();
-  advanceTime(20);
+  advanceTime(timeCost);
   return true;
 }
 
@@ -1945,7 +1983,7 @@ function restAtCabin() {
     pushMessage(`You rested recently. Rest will be available again in about ${waitText} of in-game time.`);
     return;
   }
-  if (state.minute + 45 >= 21 * 60) {
+  if (state.minute + 45 >= NIGHTFALL_MINUTE) {
     pushMessage("It is too late for a short rest. Sleep through the night from the bedroom instead.");
     return;
   }
@@ -2006,7 +2044,7 @@ function cleanRoomChore(hotspot) {
     pushMessage("That area is already tidy.");
     return;
   }
-  if (!canDoLabor("tidy") || !spendStamina(2)) return;
+  if (!canDoLabor("tidy") || !spendStamina(2, 10)) return;
   state.roomChores[room][chore] = false;
   state.dailyStats.choresCompleted += 1;
   if (room === "cabin") markPrep("tidyCottage");
@@ -2019,7 +2057,7 @@ function washDishes() {
     pushMessage("The dishes are already clean.");
     return;
   }
-  if (!canDoLabor("tidy") || !spendStamina(2)) return;
+  if (!canDoLabor("tidy") || !spendStamina(2, 10)) return;
   state.kitchenChores.dishes = false;
   state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("wash");
@@ -2031,7 +2069,7 @@ function cleanCounters() {
     pushMessage("The counters are already clean.");
     return;
   }
-  if (!canDoLabor("tidy") || !spendStamina(2)) return;
+  if (!canDoLabor("tidy") || !spendStamina(2, 10)) return;
   state.kitchenChores.counters = false;
   state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("tidy");
@@ -2043,7 +2081,7 @@ function sweepKitchen() {
     pushMessage("The kitchen floor is already tidy.");
     return;
   }
-  if (!canDoLabor("tidy") || !spendStamina(3)) return;
+  if (!canDoLabor("tidy") || !spendStamina(3, 15)) return;
   state.kitchenChores.floor = false;
   state.dailyStats.choresCompleted += 1;
   triggerSceneEffect("tidy");
@@ -3224,7 +3262,9 @@ function harvestCrop(cropId) {
   ready.forEach((planting) => {
     const catalog = cropTypes[planting.cropType];
     addItem(catalog.harvestItem, bed.fertilized || bed.composted ? 4 : 3, quality);
-    addItem(catalog.seedItem, 1);
+    const baseSeeds = catalog.seedYield ?? 1;
+    const seedBonus = bed.fertilized ? Math.ceil(baseSeeds * 0.5) : bed.composted ? Math.ceil(baseSeeds * 0.25) : 0;
+    addItem(catalog.seedItem, baseSeeds + seedBonus);
   });
   if (bonus && ready.length) {
     const firstCatalog = cropTypes[ready[0].cropType];
@@ -3240,7 +3280,7 @@ function harvestCrop(cropId) {
   }
   closeModal();
   triggerSceneEffect("harvest", cropId);
-  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}, with seeds set aside for replanting.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
+  pushMessage(`Harvested ${QUALITY_LABELS[quality]} crops from ${bed.name}. Heirloom seeds saved for replanting and trade.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
 }
 
 function cropStatus(cropId) {
@@ -3400,8 +3440,8 @@ function absoluteMinute() {
 
 function advanceTime(minutes) {
   state.minute += minutes;
-  if (state.minute >= 21 * 60) {
-    state.minute = 21 * 60;
+  if (state.minute >= NIGHTFALL_MINUTE) {
+    state.minute = NIGHTFALL_MINUTE;
     if (state.isSabbathRest) nextDay();
     else state.pendingDaySummary = true;
   }
@@ -3977,7 +4017,7 @@ function iceBoxMarkup() {
 function bedRestMarkup() {
   const napUsed = state.dailyRest?.nap || 0;
   const napRemaining = Math.max(0, REST_LIMITS.nap - napUsed);
-  const napReady = state.minute + 90 < 21 * 60;
+  const napReady = state.minute + 90 < NIGHTFALL_MINUTE;
   const sleepReady = state.minute >= SLEEP_THROUGH_NIGHT_MINUTE;
   return `<div class="card-grid">
     <article class="modal-card">
@@ -4010,7 +4050,7 @@ function napInBed() {
     render();
     return;
   }
-  if (state.minute + 90 >= 21 * 60) {
+  if (state.minute + 90 >= NIGHTFALL_MINUTE) {
     pushMessage("It is too late for a nap. Sleep through the night for a full reset.");
     closeModal();
     render();
@@ -4997,8 +5037,8 @@ function onGameTick() {
 
   // Advance time by 1 game minute
   state.minute += 1;
-  if (state.minute >= 21 * 60) {
-    state.minute = 21 * 60;
+  if (state.minute >= NIGHTFALL_MINUTE) {
+    state.minute = NIGHTFALL_MINUTE;
     showDaySummary();
     return;
   }

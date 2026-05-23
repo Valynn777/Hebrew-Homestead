@@ -107,7 +107,8 @@ small {
 }
 
 .game-layout {
-  display: block;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
 }
@@ -115,11 +116,16 @@ small {
 .scene-shell {
   position: relative;
   min-width: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .scene-stage {
   position: relative;
-  width: min(100%, calc((100svh - var(--topbar-h)) * 1.7778));
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   min-height: 0;
   margin: 0 auto;
   aspect-ratio: 1672 / 941;
@@ -2530,6 +2536,7 @@ small {
   gap: 6px;
   padding: 8px 10px 4px;
   min-height: 32px;
+  flex-shrink: 0;
 }
 
 .goal-item {
