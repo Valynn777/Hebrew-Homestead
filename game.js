@@ -171,6 +171,7 @@ const scenes = {
       hs("bed14", "Garden Bed 14", 56, 62, 10, 14, "crop", { crop: "bed14" }),
       hs("bed15", "Garden Bed 15", 69, 62, 10, 14, "crop", { crop: "bed15" }),
       hs("fieldsGate", "More Fields", 33, 4, 22, 16, "fieldsPanel"),
+      hs("rakeGarden", "Rake Garden Path", 4, 62, 14, 22, "gatherHay", { amount: 1, stamina: 3, source: "garden path" }),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
     ]
   },
@@ -183,6 +184,7 @@ const scenes = {
       hs("field1", "Field 1", 31, 34, 25, 18, "crop", { crop: "field1" }),
       hs("field2", "Field 2", 54, 39, 25, 17, "crop", { crop: "field2" }),
       hs("field3", "Field 3", 66, 55, 25, 17, "crop", { crop: "field3" }),
+      hs("gatherStraw", "Gather Loose Straw", 5, 38, 16, 24, "gatherHay", { amount: 2, stamina: 4, source: "field edges" }),
       hs("wateringCan", "Refill Watering Can", 15, 69, 14, 16, "refillWateringCan"),
       hs("backGarden", "Back to Garden", 46, 12, 18, 19, "navigate", { target: "garden" })
     ]
@@ -258,6 +260,21 @@ const itemLabels = {
   logs: "Logs",
   stone: "Stone",
   herbs: "Herbs",
+  hyssop: "Hyssop",
+  mint: "Mint",
+  cumin: "Cumin",
+  coriander: "Coriander",
+  dill: "Dill",
+  hyssopSeeds: "Hyssop Seeds",
+  mintSeeds: "Mint Seeds",
+  cuminSeeds: "Cumin Seeds",
+  corianderSeeds: "Coriander Seeds",
+  dillSeeds: "Dill Seeds",
+  hyssopRemedy: "Hyssop Remedy",
+  mintTonic: "Mint Tonic",
+  cuminPoultice: "Cumin Poultice",
+  corianderSalve: "Coriander Salve",
+  dillTonic: "Dill Tonic",
   barley: "Barley",
   lentils: "Lentils",
   cucumbers: "Cucumbers",
@@ -338,6 +355,21 @@ const starterInventory = {
   logs: 0,
   stone: 0,
   herbs: 5,
+  hyssop: 0,
+  mint: 0,
+  cumin: 0,
+  coriander: 0,
+  dill: 0,
+  hyssopSeeds: 0,
+  mintSeeds: 0,
+  cuminSeeds: 0,
+  corianderSeeds: 0,
+  dillSeeds: 0,
+  hyssopRemedy: 0,
+  mintTonic: 0,
+  cuminPoultice: 0,
+  corianderSalve: 0,
+  dillTonic: 0,
   barley: 3,
   lentils: 3,
   cucumbers: 3,
@@ -547,12 +579,67 @@ const cropTypes = {
     seedItem: "leekSeeds",
     harvestItem: "leeks",
     gardeningNote: "Leeks are a clean autumn vegetable with a mild flavour, good for soups and stews as the weather cools."
+  },
+  hyssop: {
+    name: "Hyssop",
+    cleanStatus: "clean",
+    category: "herb",
+    season: "Spring",
+    daysToMature: 3,
+    waterNeeds: "Water moderately; hyssop prefers well-drained soil and does not like soggy roots.",
+    seedItem: "hyssopSeeds",
+    harvestItem: "hyssop",
+    gardeningNote: "Hyssop is mentioned in Scripture for purification rites (Psalm 51:7, Exodus 12:22). It grows well in spring with light watering and produces small bundles of aromatic leaves."
+  },
+  mint: {
+    name: "Mint",
+    cleanStatus: "clean",
+    category: "herb",
+    season: "Summer",
+    daysToMature: 3,
+    waterNeeds: "Mint enjoys consistent moisture; keep soil evenly damp.",
+    seedItem: "mintSeeds",
+    harvestItem: "mint",
+    gardeningNote: "Mint is mentioned in Matthew 23:23 as a tithe herb. It spreads readily in summer warmth and produces fragrant leaves useful in cooking and animal care."
+  },
+  cumin: {
+    name: "Cumin",
+    cleanStatus: "clean",
+    category: "herb",
+    season: "Summer",
+    daysToMature: 4,
+    waterNeeds: "Water sparingly once established; cumin tolerates drier soil.",
+    seedItem: "cuminSeeds",
+    harvestItem: "cumin",
+    gardeningNote: "Cumin is mentioned in Isaiah 28:25-27 and Matthew 23:23. It grows slowly in summer heat and produces aromatic seeds valued for flavour and animal care."
+  },
+  coriander: {
+    name: "Coriander",
+    cleanStatus: "clean",
+    category: "herb",
+    season: "Spring",
+    daysToMature: 3,
+    waterNeeds: "Keep soil moist while germinating; reduce water once established.",
+    seedItem: "corianderSeeds",
+    harvestItem: "coriander",
+    gardeningNote: "Coriander seed is mentioned in Exodus 16:31 and Numbers 11:7, compared to manna in appearance. It grows quickly in cool spring soil and produces seeds used in cooking and remedy-making."
+  },
+  dill: {
+    name: "Dill",
+    cleanStatus: "clean",
+    category: "herb",
+    season: "Spring",
+    daysToMature: 3,
+    waterNeeds: "Water regularly while young; dill is sensitive to drought at seedling stage.",
+    seedItem: "dillSeeds",
+    harvestItem: "dill",
+    gardeningNote: "Dill is mentioned in Matthew 23:23 among the tithe herbs of the Pharisees' gardens. It grows tall and feathery in spring and produces fragrant leaves and seeds good for calming animals."
   }
 };
 
 const cropCatalog = cropTypes;
 
-const cropChoices = ["barley", "lentils", "cucumbers", "wheat", "onions", "garlic", "figs", "grapes", "leeks"];
+const cropChoices = ["barley", "lentils", "cucumbers", "wheat", "onions", "garlic", "figs", "grapes", "leeks", "hyssop", "mint", "cumin", "coriander", "dill"];
 
 const gardenBeds = {
   // Row 1 (y≈31%) — top of rectangular dirt area, 5 evenly spaced square plots
@@ -646,7 +733,12 @@ const craftingRecipes = [
   recipe("dryingRack", "Drying Rack", { wood: 3, herbs: 1 }, "A small rack for clean herbs and produce.", "tool"),
   recipe("compostBin", "Compost Bin", { wood: 3, plantMatter: 2 }, "A bin for future soil care.", "tool"),
   recipe("gardenBed", "Garden Bed", { wood: 4, stone: 2 }, "A framed bed for expanded gardening.", "tool"),
-  recipe("sabbathBasket", "Sabbath Basket", { wood: 1, herbs: 1, preparedFood: 1, water: 1 }, "A basket set aside before Sabbath.", "tool")
+  recipe("sabbathBasket", "Sabbath Basket", { wood: 1, herbs: 1, preparedFood: 1, water: 1 }, "A basket set aside before Sabbath.", "tool"),
+  recipe("hyssopRemedy", "Hyssop Remedy", { hyssop: 2, water: 1 }, "A cleansing hyssop preparation. Used historically for respiratory complaints in people and animals alike. Helps chickens and goats with respiratory distress, and fills community orders for coughs and chest ailments.", "material", { hyssopRemedy: 1 }),
+  recipe("mintTonic", "Mint Tonic", { mint: 2, water: 1 }, "A soothing mint preparation. Used historically for digestive complaints in people and animals. Helps goats and cattle with bloating and digestive upset, and fills community orders for stomach ailments.", "material", { mintTonic: 1 }),
+  recipe("cuminPoultice", "Cumin Poultice", { cumin: 2, cloth: 1 }, "A warm herbal poultice made with cumin. Used historically for skin inflammation in people and animals. Helps sheep with skin irritation and fills community orders for skin complaints.", "material", { cuminPoultice: 1 }),
+  recipe("corianderSalve", "Coriander Salve", { coriander: 2, plantMatter: 1 }, "A gentle coriander preparation. Used historically for digestive complaints and mild infections in people and animals. Helps chickens with digestive upset and fills community orders for elders and neighbors.", "material", { corianderSalve: 1 }),
+  recipe("dillTonic", "Dill Tonic", { dill: 2, water: 1 }, "A calming dill preparation. Used historically for sleeplessness and anxiety in people, and to settle restless animals. Helps stressed sheep and cattle, and fills community orders for tired or troubled households.", "material", { dillTonic: 1 })
 ];
 
 const cookingRecipes = [
@@ -767,6 +859,25 @@ const animalCatalog = {
   }
 };
 
+const ANIMAL_AILMENTS = {
+  chickens: [
+    { id: "respiratory", label: "Respiratory distress", remedy: "hyssopRemedy", note: "Hyssop remedy may help clear respiratory symptoms." },
+    { id: "digestive", label: "Digestive upset", remedy: "corianderSalve", note: "Coriander salve may ease digestive discomfort." }
+  ],
+  sheep: [
+    { id: "skinIrritation", label: "Skin irritation", remedy: "cuminPoultice", note: "Cumin poultice may soothe skin and wool irritation." },
+    { id: "stress", label: "Stress and restlessness", remedy: "dillTonic", note: "Dill tonic may help them settle." }
+  ],
+  goats: [
+    { id: "bloating", label: "Bloating", remedy: "mintTonic", note: "Mint tonic may ease bloating and digestive discomfort." },
+    { id: "respiratory", label: "Respiratory distress", remedy: "hyssopRemedy", note: "Hyssop remedy may help clear respiratory symptoms." }
+  ],
+  cattle: [
+    { id: "digestive", label: "Digestive upset", remedy: "mintTonic", note: "Mint tonic may ease digestive discomfort." },
+    { id: "stress", label: "Stress and low production", remedy: "dillTonic", note: "Dill tonic may help them settle and produce better." }
+  ]
+};
+
 const shopBuyItems = [
   shopItem("hay", "Hay", 2, "item", 3),
   shopItem("feed", "Feed", 3, "item", 3),
@@ -781,6 +892,11 @@ const shopBuyItems = [
   shopItem("figSeedlings", "Fig Seedlings", 3, "item", 1),
   shopItem("grapeSeedlings", "Grape Seedlings", 3, "item", 1),
   shopItem("leekSeeds", "Leek Seeds", 2, "item", 1),
+  shopItem("hyssopSeeds", "Hyssop Seeds", 2, "item", 1),
+  shopItem("mintSeeds", "Mint Seeds", 2, "item", 1),
+  shopItem("cuminSeeds", "Cumin Seeds", 2, "item", 1),
+  shopItem("corianderSeeds", "Coriander Seeds", 2, "item", 1),
+  shopItem("dillSeeds", "Dill Seeds", 2, "item", 1),
   shopItem("cloth", "Cloth", 3, "item", 1),
   shopItem("ironToolHead", "Iron Tool Head", 5, "item", 1),
   shopItem("wateringCan", "Watering Can", 6, "tool", 1),
@@ -821,6 +937,16 @@ const shopSellItems = [
   sellItem("trout", 5),
   sellItem("salmon", 5),
   sellItem("herbs", 2),
+  sellItem("hyssop", 3),
+  sellItem("mint", 3),
+  sellItem("cumin", 3),
+  sellItem("coriander", 3),
+  sellItem("dill", 3),
+  sellItem("hyssopRemedy", 6),
+  sellItem("mintTonic", 6),
+  sellItem("cuminPoultice", 6),
+  sellItem("corianderSalve", 6),
+  sellItem("dillTonic", 6),
   sellItem("wood", 1),
   sellItem("stone", 1)
 ];
@@ -860,7 +986,22 @@ const ORDER_POOL = [
   { tpl: "muttonOrder",    label: "Portion of Mutton",       items: { mutton: 2 },                      reward: 16, days: 4 },
   { tpl: "harvestBundle",  label: "Harvest Bundle",          items: { wheat: 2, barley: 2, herbs: 1 },  reward: 18, days: 4 },
   { tpl: "fishMealOrder",  label: "Clean Fish Meal",         items: { cleanFishMeal: 1, cleanFish: 1 }, reward: 16, days: 3 },
-  { tpl: "sabbathBasket",  label: "Sabbath Meal Basket",     items: { simpleSabbathMeal: 1, herbs: 1 }, reward: 16, days: 6 }
+  { tpl: "sabbathBasket",  label: "Sabbath Meal Basket",     items: { simpleSabbathMeal: 1, herbs: 1 },             reward: 16, days: 6 },
+  { tpl: "hyssopBundle",  label: "Bundle of Hyssop",        items: { hyssop: 2 },                                  reward: 10, days: 4 },
+  { tpl: "mintBundle",    label: "Fresh Mint",               items: { mint: 2 },                                    reward: 10, days: 4 },
+  { tpl: "cuminBundle",   label: "Cumin Seeds",              items: { cumin: 2 },                                   reward: 12, days: 5 },
+  { tpl: "corianderBundle", label: "Coriander Seed",         items: { coriander: 2 },                               reward: 10, days: 4 },
+  { tpl: "dillBundle",    label: "Dill Herb",                items: { dill: 2 },                                    reward: 10, days: 4 },
+  { tpl: "remedyKit",     label: "Herbal Remedy Kit",        items: { hyssopRemedy: 1, mintTonic: 1 },              reward: 20, days: 5 },
+  { tpl: "remedyBox",     label: "Animal Remedy Box",        items: { cuminPoultice: 1, corianderSalve: 1, dillTonic: 1 }, reward: 28, days: 6 },
+  { tpl: "herbGarden",       label: "Mixed Herb Bundle",                  items: { hyssop: 1, mint: 1, coriander: 1, dill: 1 },                  reward: 22, days: 5 },
+  { tpl: "neighborCough",    label: "Remedy for a Neighbor's Cough",      items: { hyssopRemedy: 1 },                                            reward: 14, days: 4 },
+  { tpl: "weaverStomach",    label: "Stomach Tonic for the Weaver",       items: { mintTonic: 1 },                                               reward: 14, days: 4 },
+  { tpl: "potterSkin",       label: "Skin Salve for the Potter",          items: { cuminPoultice: 1 },                                           reward: 14, days: 4 },
+  { tpl: "elderDigestive",   label: "Digestive Remedy for an Elder",      items: { corianderSalve: 1 },                                          reward: 14, days: 4 },
+  { tpl: "calmingHousehold", label: "Calming Tonic for a Tired Household", items: { dillTonic: 1 },                                              reward: 14, days: 4 },
+  { tpl: "healerBundle",     label: "Healer's Bundle",                    items: { hyssopRemedy: 1, dillTonic: 1 },                              reward: 26, days: 5 },
+  { tpl: "communityRemedyBasket", label: "Community Remedy Basket",       items: { hyssopRemedy: 1, mintTonic: 1, corianderSalve: 1 },           reward: 36, days: 7 }
 ];
 
 const sabbathTasks = [
@@ -878,7 +1019,14 @@ const journalEntries = [
   entry("barley", "Barley", "Barley is a clean grain and an early crop in the land. It likes cooler weather and well-drained soil."),
   entry("lentils", "Lentils", "Lentils are clean legumes, simple and nourishing. They grow best in loose soil with steady moisture while sprouting."),
   entry("cucumbers", "Cucumbers", "Cucumbers are clean garden produce. They enjoy warmth and regular water."),
-  entry("herbs", "Herbal Notes and Safety", "Herbs are part of Elohims beautful creation given to us for our good. More will be added here later for herbs."),
+  entry("herbs", "Herbs on the Homestead", "Five herbs grow on this homestead: Hyssop, Mint, Cumin, Coriander, and Dill — all mentioned in Scripture. Each can be grown in garden beds or foraged in the forest. They are used in cooking, remedy-making for animals, Sabbath preparation, and community orders. See individual entries for each herb and the Animal Remedies entry for how to care for your animals with them."),
+  entry("hyssop", "Hyssop", "Hyssop (Hyssopus officinalis) is mentioned throughout Scripture in purification rites (Psalm 51:7, Leviticus 14, Numbers 19). It was tied in a bundle to apply the blood of Passover to doorposts (Exodus 12:22). Hyssop has historically been noted for its support of respiratory health and its cleansing properties, owing to volatile oils including pinocamphone. On the homestead, two hyssop and water can be crafted into a Hyssop Remedy that helps chickens and goats recover from respiratory distress. Grows in Spring, ready in 3 days."),
+  entry("mint", "Mint", "Mint is mentioned in Matthew 23:23 and Luke 11:42 as a garden herb subject to tithing, showing it was commonly cultivated in biblical households. Spearmint and peppermint have long been valued for easing digestive discomfort, calming bloating, and supporting the stomach. The menthol compounds in mint have a soothing effect on the digestive tract. On the homestead, two mint and water can be crafted into a Mint Tonic that helps goats with bloating and cattle with digestive upset. Grows in Summer, ready in 3 days."),
+  entry("cumin", "Cumin", "Cumin (Cuminum cyminum) is mentioned in Isaiah 28:25-27, where its careful hand-harvest method is described by the prophet, and in Matthew 23:23 as a tithe herb. Cumin has a long history of use for digestive health and skin conditions, and is rich in thymoquinone and other active compounds with antimicrobial properties. On the homestead, two cumin and a cloth can be crafted into a Cumin Poultice that helps sheep with skin irritation and wool problems. Grows in Summer, ready in 4 days."),
+  entry("coriander", "Coriander", "Coriander seed (Coriandrum sativum) is mentioned in Exodus 16:31 and Numbers 11:7, where the appearance of manna is compared to coriander seed. It has a long history of use for digestive complaints, as a gentle antimicrobial herb, and to support healthy appetite. Its seeds contain linalool and other beneficial compounds. On the homestead, two coriander and plant matter can be crafted into a Coriander Salve that helps chickens with digestive upset. Grows in Spring, ready in 3 days."),
+  entry("dill", "Dill", "Dill (Anethum graveolens) is mentioned in Matthew 23:23 among the herbs subject to tithing in the Pharisees' carefully tended gardens. It has a long tradition of use as a calming herb, valued for easing nervousness and helping animals settle. Its gentle volatile oils, including carvone and limonene, are thought to support a calm disposition. On the homestead, two dill and water can be crafted into a Dill Tonic that helps stressed sheep and cattle, encouraging them to settle and maintain production. Grows in Spring, ready in 3 days."),
+  entry("animalRemedies", "Animal Remedies", "When an animal group shows signs of ailment, a prepared herbal remedy may help them recover. Ailments can develop when animals are not consistently fed and watered, or occasionally even under good care. An unwell group cannot provide their daily product until treated. Hyssop Remedy (hyssop + water) helps chickens and goats with respiratory distress. Mint Tonic (mint + water) helps goats with bloating and cattle with digestive upset. Cumin Poultice (cumin + cloth) helps sheep with skin irritation. Coriander Salve (coriander + plant matter) helps chickens with digestive complaints. Dill Tonic (dill + water) calms stressed sheep and cattle. Remedies are crafted at the worktable and applied from the barn animal modal. Prevention through faithful daily care is always better than treatment."),
+  entry("humanRemedies", "Herbal Remedies for the Community", "The same remedies that care for animals have long been used by people as well. Neighbors and community members may send orders for specific preparations when ailments arise. Hyssop Remedy has historically been used for respiratory complaints — coughs, chest tightness, and congestion. Its volatile oils have expectorant properties that may help loosen phlegm and support breathing. Mint Tonic has been used for digestive complaints including nausea, indigestion, bloating, and cramping. Menthol compounds in mint soothe the digestive tract and ease discomfort after heavy meals. Cumin Poultice has been used for skin inflammation, rashes, and irritated wounds. Cumin's thymoquinone content has historically been valued for its antimicrobial and anti-inflammatory properties. Coriander Salve has been used for digestive complaints, loss of appetite, and mild infections. Its linalool content was known in ancient medicine for its calming and antimicrobial effects. Dill Tonic has been used for sleeplessness, anxiety, restlessness, and digestive discomfort. It has a long tradition as a calming herb for both adults and children. Note: this journal records historical and educational information. Seek appropriate care for serious ailments."),
   entry("cleanFood", "Clean Food and Faithful Stewardship", "Food systems begin with clean grains, legumes, vegetables, fruits, and herbs. Questionable or unclassified foods are not edible until reviewed."),
   entry("sabbathPrep", "Sabbath Preparation and Rest", "Preparation Day invites water, clean food, herbs, tidying, tools put away, and a Sabbath basket. Sabbath rest is blessing, not punishment."),
   entry("sixDays", "Six Days You Shall Labor", "Six days are for ordinary work. The rhythm gives work dignity and keeps it from swallowing the whole life of the homestead."),
@@ -1071,7 +1219,7 @@ function createBarnAnimals() {
 }
 
 function emptyAnimalGroup() {
-  return { count: 0, fedToday: false, wateredToday: false, cleanedToday: false, productCollectedToday: false, feathersCollectedToday: false };
+  return { count: 0, fedToday: false, wateredToday: false, cleanedToday: false, productCollectedToday: false, feathersCollectedToday: false, ailment: null };
 }
 
 function createRoomChores() {
@@ -1685,6 +1833,7 @@ function handleHotspot(hotspot) {
   if (action === "refillWateringCan") refillWateringCan();
   if (action === "putToolsAway") putToolsAway();
   if (action === "forestGather") forestGather(hotspot);
+  if (action === "gatherHay") gatherHay(hotspot);
   if (action === "smallTree") chopSmallTree();
   if (action === "harvestTrees") harvestTrees();
   if (action === "stonePile") stonePile();
@@ -1954,6 +2103,15 @@ function refillWateringCan() {
   pushMessage(`Refilled the watering can with ${amount} water.`);
 }
 
+function gatherHay(hotspot) {
+  if (!canDoLabor("gather") || !spendStamina(hotspot.stamina)) return;
+  addItem("hay", hotspot.amount);
+  addItem("plantMatter", 1);
+  learnFrom("gathering");
+  triggerSceneEffect("gather");
+  pushMessage(`Gathered ${hotspot.amount} hay and some plant matter from the ${hotspot.source}.`);
+}
+
 function forestGather(hotspot) {
   if (!canDoLabor("gather") || !spendStamina(hotspot.stamina)) return;
   addItem(hotspot.resource, hotspot.amount);
@@ -2001,30 +2159,115 @@ function stonePile() {
   pushMessage("Picked up loose stones by hand. A pickaxe would gather more.");
 }
 
+// ── Fishing Minigame ─────────────────────────────────────────────────────────
+
+let mgFishPhase = "idle";
+let mgFishTimer = null;
+let mgFishWindowTimer = null;
+
 function fishPond() {
   if (!state.tools.fishingPole && !state.tools.fishingNet) {
     pushMessage("You need a fishing pole or net to catch clean fish here.");
     return;
   }
   if (!canDoLabor("fish") || !spendStamina(state.tools.fishingNet ? 6 : 8)) return;
+  mgFishPhase = "idle";
+  clearTimeout(mgFishTimer);
+  clearTimeout(mgFishWindowTimer);
+  openCustomModal("Fishing at the Pond", mgFishingMarkup());
+  document.getElementById("mgCastBtn").addEventListener("click", mgCast);
+  document.getElementById("mgReelBtn").addEventListener("click", mgReel);
+}
+
+function mgFishingMarkup() {
+  return `
+    <div class="mg-fishing">
+      <div class="mg-pond">
+        <div class="mg-rod"></div>
+        <div class="mg-line" id="mgLine"></div>
+        <div class="mg-bobber" id="mgBobber">
+          <div class="mg-bobber-top"></div>
+          <div class="mg-bobber-bot"></div>
+        </div>
+        <div class="mg-ripple" id="mgRipple"></div>
+      </div>
+      <p class="hint-text mg-hint" id="mgFishHint">Click Cast Line to drop your line in the water.</p>
+      <div class="mg-btns">
+        <button type="button" id="mgCastBtn">Cast Line</button>
+        <button type="button" id="mgReelBtn" class="mg-reel" disabled>Reel In!</button>
+      </div>
+    </div>`;
+}
+
+function mgCast() {
+  if (mgFishPhase !== "idle") return;
+  mgFishPhase = "waiting";
+  document.getElementById("mgCastBtn").disabled = true;
+  document.getElementById("mgLine").classList.add("visible");
+  document.getElementById("mgBobber").classList.add("cast");
+  document.getElementById("mgFishHint").textContent = "Waiting for a bite...";
+  mgFishTimer = setTimeout(mgFishBite, 2200 + Math.random() * 2800);
+}
+
+function mgFishBite() {
+  if (mgFishPhase !== "waiting") return;
+  mgFishPhase = "bite";
+  document.getElementById("mgBobber").classList.add("bite");
+  document.getElementById("mgRipple").classList.add("active");
+  document.getElementById("mgFishHint").textContent = "Fish on the line — reel it in!";
+  const reelBtn = document.getElementById("mgReelBtn");
+  reelBtn.disabled = false;
+  reelBtn.classList.add("urgent");
+  mgFishWindowTimer = setTimeout(mgFishEscape, 2200);
+}
+
+function mgReel() {
+  if (mgFishPhase !== "bite") return;
+  clearTimeout(mgFishWindowTimer);
+  mgFishPhase = "done";
   const quality = improveQualityByLearning(state.tools.fishingNet ? "good" : "standard", "gathering");
   const bonus = consumeProductionBuff();
-  const currentSeason = seasons[state.seasonIndex] || "Spring";
-  let fishItem, fishName;
-  if (currentSeason === "Autumn") {
-    fishItem = "trout";
-    fishName = "trout";
-  } else if (currentSeason === "Winter") {
-    fishItem = "salmon";
-    fishName = "salmon";
-  } else {
-    fishItem = "cleanFish";
-    fishName = "clean fish";
-  }
-  addItem(fishItem, (state.tools.fishingNet ? 2 : 1) + bonus, quality);
+  const season = seasons[state.seasonIndex] || "Spring";
+  const fishItem = season === "Autumn" ? "trout" : season === "Winter" ? "salmon" : "cleanFish";
+  const fishName = season === "Autumn" ? "trout" : season === "Winter" ? "salmon" : "clean fish";
+  const amount = (state.tools.fishingNet ? 2 : 1) + bonus;
+  addItem(fishItem, amount, quality);
   learnFrom("gathering");
-  pushMessage(`Caught ${QUALITY_LABELS[quality]} ${fishName} from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
+  document.getElementById("mgBobber").classList.remove("bite");
+  document.getElementById("mgBobber").classList.add("caught");
+  document.getElementById("mgReelBtn").disabled = true;
+  document.getElementById("mgReelBtn").classList.remove("urgent");
+  document.getElementById("mgFishHint").textContent = `Caught ${amount} ${QUALITY_LABELS[quality]} ${fishName}!`;
+  setTimeout(() => {
+    closeModal();
+    pushMessage(`Caught ${QUALITY_LABELS[quality]} ${fishName} from the pond, keeping only fish with fins and scales.${bonus ? " Clean Laundry added 1 extra." : ""}`);
+    render();
+  }, 1400);
 }
+
+function mgFishEscape() {
+  if (mgFishPhase !== "bite") return;
+  mgFishPhase = "done";
+  const bobber = document.getElementById("mgBobber");
+  if (bobber) { bobber.classList.remove("bite"); bobber.classList.add("escaped"); }
+  const reelBtn = document.getElementById("mgReelBtn");
+  if (reelBtn) { reelBtn.disabled = true; reelBtn.classList.remove("urgent"); }
+  const hint = document.getElementById("mgFishHint");
+  if (hint) hint.textContent = "The fish got away. Try again.";
+  setTimeout(() => {
+    closeModal();
+    pushMessage("The fish got away. Better luck next time.");
+    render();
+  }, 1400);
+}
+
+// ── Hunting Minigame ─────────────────────────────────────────────────────────
+
+let mgHuntActive = false;
+let mgHuntRaf = null;
+let mgHuntPos = 20;
+let mgHuntDir = 1;
+let mgHuntSpeed = 1.0;
 
 function huntDeer() {
   if (!state.tools.bow) {
@@ -2036,15 +2279,118 @@ function huntDeer() {
     return;
   }
   if (!canDoLabor("hunt") || !spendStamina(14)) return;
+  mgHuntActive = false;
+  cancelAnimationFrame(mgHuntRaf);
+  mgHuntPos = 20;
+  mgHuntDir = 1;
+  openCustomModal("Hunting in the Forest", mgHuntingMarkup());
+  document.getElementById("mgDrawBtn").addEventListener("click", mgDrawBow);
+  document.getElementById("mgShootBtn").addEventListener("click", mgShoot);
+}
+
+function mgHuntingMarkup() {
+  return `
+    <div class="mg-hunting">
+      <div class="mg-forest">
+        <div class="mg-tree mg-tree-l"></div>
+        <div class="mg-tree mg-tree-r"></div>
+        <div class="mg-tree mg-tree-lm"></div>
+        <div class="mg-tree mg-tree-rm"></div>
+        <div class="mg-deer" id="mgDeer">
+          <svg viewBox="0 0 70 60" xmlns="http://www.w3.org/2000/svg" width="70" height="60">
+            <ellipse cx="32" cy="38" rx="22" ry="12" fill="#0d140d"/>
+            <rect x="48" y="27" width="9" height="15" rx="4" fill="#0d140d"/>
+            <ellipse cx="54" cy="23" rx="9" ry="7" fill="#0d140d"/>
+            <rect x="14" y="48" width="5" height="15" rx="2" fill="#0d140d"/>
+            <rect x="24" y="48" width="5" height="15" rx="2" fill="#0d140d"/>
+            <rect x="37" y="48" width="5" height="14" rx="2" fill="#0d140d"/>
+            <rect x="46" y="47" width="5" height="14" rx="2" fill="#0d140d"/>
+            <path d="M50 17 L47 7 M47 7 L43 2 M47 7 L50 3 M57 16 L60 6 M60 6 L57 2 M60 6 L64 3" stroke="#0d140d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <p class="hint-text mg-hint" id="mgHuntHint">Draw your bow, then release when the marker enters the green zone.</p>
+      <div class="mg-aim-wrap" id="mgAimWrap" style="display:none">
+        <div class="mg-aim-bar">
+          <div class="mg-aim-zone"></div>
+          <div class="mg-aim-cursor" id="mgAimCursor"></div>
+        </div>
+        <div class="mg-aim-labels">
+          <span>wide</span><span>target zone</span><span>wide</span>
+        </div>
+      </div>
+      <div class="mg-btns">
+        <button type="button" id="mgDrawBtn">Draw Bow</button>
+        <button type="button" id="mgShootBtn" disabled>Release!</button>
+      </div>
+    </div>`;
+}
+
+function mgDrawBow() {
+  const drawBtn = document.getElementById("mgDrawBtn");
+  if (drawBtn) drawBtn.disabled = true;
+  const shootBtn = document.getElementById("mgShootBtn");
+  if (shootBtn) shootBtn.disabled = false;
+  const aimWrap = document.getElementById("mgAimWrap");
+  if (aimWrap) aimWrap.style.display = "block";
+  document.getElementById("mgHuntHint").textContent = "Steady... release when the marker is in the green zone.";
+  const gatherStage = Math.floor((state.skills?.gathering || 0) / 20);
+  mgHuntSpeed = Math.max(0.3, 1.15 - gatherStage * 0.16);
+  mgHuntPos = 20;
+  mgHuntDir = 1;
+  mgHuntActive = true;
+  mgAnimateAim();
+}
+
+function mgAnimateAim() {
+  if (!mgHuntActive) return;
+  const cursor = document.getElementById("mgAimCursor");
+  if (!cursor) { mgHuntActive = false; return; }
+  mgHuntPos += mgHuntDir * mgHuntSpeed;
+  if (mgHuntPos >= 100) { mgHuntPos = 100; mgHuntDir = -1; }
+  if (mgHuntPos <= 0)   { mgHuntPos = 0;   mgHuntDir = 1; }
+  cursor.style.left = `${mgHuntPos}%`;
+  mgHuntRaf = requestAnimationFrame(mgAnimateAim);
+}
+
+function mgShoot() {
+  if (!mgHuntActive) return;
+  mgHuntActive = false;
+  cancelAnimationFrame(mgHuntRaf);
+  const shootBtn = document.getElementById("mgShootBtn");
+  if (shootBtn) shootBtn.disabled = true;
   spendQualityItem("arrows", 1);
   state.inventory.arrows -= 1;
-  const quality = improveQualityByLearning("good", "gathering");
-  const bonus = consumeProductionBuff();
-  addItem("venison", 2 + bonus, quality);
-  addItem("hide", 1);
-  addItem("fur", 1);
-  learnFrom("gathering");
-  pushMessage(`Harvested clean wild game with care: ${QUALITY_LABELS[quality]} venison, hide, and fur were added.${bonus ? " Clean Laundry added 1 extra venison." : ""}`);
+  const hit = mgHuntPos >= 35 && mgHuntPos <= 65;
+  const forest = document.querySelector(".mg-forest");
+  if (forest) {
+    const flash = document.createElement("div");
+    flash.className = "mg-arrow-flash";
+    forest.appendChild(flash);
+  }
+  if (hit) {
+    const quality = improveQualityByLearning("good", "gathering");
+    const bonus = consumeProductionBuff();
+    addItem("venison", 2 + bonus, quality);
+    addItem("hide", 1);
+    addItem("fur", 1);
+    learnFrom("gathering");
+    document.getElementById("mgHuntHint").textContent = "Clean shot. Wild game taken with care.";
+    document.getElementById("mgDeer")?.classList.add("mg-deer-hit");
+    setTimeout(() => {
+      closeModal();
+      pushMessage(`Harvested clean wild game: ${QUALITY_LABELS[quality]} venison, hide, and fur were added.${bonus ? " Clean Laundry added 1 extra venison." : ""}`);
+      render();
+    }, 1500);
+  } else {
+    document.getElementById("mgHuntHint").textContent = "The shot went wide. The deer bolted into the trees.";
+    document.getElementById("mgDeer")?.classList.add("mg-deer-flee");
+    setTimeout(() => {
+      closeModal();
+      pushMessage("The shot went wide. Arrow used — the deer got away.");
+      render();
+    }, 1500);
+  }
 }
 
 function setAsideSabbathBasket() {
@@ -2223,6 +2569,18 @@ function openAnimalModal(animalId) {
   const catalog = animalCatalog[animalId];
   const group = state.barnAnimals[animalId];
   if (!catalog || !group) return;
+  const ailmentCard = group.ailment
+    ? `<article class="modal-card">
+        <h3>Animal Health</h3>
+        <p><strong>Ailment:</strong> ${group.ailment.label}</p>
+        <p class="hint-text">${group.ailment.note}</p>
+        <p>Remedy needed: <strong>${itemLabels[group.ailment.remedy]}</strong> (have: ${state.inventory[group.ailment.remedy] || 0})</p>
+        <button type="button" data-treat-animal="${animalId}" ${(state.inventory[group.ailment.remedy] || 0) <= 0 || !canPreviewLabor("animalCare") ? "disabled" : ""}>Apply Remedy</button>
+      </article>`
+    : `<article class="modal-card">
+        <h3>Animal Health</h3>
+        <p>The ${catalog.name.toLowerCase()} appear healthy. Faithful daily feeding, watering, and cleaning helps prevent ailments.</p>
+      </article>`;
   const cards = [
     `<article class="modal-card">
       <h3>${catalog.name}</h3>
@@ -2230,13 +2588,17 @@ function openAnimalModal(animalId) {
       <p><strong>Status:</strong> ${animalStatus(group)}</p>
       <p>${catalog.cleanNote}</p>
     </article>`,
+    ailmentCard,
     buttonCard("Feed", `Requires ${catalog.feedNeed} hay or feed. Feeding is ordinary care and may be done as necessity.`, () => feedAnimal(animalId), group.count <= 0 || !hasAnimalFeed(catalog.feedNeed)),
     buttonCard("Clean", "Clean the stall and keep the animals healthy.", () => cleanAnimal(animalId), group.count <= 0),
-    buttonCard(catalog.productLabel, animalProductText(catalog), () => collectAnimalProduct(animalId), group.count <= 0 || group.productCollectedToday || !animalProductToolReady(catalog) || isSabbath()),
+    buttonCard(catalog.productLabel, animalProductText(catalog), () => collectAnimalProduct(animalId), group.count <= 0 || !!group.ailment || group.productCollectedToday || !animalProductToolReady(catalog) || isSabbath()),
     animalId === "chickens" ? buttonCard("Collect Feathers", "Gather loose feathers for arrow crafting.", () => collectChickenFeathers(), group.count <= 0 || group.feathersCollectedToday || isSabbath()) : "",
     buttonCard("Harvest", `Harvest one ${catalog.singular.toLowerCase()} for clean meat and useful materials. This is never available on Sabbath.`, () => harvestAnimal(animalId), group.count <= 0 || !canPreviewLabor("harvest"))
   ];
   openCustomModal(catalog.name, `<div class="card-grid">${cards.join("")}</div>`);
+  document.querySelectorAll("[data-treat-animal]").forEach((btn) => {
+    btn.addEventListener("click", () => treatAnimal(btn.dataset.treatAnimal));
+  });
   bindModalActions({
     feed: () => feedAnimal(animalId),
     clean: () => cleanAnimal(animalId),
@@ -2247,12 +2609,39 @@ function openAnimalModal(animalId) {
 }
 
 function animalStatus(group) {
-  return [
+  const parts = [
     group.fedToday ? "fed" : "needs feed",
     group.wateredToday ? "watered" : "needs water",
     group.cleanedToday ? "clean" : "needs cleaning",
     group.productCollectedToday ? "product collected" : "product available if fed"
-  ].join(", ");
+  ];
+  if (group.ailment) parts.push(`unwell: ${group.ailment.label.toLowerCase()}`);
+  return parts.join(", ");
+}
+
+function treatAnimal(animalId) {
+  const catalog = animalCatalog[animalId];
+  const group = state.barnAnimals[animalId];
+  if (!group || !group.count) {
+    pushMessage(`You do not own any ${catalog.name.toLowerCase()}.`);
+    return;
+  }
+  if (!group.ailment) {
+    pushMessage(`The ${catalog.name.toLowerCase()} are not showing any ailment right now.`);
+    return;
+  }
+  const remedyId = group.ailment.remedy;
+  if ((state.inventory[remedyId] || 0) <= 0) {
+    pushMessage(`You need ${itemLabels[remedyId] || remedyId} to treat the ${catalog.name.toLowerCase()}.`);
+    return;
+  }
+  if (!canDoLabor("animalCare") || !spendStamina(3)) return;
+  state.inventory[remedyId] -= 1;
+  const ailmentLabel = group.ailment.label;
+  group.ailment = null;
+  learnFrom("animalCare");
+  closeModal();
+  pushMessage(`Applied ${itemLabels[remedyId]} to the ${catalog.name.toLowerCase()}. The ${ailmentLabel.toLowerCase()} has cleared. They should produce normally tomorrow.`);
 }
 
 function animalProductText(catalog) {
@@ -2319,6 +2708,10 @@ function collectAnimalProduct(animalId) {
   const group = state.barnAnimals[animalId];
   if (!group.count) {
     pushMessage(`You do not own any ${catalog.name.toLowerCase()} yet.`);
+    return;
+  }
+  if (group.ailment) {
+    pushMessage(`The ${catalog.name.toLowerCase()} are unwell with ${group.ailment.label.toLowerCase()}. ${group.ailment.note} Apply a remedy before gathering from them.`);
     return;
   }
   if (!group.fedToday) {
@@ -2733,6 +3126,7 @@ function harvestCrop(cropId) {
   ready.forEach((planting) => {
     const catalog = cropTypes[planting.cropType];
     addItem(catalog.harvestItem, bed.fertilized || bed.composted ? 4 : 3, quality);
+    addItem(catalog.seedItem, 1);
   });
   if (bonus && ready.length) {
     const firstCatalog = cropTypes[ready[0].cropType];
@@ -2747,7 +3141,7 @@ function harvestCrop(cropId) {
   }
   closeModal();
   triggerSceneEffect("harvest", cropId);
-  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
+  pushMessage(`Harvested ${QUALITY_LABELS[quality]} ready crops from ${bed.name}, with seeds set aside for replanting.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
 }
 
 function cropStatus(cropId) {
@@ -2982,7 +3376,18 @@ function updateRoomChoresForNewDay() {
 }
 
 function resetBarnAnimalDailyCare() {
-  Object.values(state.barnAnimals).forEach((group) => {
+  Object.entries(state.barnAnimals).forEach(([id, group]) => {
+    if (group.count > 0 && !group.ailment) {
+      const neglected = !group.fedToday || !group.wateredToday;
+      const ailmentChance = neglected ? 0.20 : 0.05;
+      if (Math.random() < ailmentChance) {
+        const options = ANIMAL_AILMENTS[id];
+        if (options && options.length > 0) {
+          group.ailment = options[Math.floor(Math.random() * options.length)];
+          pushMessage(`Your ${id} have developed ${group.ailment.label.toLowerCase()}. Visit the barn to check on them.`);
+        }
+      }
+    }
     group.fedToday = false;
     group.wateredToday = false;
     group.cleanedToday = false;
@@ -3246,10 +3651,20 @@ function improveClothing(id) {
   openModal("character");
 }
 
+function ingredientList(ingredients) {
+  return Object.entries(ingredients).map(([key, amount]) => {
+    const have = state.inventory[key] || 0;
+    const label = `${amount} ${itemLabels[key] || key}`;
+    return have >= amount
+      ? label
+      : `<span class="ingredient-missing">${label} <small>(have ${have})</small></span>`;
+  }).join(", ");
+}
+
 function recipeMarkup(list, type) {
   const attr = type === "craft" ? "data-craft" : "data-cook";
   return `<div class="card-grid">${list.map((item) => {
-    const needs = Object.entries(item.ingredients).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
+    const needs = ingredientList(item.ingredients);
     const alreadyOwnedTool = type === "craft" && item.type === "tool" && state.tools[item.id];
     const disabled = alreadyOwnedTool || !hasIngredients(item.ingredients) || (type === "craft" && isSabbath()) || (type === "cook" && isSabbath());
     return `<article class="modal-card">
@@ -3300,7 +3715,7 @@ function foodPrepMarkup() {
       <div class="inventory-list">${ingredientRows}</div>
     </div>
     <div class="card-grid">${cookingRecipes.map((item) => {
-      const needs = Object.entries(item.ingredients).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
+      const needs = ingredientList(item.ingredients);
       const disabled = Boolean(state.preppedFood) || !hasIngredients(item.ingredients) || isSabbath();
       return `<article class="modal-card">
         <h3>${item.name}</h3>
