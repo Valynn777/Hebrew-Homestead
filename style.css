@@ -2725,13 +2725,13 @@ small {
 }
 
 @keyframes wingFlapLeft {
-  0%, 30%  { transform: rotate(-12deg) scaleX(1); }
-  70%, 100% { transform: rotate(52deg) scaleX(0.32); }
+  from { transform: rotate(-12deg) scaleX(1); }
+  to   { transform: rotate(52deg) scaleX(0.32); }
 }
 
 @keyframes wingFlapRight {
-  0%, 30%  { transform: rotate(12deg) scaleX(1); }
-  70%, 100% { transform: rotate(-52deg) scaleX(0.32); }
+  from { transform: rotate(12deg) scaleX(1); }
+  to   { transform: rotate(-52deg) scaleX(0.32); }
 }
 
 @keyframes beeDrift {

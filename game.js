@@ -6008,29 +6008,29 @@ function hotspotNeedsAlert(hotspot) {
 function generateSeasonParticles(season) {
   const r = (min, max) => (Math.random() * (max - min) + min).toFixed(2);
   if (season === "Spring") {
-    const drops = Array.from({ length: 24 }, () =>
-      `<span class="sp-rain" style="--x:${r(0,100)}%;--delay:${r(0,4)}s;--dur:${r(0.55,1)}s;--op:${r(0.28,0.52)}"></span>`
+    const drops = Array.from({ length: 16 }, () =>
+      `<span class="sp-rain" style="--x:${r(0,100)}%;--delay:${r(0,5)}s;--dur:${r(0.7,1.2)}s;--op:${r(0.22,0.42)}"></span>`
     ).join("");
-    const petals = Array.from({ length: 16 }, () =>
-      `<span class="sp-petal" style="--x:${r(2,98)}%;--delay:${r(0,14)}s;--dur:${r(5,10)}s;--hue:${r(315,360)}deg"></span>`
+    const petals = Array.from({ length: 10 }, () =>
+      `<span class="sp-petal" style="--x:${r(2,98)}%;--delay:${r(0,22)}s;--dur:${r(7,13)}s;--hue:${r(315,360)}deg"></span>`
     ).join("");
     return drops + petals;
   }
   if (season === "Summer") {
-    const motes = Array.from({ length: 14 }, () =>
-      `<span class="sp-mote" style="--x:${r(5,95)}%;--y:${r(15,82)}%;--delay:${r(0,12)}s;--dur:${r(5,13)}s;--dx:${r(-28,28)}px"></span>`
+    const motes = Array.from({ length: 10 }, () =>
+      `<span class="sp-mote" style="--x:${r(5,95)}%;--y:${r(15,82)}%;--delay:${r(0,16)}s;--dur:${r(7,15)}s;--dx:${r(-28,28)}px"></span>`
     ).join("");
     return motes;
   }
   if (season === "Autumn") {
-    const leaves = Array.from({ length: 22 }, () =>
-      `<span class="sp-leaf" style="--x:${r(0,100)}%;--delay:${r(0,18)}s;--dur:${r(6,13)}s;--rot:${r(0,360)}deg;--dx:${r(-40,40)}px;--hue:${r(15,45)}deg"></span>`
+    const leaves = Array.from({ length: 14 }, () =>
+      `<span class="sp-leaf" style="--x:${r(0,100)}%;--delay:${r(0,26)}s;--dur:${r(9,16)}s;--rot:${r(0,360)}deg;--dx:${r(-40,40)}px;--hue:${r(15,45)}deg"></span>`
     ).join("");
     return leaves;
   }
   if (season === "Winter") {
-    const flakes = Array.from({ length: 36 }, () =>
-      `<span class="sp-snow" style="--x:${r(0,100)}%;--delay:${r(0,10)}s;--dur:${r(4,10)}s;--size:${r(2.5,6)}px;--dx:${r(-18,18)}px"></span>`
+    const flakes = Array.from({ length: 22 }, () =>
+      `<span class="sp-snow" style="--x:${r(0,100)}%;--delay:${r(0,14)}s;--dur:${r(6,12)}s;--size:${r(2.5,6)}px;--dx:${r(-18,18)}px"></span>`
     ).join("");
     return flakes;
   }
@@ -6249,8 +6249,7 @@ function decorationMarkup(sceneId) {
     ${effect}
     ${buffs}
     <span class="smoke" style="--x: 23.6%; --y: 16%; --size: 42px; --delay: 0s;"></span>
-    <span class="smoke" style="--x: 24.7%; --y: 15%; --size: 34px; --delay: 6.6s;"></span>
-    <span class="smoke" style="--x: 22.8%; --y: 15.8%; --size: 48px; --delay: 13.2s;"></span>
+    <span class="smoke" style="--x: 22.8%; --y: 15.8%; --size: 48px; --delay: 10s;"></span>
     <span class="lantern-glow" style="--x: 49.6%; --y: 42.6%; --w: 5.6%; --h: 9.5%;"></span>
     <span class="lantern-glow" style="--x: 87.8%; --y: 67.8%; --w: 5.4%; --h: 8%;"></span>
     <span class="well-shimmer" style="--x: 61.7%; --y: 72%; --w: 7.4%; --h: 7.5%;"></span>
