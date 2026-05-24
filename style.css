@@ -188,6 +188,115 @@ small {
   opacity: 1;
 }
 
+/* ── Seasonal particle layer ───────────────────────────────────────── */
+.season-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Spring – rain drops */
+.sp-rain {
+  position: absolute;
+  left: var(--x, 50%);
+  top: -3%;
+  width: 1px;
+  height: 13px;
+  background: linear-gradient(to bottom, transparent, rgba(140, 190, 230, var(--op, 0.4)));
+  border-radius: 0 0 1px 1px;
+  animation: sp-rain-fall var(--dur, 0.8s) linear var(--delay, 0s) infinite;
+}
+@keyframes sp-rain-fall {
+  from { transform: translateY(0); }
+  to   { transform: translateY(110%); }
+}
+
+/* Spring – petals */
+.sp-petal {
+  position: absolute;
+  left: var(--x, 50%);
+  top: -3%;
+  width: 9px;
+  height: 9px;
+  background: hsl(var(--hue, 340deg) 75% 82%);
+  border-radius: 50% 0 50% 0;
+  opacity: 0;
+  animation: sp-petal-fall var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes sp-petal-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  8%   { opacity: 0.8; }
+  35%  { transform: translateY(32%) translateX(18px) rotate(160deg); }
+  65%  { transform: translateY(65%) translateX(-12px) rotate(290deg); }
+  92%  { opacity: 0.7; }
+  100% { transform: translateY(108%) translateX(6px) rotate(420deg); opacity: 0; }
+}
+
+/* Summer – glowing motes */
+.sp-mote {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: 5px;
+  height: 5px;
+  background: rgba(253, 222, 80, 0.85);
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(253, 200, 60, 0.4);
+  opacity: 0;
+  animation: sp-mote-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes sp-mote-float {
+  from { transform: translate(0, 0); opacity: 0.1; }
+  40%  { opacity: 0.85; }
+  to   { transform: translate(var(--dx, 20px), -28px); opacity: 0.1; }
+}
+
+/* Autumn – falling leaves */
+.sp-leaf {
+  position: absolute;
+  left: var(--x, 50%);
+  top: -3%;
+  width: 11px;
+  height: 9px;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  border-radius: 50% 0 50% 0;
+  filter: hue-rotate(var(--hue, 0deg));
+  opacity: 0;
+  animation: sp-leaf-fall var(--dur, 8s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes sp-leaf-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(var(--rot, 0deg)); opacity: 0; }
+  7%   { opacity: 0.88; }
+  30%  { transform: translateY(28%) translateX(var(--dx, 30px)) rotate(calc(var(--rot, 0deg) + 120deg)); }
+  60%  { transform: translateY(58%) translateX(0) rotate(calc(var(--rot, 0deg) + 240deg)); }
+  92%  { opacity: 0.82; }
+  100% { transform: translateY(108%) translateX(var(--dx, 30px)) rotate(calc(var(--rot, 0deg) + 380deg)); opacity: 0; }
+}
+
+/* Winter – snowflakes */
+.sp-snow {
+  position: absolute;
+  left: var(--x, 50%);
+  top: -2%;
+  width: var(--size, 4px);
+  height: var(--size, 4px);
+  background: rgba(235, 248, 255, 0.92);
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(200, 230, 255, 0.5);
+  opacity: 0;
+  animation: sp-snow-fall var(--dur, 6s) linear var(--delay, 0s) infinite;
+}
+@keyframes sp-snow-fall {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  8%   { opacity: 0.88; }
+  50%  { transform: translateY(52%) translateX(var(--dx, 10px)); }
+  92%  { opacity: 0.88; }
+  100% { transform: translateY(108%) translateX(0); opacity: 0; }
+}
+/* ── End seasonal particles ─────────────────────────────────────────── */
+
 .scene-fallback {
   position: absolute;
   inset: 0;
@@ -369,6 +478,7 @@ small {
 .vital-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   background: rgba(255,250,240,0.88);
   border: 1px solid var(--line);
@@ -377,7 +487,7 @@ small {
   font-size: 0.78rem;
   color: var(--ink);
   backdrop-filter: blur(4px);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .vital-bar .vb-time {
@@ -385,26 +495,41 @@ small {
   color: var(--leaf-dark);
 }
 
-.vital-bar .vb-stamina {
+.vital-bar .vb-need {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--muted);
 }
 
-.vital-bar .vb-stamina-bar {
+.vital-bar .vb-need-bar {
   display: inline-block;
-  width: 52px;
-  height: 6px;
+  width: 64px;
+  height: 7px;
   background: var(--line);
-  border-radius: 3px;
+  border-radius: 4px;
   vertical-align: middle;
   overflow: hidden;
 }
 
-.vital-bar .vb-stamina-fill {
+.vital-bar .vb-need-fill {
   display: block;
   height: 100%;
-  background: var(--leaf);
+  background: var(--gold);
   border-radius: 3px;
   transition: width 0.4s ease;
+}
+
+.vital-bar .vb-need-thirst .vb-need-fill {
+  background: var(--water);
+}
+
+.vital-bar .vb-need-hygiene .vb-need-fill {
+  background: #5fba96;
+}
+
+.vital-bar .vb-need-relaxation .vb-need-fill {
+  background: #8f7cc0;
 }
 
 .message-bar {
@@ -628,7 +753,7 @@ small {
   background: radial-gradient(circle, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0));
   filter: blur(2px);
   opacity: 0;
-  animation: smokeDrift 7s ease-in-out infinite;
+  animation: smokeDrift 20s ease-in-out infinite;
   animation-delay: var(--delay);
 }
 
@@ -1134,13 +1259,56 @@ small {
 }
 
 .butterfly {
-  width: 18px;
-  height: 14px;
-  background:
-    radial-gradient(ellipse at 30% 50%, rgba(255, 218, 98, 0.75) 0 6px, transparent 7px),
-    radial-gradient(ellipse at 70% 50%, rgba(255, 187, 89, 0.72) 0 6px, transparent 7px);
+  position: relative;
+  width: 28px;
+  height: 22px;
+  /* thin body as a vertical strip at centre */
+  background: linear-gradient(to right,
+    transparent 43%, rgba(52, 26, 6, 0.85) 43%,
+    rgba(52, 26, 6, 0.85) 57%, transparent 57%
+  );
   animation: butterflyFloat 9s ease-in-out infinite;
   animation-delay: var(--delay);
+}
+
+/* Left wing */
+.butterfly::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  width: 12px;
+  height: 19px;
+  background: linear-gradient(145deg,
+    rgba(255, 90, 0, 0.94) 0%,
+    rgba(255, 168, 22, 0.88) 38%,
+    rgba(200, 55, 0, 0.70) 72%,
+    transparent 92%
+  );
+  border-radius: 80% 5% 90% 15% / 60% 5% 80% 20%;
+  transform-origin: right center;
+  animation: wingFlapLeft 0.42s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Right wing */
+.butterfly::after {
+  content: "";
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 12px;
+  height: 19px;
+  background: linear-gradient(35deg,
+    rgba(255, 90, 0, 0.94) 0%,
+    rgba(255, 168, 22, 0.88) 38%,
+    rgba(200, 55, 0, 0.70) 72%,
+    transparent 92%
+  );
+  border-radius: 5% 80% 15% 90% / 5% 60% 20% 80%;
+  transform-origin: left center;
+  animation: wingFlapRight 0.42s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
 }
 
 .bee {
@@ -1793,6 +1961,88 @@ small {
   line-height: 1.65;
 }
 
+/* Journal gardening tree */
+.jt-root-wrap {
+  border-left: 3px solid var(--leaf);
+  padding-left: 6px;
+  display: grid;
+  gap: 3px;
+}
+
+.jt-root {
+  font-weight: 600;
+  text-align: left;
+  width: 100%;
+}
+
+.jt-season {
+  margin: 0;
+}
+
+.jt-season > summary {
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--leaf-dark);
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.jt-season > summary::before {
+  content: "▶";
+  font-size: 0.65em;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.jt-season[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.jt-season-crops {
+  display: grid;
+  gap: 3px;
+  padding: 2px 0 4px 10px;
+}
+
+.jt-leaf {
+  font-size: 0.88rem;
+  text-align: left;
+  width: 100%;
+  padding: 3px 8px;
+}
+
+.jt-extra {
+  font-size: 0.88rem;
+  text-align: left;
+  width: 100%;
+  padding: 3px 8px;
+  margin-top: 2px;
+}
+
+/* Plant many quantity input */
+.plant-qty-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.plant-qty-input {
+  width: 60px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 740px) {
   :root { --topbar-h: 76px; }
 
@@ -2155,6 +2405,16 @@ small {
     font-size: 0.78rem;
   }
 
+  .vital-bar {
+    gap: 5px;
+    padding: 4px 7px;
+    font-size: 0.68rem;
+  }
+
+  .vital-bar .vb-need-bar {
+    width: 40px;
+  }
+
   .message-bar {
     left: 10px;
     right: 10px;
@@ -2268,11 +2528,13 @@ small {
     transform: translate(0, 0) scale(0.4);
     opacity: 0;
   }
-  20% {
-    opacity: 0.36;
+  8% { opacity: 0.26; }
+  42% {
+    transform: translate(-22px, -72px) scale(1.5);
+    opacity: 0;
   }
   100% {
-    transform: translate(-28px, -78px) scale(1.6);
+    transform: translate(-22px, -72px) scale(1.5);
     opacity: 0;
   }
 }
@@ -2313,8 +2575,10 @@ small {
     transform: translate(0, 0) rotate(0deg);
     opacity: 0;
   }
-  12% {
-    opacity: 0.65;
+  8% { opacity: 0.58; }
+  60% {
+    transform: translate(42px, 96vh) rotate(280deg);
+    opacity: 0;
   }
   100% {
     transform: translate(42px, 96vh) rotate(280deg);
@@ -2444,12 +2708,22 @@ small {
 }
 
 @keyframes butterflyFloat {
-  0%, 100% {
-    transform: translate(0, 0) rotate(-8deg);
-  }
-  50% {
-    transform: translate(28px, -18px) rotate(12deg);
-  }
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(14px, -12px); }
+  45%  { transform: translate(30px, -20px); }
+  65%  { transform: translate(18px, -8px); }
+  82%  { transform: translate(6px, -22px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes wingFlapLeft {
+  from { transform: rotate(-12deg) scaleX(1); }
+  to   { transform: rotate(55deg) scaleX(0.28); }
+}
+
+@keyframes wingFlapRight {
+  from { transform: rotate(12deg) scaleX(1); }
+  to   { transform: rotate(-55deg) scaleX(0.28); }
 }
 
 @keyframes beeDrift {
@@ -3404,3 +3678,123 @@ small {
 .hm-icon-lg  { width: 48px; height: 48px; display: block; }
 .hm-icon-sm  { width: 20px; height: 20px; vertical-align: middle; display: inline-block; }
 .hm-tab-icon { width: 20px; height: 20px; vertical-align: middle; display: inline-block; margin-right: 2px; }
+
+/* Animal ready pulse */
+@keyframes pulse-alert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(197, 139, 63, 0.7), inset 0 0 0 2px rgba(197, 139, 63, 0.5); }
+  50%       { box-shadow: 0 0 0 10px rgba(197, 139, 63, 0), inset 0 0 0 2px rgba(197, 139, 63, 0.5); }
+}
+
+.hotspot--alert {
+  animation: pulse-alert 1.8s ease-in-out infinite;
+  border-radius: 6px !important;
+}
+
+.hotspot--alert span:first-child {
+  color: var(--ink) !important;
+  background: rgba(197, 139, 63, 0.18);
+  border: 1px solid rgba(197, 139, 63, 0.55);
+  border-radius: 6px;
+}
+
+/* Market Stall */
+.stall-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.stall-open {
+  background: rgba(93, 138, 90, 0.15);
+  border: 1px solid rgba(93, 138, 90, 0.4);
+  color: var(--leaf-dark);
+}
+
+.stall-closed {
+  background: rgba(197, 139, 63, 0.1);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.stall-listing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+
+.stall-listing:last-child { border-bottom: none; }
+
+.stall-item-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.stall-item-stock {
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.stall-out-of-stock .stall-item-name,
+.stall-out-of-stock .stall-item-stock {
+  opacity: 0.5;
+}
+
+.stall-add-list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-bottom: 8px;
+}
+
+.stall-sales {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.stall-sales li {
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(215, 201, 170, 0.4);
+}
+
+.stall-sales li:last-child { border-bottom: none; }
+
+.stall-qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stall-qty-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stall-qty {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
