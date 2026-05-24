@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- trowel blade -->
+  <path d="M18 26 C17 28 14 30 12 29 C10 28 10 25 12 23 L20 12 C21 11 23 12 22 14Z" fill="#8a9ab0" opacity="0.68"/>
+  <!-- trowel blade shine -->
+  <path d="M13 26 C13 28 15 29 16 28" stroke="white" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.30"/>
+  <!-- trowel handle -->
+  <path d="M20 12 C22 10 24 9 25 10 C26 11 25 13 23 14 L20 12Z" fill="#c8a060" opacity="0.72"/>
+  <!-- trowel handle wrap -->
+  <path d="M21 12 L23 11" stroke="#a07830" stroke-width="0.8" stroke-linecap="round" opacity="0.45"/>
+  <!-- hammer head -->
+  <rect x="4" y="8" width="12" height="7" rx="1.5" fill="#7a8a98" opacity="0.70" transform="rotate(-35 10 11)"/>
+  <!-- hammer head face shadow -->
+  <rect x="4" y="8" width="4" height="7" rx="1" fill="#5a6a78" opacity="0.35" transform="rotate(-35 10 11)"/>
+  <!-- hammer handle -->
+  <path d="M14 16 C16 19 17 22 16 25" stroke="#c8a060" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.70"/>
+  <!-- hammer handle grain -->
+  <path d="M14.5 17 C16 20 17 23 16 25" stroke="#a07830" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.30"/>
+  <!-- small sparkle/craft spark -->
+  <circle cx="20" cy="7" r="1.2" fill="#d4b840" opacity="0.48"/>
+  <path d="M20 4 L20 5.5" stroke="#d4b840" stroke-width="0.8" stroke-linecap="round" opacity="0.40"/>
+  <path d="M17.5 7 L19 7" stroke="#d4b840" stroke-width="0.8" stroke-linecap="round" opacity="0.35"/>
+  <path d="M22.5 7 L21 7" stroke="#d4b840" stroke-width="0.8" stroke-linecap="round" opacity="0.35"/>
+</svg>

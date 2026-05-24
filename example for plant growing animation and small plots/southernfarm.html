@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Southern Farm Simulator</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.game-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dev-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.9);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  z-index: 5000;
+  display: none;
+  max-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.dev-panel.active {
+  display: block;
+}
+
+.dev-btn {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 2px;
+  font-size: 10px;
+}
+
+.dev-btn:hover {
+  background: #666;
+}
+
+.header {
+  background: linear-gradient(45deg, #4CAF50, #8BC34A);
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.header-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.stat-item {
+  background: rgba(255,255,255,0.2);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  transition: width 0.3s ease;
+}
+
+.nav-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 9px;
+  text-align: center;
+}
+
+.nav-btn:hover {
+  transform: translateY(-2px);
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.farm-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.farm-section {
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+#farmCanvas {
+  width: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  display: block;
+}
+
+#animalsCanvas {
+  width: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #90EE90 0%, #98FB98 100%);
+  display: block;
+  margin-top: 10px;
+}
+
+.btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-success { background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); }
+.btn-danger { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); }
+
+.field-popup {
+  position: fixed;
+  background: white;
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 2000;
+  max-width: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.field-popup.active {
+  display: block;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 4000;
+  font-size: 12px;
+  display: none;
+}
+
+.appliance-card {
+  background: rgba(255,255,255,0.8);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.appliance-card:hover {
+  transform: scale(1.05);
+  border-color: #4CAF50;
+}
+
+.appliance-card.selected {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.2);
+}
+
+@media (max-width: 768px) {
+  .farm-layout { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="dev-panel" id="devPanel">
+  <h3 style="margin-bottom: 10px;">Dev Tools</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+    <button class="dev-btn" onclick="devAddMoney()">+$5000</button>
+    <button class="dev-btn" onclick="devAddStamina()">+100 Stamina</button>
+    <button class="dev-btn" onclick="devGrowCrops()">Grow Crops</button>
+    <button class="dev-btn" onclick="devAddSeeds()">+Seeds</button>
+    <button class="dev-btn" onclick="devMaxSkills()">Max Skills</button>
+    <button class="dev-btn" onclick="devAddMaterials()">+Materials</button>
+    <button class="dev-btn" onclick="devFeedAnimals()">Feed Animals</button>
+    <button class="dev-btn" onclick="devResetGame()">Reset Game</button>
+  </div>
+  <button class="dev-btn" onclick="toggleDevPanel()" style="width: 100%; margin-top: 10px;">Close</button>
+</div>
+
+<div class="game-container">
+  <div class="header">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h1 style="font-size: 16px;">🌾 Southern Farm Simulator</h1>
+      <div style="font-size: 11px;">
+        <span id="weatherDisplay">Sunny</span> |
+        <span id="timeOfDay">Morning</span> |
+        <span id="timeDisplay">Day 1</span>
+        <button onclick="toggleDevPanel()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 10px; font-size: 16px;">🛠️</button>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-item">
+        <div>Money</div>
+        <div id="moneyDisplay">$2000</div>
+      </div>
+      <div class="stat-item">
+        <div>Stamina</div>
+        <div id="staminaDisplay">100/100</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="staminaBar" style="width: 100%"></div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div>Water</div>
+        <div id="waterDisplay">50/50</div>
+      </div>
+      <div class="stat-item">
+        <div>Level</div>
+        <div id="levelDisplay">1</div>
+      </div>
+      <div class="stat-item">
+        <div>XP</div>
+        <div id="xpDisplay">0/100</div>
+      </div>
+    </div>
+    <div style="margin-top: 10px; text-align: right;">
+      <button class="btn" onclick="saveGame()" style="font-size: 9px;">💾 Save</button>
+      <button class="btn" onclick="loadGame()" style="font-size: 9px;">📂 Load</button>
+    </div>
+  </div>
+
+  <div class="nav-container">
+    <button class="nav-btn active" onclick="showPage('farm')">Farm</button>
+    <button class="nav-btn" onclick="showPage('character')">Character</button>
+    <button class="nav-btn" onclick="showPage('animals')">Animals</button>
+    <button class="nav-btn" onclick="showPage('inventory')">Inventory</button>
+    <button class="nav-btn" onclick="showPage('kitchen')">Kitchen</button>
+    <button class="nav-btn" onclick="showPage('workshop')">Workshop</button>
+    <button class="nav-btn" onclick="showPage('shop')">Shop</button>
+    <button class="nav-btn" onclick="showPage('npcs')">NPCs</button>
+    <button class="nav-btn" onclick="showPage('cabin')">Cabin</button>
+    <button class="nav-btn" onclick="showPage('fishing')">Fishing</button>
+    <button class="nav-btn" onclick="showPage('explore')">Explore</button>
+    <button class="nav-btn" onclick="showPage('market')">Market</button>
+    <button class="nav-btn" onclick="showPage('trade')">Trade</button>
+  </div>
+
+  <div id="farm" class="page active">
+    <div class="farm-layout">
+      <div class="farm-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="font-size: 14px;">Crop Fields</h3>
+          <button class="btn btn-success" onclick="expandFields()" style="font-size: 10px;">Expand ($500)</button>
+        </div>
+        <div id="farmUpgrades" style="margin-bottom: 10px; font-size: 11px;">
+          <div id="tractorStatus"></div>
+          <div id="irrigationStatus"></div>
+        </div>
+        <canvas id="farmCanvas" width="600" height="400"></canvas>
+      </div>
+      <div class="farm-section">
+        <h3 style="font-size: 14px; margin-bottom: 10px;">Farm Water Well</h3>
+        <div style="background: linear-gradient(135deg, #4682B4 0%, #87CEEB 100%); border-radius: 12px; padding: 15px; text-align: center; color: white;">
+          <div style="font-size: 48px; margin-bottom: 10px;">💧</div>
+          <button class="btn btn-success" onclick="refillWater()">Refill Water Can (-3 stamina)</button>
+          <div style="margin-top: 10px; font-size: 11px;">Your Can: <span id="wellWaterDisplay">50/50</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="character" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Character</h2>
+    <div class="farm-section">
+      <h3 style="margin-bottom: 10px;">Skills</h3>
+      <div id="skillsDisplay"></div>
+    </div>
+  </div>
+
+  <div id="animals" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Animal Management</h2>
+    <div class="farm-section">
+      <h3 style="font-size: 14px; margin-bottom: 10px;">Animal Pens</h3>
+      <canvas id="animalsCanvas" width="800" height="500"></canvas>
+    </div>
+    <div id="animalControls" style="margin-top: 15px;"></div>
+  </div>
+
+  <div id="inventory" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Inventory</h2>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px; font-size: 14px;">Seeds</h3>
+      <div id="inventorySeeds" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px; font-size: 14px;">Crops</h3>
+      <div id="inventoryCrops" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px; font-size: 14px;">Fish</h3>
+      <div id="inventoryFish" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px; font-size: 14px;">Cooked Food (Click to eat)</h3>
+      <div id="inventoryCooked" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px; font-size: 14px;">Materials</h3>
+      <div id="inventoryMaterials" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
+    </div>
+  </div>
+
+  <div id="kitchen" class="page">
+    <div style="background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%); border-radius: 15px; padding: 20px;">
+      <h2 style="text-align: center; color: #8B4513; margin-bottom: 15px;">Country Kitchen</h2>
+      <div id="kitchenLevel" style="text-align: center; margin-bottom: 15px; font-size: 12px;">
+        Level 1 Kitchen
+        <button class="btn" onclick="upgradeKitchen()" style="font-size: 10px; margin-left: 10px;">Upgrade ($1000)</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 15px;">
+        <div class="appliance-card" onclick="selectAppliance('stove')" id="appliance-stove">
+          <div style="font-size: 32px;">🔥</div>
+          <div style="font-size: 11px; margin-top: 5px; font-weight: bold;">Stove</div>
+        </div>
+        <div class="appliance-card" onclick="selectAppliance('oven')" id="appliance-oven">
+          <div style="font-size: 32px;">🍞</div>
+          <div style="font-size: 11px; margin-top: 5px; font-weight: bold;">Oven</div>
+        </div>
+        <div class="appliance-card" onclick="selectAppliance('grill')" id="appliance-grill">
+          <div style="font-size: 32px;">🍖</div>
+          <div style="font-size: 11px; margin-top: 5px; font-weight: bold;">Grill</div>
+        </div>
+        <div class="appliance-card" onclick="selectAppliance('fryer')" id="appliance-fryer">
+          <div style="font-size: 32px;">🍤</div>
+          <div style="font-size: 11px; margin-top: 5px; font-weight: bold;">Fryer</div>
+        </div>
+      </div>
+      <div id="cookingRecipes"></div>
+    </div>
+  </div>
+
+  <div id="workshop" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Workshop</h2>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px;">Farm Upgrades</h3>
+      <div id="farmUpgradesList"></div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px;">
+      <h3 style="margin-bottom: 10px;">Production</h3>
+      <div style="background: #4CAF50; color: white; padding: 15px; border-radius: 8px;">
+        <h4 style="margin-bottom: 6px; font-size: 12px;">Make Animal Feed</h4>
+        <div style="font-size: 10px; margin-bottom: 8px;">5 Wheat → 20 Animal Feed</div>
+        <button class="btn btn-success" onclick="craftAnimalFeed()" style="font-size: 10px;">Craft</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="shop" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Your Farm Shop</h2>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+      <h3 style="margin-bottom: 10px;">List Items for Sale</h3>
+      <p style="font-size: 11px; margin-bottom: 10px; color: #666;">Customers buy when you sleep!</p>
+      <div style="margin-bottom: 15px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 5px;">Select Item:</label>
+        <select id="shopItemSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 8px; font-size: 11px;">
+          <option value="">-- Choose Item --</option>
+        </select>
+        <label style="font-size: 11px; display: block; margin-bottom: 5px;">Quantity:</label>
+        <input type="number" id="shopQuantity" min="1" value="1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 8px; font-size: 11px;">
+        <button class="btn btn-success" onclick="listItemInShop()" style="font-size: 11px; width: 100%;">List Item</button>
+      </div>
+    </div>
+    <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 15px;">
+      <h3 style="margin-bottom: 10px;">Listed Items</h3>
+      <div id="shopListings"></div>
+    </div>
+  </div>
+
+  <div id="npcs" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Town NPCs</h2>
+    <div id="npcContainer"></div>
+  </div>
+
+  <div id="cabin" class="page">
+    <div style="background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%); border-radius: 15px; padding: 25px; text-align: center; color: white;">
+      <h2 style="margin-bottom: 15px;">Cozy Log Cabin</h2>
+      <div style="font-size: 40px; margin-bottom: 15px;">🏠🔥💤</div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 8px; cursor: pointer;" onclick="takeNap()">
+          <div style="font-size: 24px;">😴</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Nap</strong><br/>+30 Stamina</div>
+        </button>
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 8px; cursor: pointer;" onclick="endDay()">
+          <div style="font-size: 24px;">🛏️</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Sleep</strong><br/>End Day</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="fishing" class="page">
+    <div style="background: linear-gradient(180deg, #87CEEB 0%, #4682B4 100%); border-radius: 15px; padding: 20px; text-align: center;">
+      <h2 style="margin-bottom: 15px; color: white;">Mountain Stream Fishing</h2>
+      <canvas id="fishingCanvas" width="600" height="300" style="border-radius: 10px; display: block; margin: 0 auto;"></canvas>
+      <div style="margin: 15px 0;">
+        <button class="btn btn-success" onclick="castLine()" id="castBtn">Cast Line (-8 stamina)</button>
+        <button class="btn btn-danger" onclick="reelIn()" id="reelBtn" style="display: none;">Reel In!</button>
+        <div style="margin-top: 10px; font-size: 11px; color: white;">Worm Bait: <span id="wormCount">5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="explore" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Exploration</h2>
+    <div style="background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); border-radius: 15px; padding: 20px; color: white; text-align: center;">
+      <h3>Activities</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 15px;">
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="chopWood()">
+          <div style="font-size: 24px;">🪓</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Chop Wood</strong><br/>(-6 stamina)</div>
+        </button>
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="digWorms()">
+          <div style="font-size: 24px;">🪱</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Dig Worms</strong><br/>(-4 stamina)</div>
+        </button>
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="mineStone()">
+          <div style="font-size: 24px;">🪨</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Mine Stone</strong><br/>(-8 stamina)</div>
+        </button>
+        <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 15px; border-radius: 10px; cursor: pointer;" onclick="mineIron()">
+          <div style="font-size: 24px;">⛏️</div>
+          <div style="font-size: 11px; margin-top: 5px;"><strong>Mine Iron</strong><br/>(-12 stamina)</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="market" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">General Store</h2>
+    <div id="marketContent"></div>
+  </div>
+
+  <div id="trade" class="page">
+    <h2 style="font-size: 16px; margin-bottom: 15px;">Livestock Trading</h2>
+    <div id="tradeContent"></div>
+  </div>
+</div>
+
+<div id="fieldPopup" class="field-popup">
+  <h3 id="fieldTitle">Field Actions</h3>
+  <div id="fieldActions" style="display: grid; gap: 10px; margin-top: 15px;"></div>
+  <button class="btn" onclick="closeFieldPopup()" style="width: 100%; margin-top: 10px;">Close</button>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<script>
+let gameState = {
+  money: 2000, stamina: 100, maxStamina: 100, water: 50, maxWater: 50,
+  level: 1, xp: 0, xpToNext: 100, day: 1, timeOfDay: 'Morning', weather: 'Sunny',
+  fields: [],
+  inventory: {
+    seeds: {'Tomato Seeds':10,'Carrot Seeds':8,'Corn Seeds':5,'Wheat Seeds':10,'Okra Seeds':3,'Collard Seeds':5,'Sweet Potato Seeds':4},
+    crops: {}, fish: {}, cooked: {}, animalProducts: {},
+    materials: {'Wood':20,'Stone':10,'Iron Ore':5,'Worms':5,'Animal Feed':50,'Fertilizer':10}
+  },
+  animals: [], shopListings: [], npcOrders: [],
+  upgrades: {tractor:false,irrigation:false,kitchenLevel:1,shed:false},
+  skills: {farming:0,cooking:0,fishing:0,animal:0}
+};
+
+const CROPS = {
+  'Tomato':{icon:'🍅',growTime:35000,value:8,seeds:'Tomato Seeds',xp:10,color:'#FF6347'},
+  'Carrot':{icon:'🥕',growTime:25000,value:6,seeds:'Carrot Seeds',xp:8,color:'#FF8C00'},
+  'Corn':{icon:'🌽',growTime:45000,value:12,seeds:'Corn Seeds',xp:15,color:'#FFD700'},
+  'Wheat':{icon:'🌾',growTime:40000,value:10,seeds:'Wheat Seeds',xp:12,color:'#F4A460'},
+  'Okra':{icon:'🫛',growTime:38000,value:14,seeds:'Okra Seeds',xp:13,color:'#90EE90'},
+  'Collards':{icon:'🥬',growTime:32000,value:11,seeds:'Collard Seeds',xp:11,color:'#228B22'},
+  'Sweet Potato':{icon:'🍠',growTime:35000,value:12,seeds:'Sweet Potato Seeds',xp:11,color:'#CD853F'}
+};
+
+const APPLIANCE_RECIPES = {
+  stove:[
+    {name:'Tomato Soup',ingredients:{'Tomato':3},stamina:40,value:25},
+    {name:'Corn Chowder',ingredients:{'Corn':2,'Milk':1},stamina:50,value:35},
+    {name:'Collard Greens',ingredients:{'Collards':3},stamina:35,value:30},
+    {name:'Vegetable Stew',ingredients:{'Carrot':2,'Tomato':2},stamina:45,value:32}
+  ],
+  oven:[
+    {name:'Cornbread',ingredients:{'Corn':2,'Egg':1},stamina:45,value:30},
+    {name:'Sweet Potato Pie',ingredients:{'Sweet Potato':3,'Egg':1},stamina:60,value:50},
+    {name:'Biscuits',ingredients:{'Wheat':3,'Milk':1},stamina:35,value:28},
+    {name:'Roasted Chicken',ingredients:{'Chicken':1},stamina:70,value:65}
+  ],
+  grill:[
+    {name:'Grilled Bass',ingredients:{'Bass':1},stamina:50,value:40},
+    {name:'Grilled Trout',ingredients:{'Trout':1},stamina:45,value:38},
+    {name:'BBQ Chicken',ingredients:{'Chicken':1},stamina:65,value:55},
+    {name:'Lamb Chops',ingredients:{'Lamb':1},stamina:75,value:70}
+  ],
+  fryer:[
+    {name:'Fried Catfish',ingredients:{'Catfish':1},stamina:55,value:42},
+    {name:'Fish & Chips',ingredients:{'Bluegill':2,'Sweet Potato':1},stamina:60,value:45},
+    {name:'Fried Okra',ingredients:{'Okra':4},stamina:40,value:35},
+    {name:'Chicken Tenders',ingredients:{'Chicken':1,'Egg':1},stamina:55,value:48}
+  ]
+};
+
+const ANIMALS = {
+  'Chicken':{cost:200,product:'Egg',productTime:20000,feedCost:5,icon:'🐔',value:5,sellPrice:150,cleanProduct:'Chicken'},
+  'Cow':{cost:1500,product:'Milk',productTime:30000,feedCost:10,icon:'🐄',value:15,sellPrice:1200,cleanProduct:'Beef'},
+  'Sheep':{cost:800,product:'Wool',productTime:35000,feedCost:8,icon:'🐑',value:12,sellPrice:600,cleanProduct:'Lamb'}
+};
+
+let selectedField=null,selectedAppliance=null,fishingActive=false,fishBiting=false;
+let farmCanvas,farmCtx,animalsCanvas,animalsCtx,fishingCanvas,fishingCtx;
+let animationFrame=0;
+
+function initGame(){
+  for(let i=0;i<12;i++){
+    gameState.fields.push({id:i,state:'empty',crop:null,plantTime:0,waterLevel:0,fertilized:false,growthStage:0});
+  }
+  farmCanvas=document.getElementById('farmCanvas');
+  farmCtx=farmCanvas.getContext('2d');
+  animalsCanvas=document.getElementById('animalsCanvas');
+  animalsCtx=animalsCanvas.getContext('2d');
+  fishingCanvas=document.getElementById('fishingCanvas');
+  fishingCtx=fishingCanvas.getContext('2d');
+  farmCanvas.addEventListener('click',handleFarmClick);
+  animalsCanvas.addEventListener('click',handleAnimalClick);
+  generateNPCOrders();
+  updateDisplay();
+  setInterval(updateCrops,1000);
+  setInterval(updateAnimals,1000);
+  animate();
+}
+
+function animate(){
+  animationFrame++;
+  drawFarm();
+  drawAnimals();
+  drawFishing();
+  requestAnimationFrame(animate);
+}
+
+function drawFarm(){
+  if(!farmCtx)return;
+  const canvas=farmCanvas,ctx=farmCtx;
+  ctx.fillStyle='#8B4513';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const cols=3,rows=Math.ceil(gameState.fields.length/cols);
+  const fieldWidth=canvas.width/cols-10,fieldHeight=Math.min(100,canvas.height/rows-10);
+  gameState.fields.forEach((field,i)=>{
+    const col=i%cols,row=Math.floor(i/cols);
+    const x=col*(fieldWidth+10)+5,y=row*(fieldHeight+10)+5;
+    if(field.state==='empty')ctx.fillStyle='#654321';
+    else if(field.state==='plowed')ctx.fillStyle='#8B4513';
+    else if(field.state==='needsWater')ctx.fillStyle='#CD853F';
+    else if(field.state==='harvestable')ctx.fillStyle='#FFD700';
+    else ctx.fillStyle='#228B22';
+    ctx.fillRect(x,y,fieldWidth,fieldHeight);
+    if(field.fertilized){
+      ctx.strokeStyle='#FFD700';ctx.lineWidth=3;ctx.strokeRect(x,y,fieldWidth,fieldHeight);
+      ctx.font='16px Arial';ctx.fillText('⭐',x+5,y+20);
+    }
+    if(field.crop&&(field.state==='planted'||field.state==='growing'||field.state==='harvestable')){
+      const cropData=CROPS[field.crop];
+      const elapsed=Date.now()-field.plantTime;
+      const progress=Math.min(1,elapsed/cropData.growTime);
+      let growthStage=0;
+      if(progress<0.25)growthStage=0;
+      else if(progress<0.5)growthStage=1;
+      else if(progress<0.75)growthStage=2;
+      else growthStage=3;
+      const centerX=x+fieldWidth/2,centerY=y+fieldHeight/2;
+      if(field.state==='harvestable'){
+        ctx.save();ctx.translate(centerX,centerY);ctx.rotate((animationFrame*0.05)%(Math.PI*2));
+        ctx.fillStyle=cropData.color;ctx.beginPath();
+        for(let i=0;i<8;i++){
+          const angle=(i/8)*Math.PI*2;
+          const r=15+Math.sin(animationFrame*0.1+i)*3;
+          ctx.lineTo(Math.cos(angle)*r,Math.sin(angle)*r);
+        }
+        ctx.closePath();ctx.fill();ctx.restore();
+        ctx.font='24px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(cropData.icon,centerX,centerY);
+      }else{
+        const size=10+growthStage*8;
+        ctx.fillStyle=cropData.color;
+        if(growthStage===0){
+          ctx.beginPath();ctx.arc(centerX,centerY,5,0,Math.PI*2);ctx.fill();
+        }else if(growthStage===1){
+          ctx.fillRect(centerX-3,centerY-5,6,15);
+          ctx.fillStyle='#90EE90';ctx.beginPath();ctx.arc(centerX,centerY-5,5,0,Math.PI*2);ctx.fill();
+        }else if(growthStage===2){
+          ctx.fillRect(centerX-4,centerY-10,8,25);
+          ctx.fillStyle=cropData.color;ctx.beginPath();
+          ctx.arc(centerX-8,centerY-8,6,0,Math.PI*2);
+          ctx.arc(centerX+8,centerY-8,6,0,Math.PI*2);ctx.fill();
+        }else{
+          ctx.font='20px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(cropData.icon,centerX,centerY);
+        }
+      }
+    }else if(field.state==='empty'){
+      ctx.font='24px Arial';ctx.fillStyle='rgba(255,255,255,0.3)';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🌱',x+fieldWidth/2,y+fieldHeight/2);
+    }else if(field.state==='needsWater'){
+      ctx.font='32px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('💧',x+fieldWidth/2,y+fieldHeight/2);
+    }
+    ctx.font='10px Arial';ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('#'+(i+1),x+5,y+5);
+  });
+}
+
+function drawAnimals(){
+  if(!animalsCtx)return;
+  const canvas=animalsCanvas,ctx=animalsCtx;
+  ctx.fillStyle='#90EE90';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='rgba(34,139,34,0.3)';
+  for(let i=0;i<50;i++){
+    const x=(i*73)%canvas.width,y=(i*97)%canvas.height;
+    ctx.fillRect(x,y,3,8);
+  }
+  if(gameState.animals.length===0){
+    ctx.font='20px Arial';ctx.fillStyle='#666';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('No animals yet. Visit Trade page!',canvas.width/2,canvas.height/2);
+    return;
+  }
+  const grouped={};
+  gameState.animals.forEach(animal=>{
+    if(!grouped[animal.type])grouped[animal.type]=[];
+    grouped[animal.type].push(animal);
+  });
+  const penWidth=canvas.width/Object.keys(grouped).length-20;
+  let penX=10;
+  Object.entries(grouped).forEach(([type,animals])=>{
+    ctx.strokeStyle='#8B4513';ctx.lineWidth=4;ctx.strokeRect(penX,10,penWidth,canvas.height-20);
+    ctx.font='bold 16px Arial';ctx.fillStyle='#8B4513';ctx.textAlign='center';
+    ctx.fillText(type+' Pen',penX+penWidth/2,30);
+    animals.forEach((animal,i)=>{
+      const animalData=ANIMALS[animal.type];
+      const baseX=penX+penWidth/2,baseY=100+i*80;
+      const offsetX=Math.sin(animationFrame*0.02+i)*20;
+      const offsetY=Math.cos(animationFrame*0.03+i)*10;
+      const x=baseX+offsetX,y=baseY+offsetY;
+      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();
+      ctx.ellipse(x,y+25,15,8,0,0,Math.PI*2);ctx.fill();
+      ctx.font='40px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(animalData.icon,x,y);
+      ctx.font='16px Arial';
+      if(animal.fed)ctx.fillText('✅',x-25,y-25);
+      else ctx.fillText('❌',x-25,y-25);
+      if(animal.productReady)ctx.fillText('🎁',x+25,y-25);
+    });
+    penX+=penWidth+20;
+  });
+}
+
+function drawFishing(){
+  if(!fishingCtx)return;
+  const canvas=fishingCanvas,ctx=fishingCtx;
+  ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#4682B4';ctx.fillRect(0,canvas.height*0.4,canvas.width,canvas.height*0.6);
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;
+  for(let i=0;i<5;i++){
+    ctx.beginPath();
+    const offset=(animationFrame*2+i*50)%canvas.width;
+    for(let x=-50;x<canvas.width+50;x+=20){
+      const y=canvas.height*0.4+Math.sin((x+offset)*0.05)*10+i*20;
+      if(x===-50)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  if(fishingActive){
+    ctx.strokeStyle='#8B4513';ctx.lineWidth=2;ctx.beginPath();
+    ctx.moveTo(canvas.width/2,50);ctx.lineTo(canvas.width/2,canvas.height*0.6);ctx.stroke();
+    ctx.fillStyle='#FF0000';ctx.beginPath();
+    const bobberY=canvas.height*0.6+Math.sin(animationFrame*0.1)*5;
+    ctx.arc(canvas.width/2,bobberY,8,0,Math.PI*2);ctx.fill();
+  }
+  if(fishBiting){
+    ctx.font='40px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    const scale=1+Math.sin(animationFrame*0.3)*0.2;
+    ctx.save();ctx.translate(canvas.width/2,canvas.height*0.65);
+    ctx.scale(scale,scale);ctx.fillText('🐟',0,0);ctx.restore();
+  }
+}
+
+function handleFarmClick(e){
+  const rect=farmCanvas.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const scaleX=farmCanvas.width/rect.width,scaleY=farmCanvas.height/rect.height;
+  const canvasX=x*scaleX,canvasY=y*scaleY;
+  const cols=3,rows=Math.ceil(gameState.fields.length/cols);
+  const fieldWidth=farmCanvas.width/cols-10,fieldHeight=Math.min(100,farmCanvas.height/rows-10);
+  gameState.fields.forEach((field,i)=>{
+    const col=i%cols,row=Math.floor(i/cols);
+    const fx=col*(fieldWidth+10)+5,fy=row*(fieldHeight+10)+5;
+    if(canvasX>=fx&&canvasX<=fx+fieldWidth&&canvasY>=fy&&canvasY<=fy+fieldHeight){
+      openFieldPopup(i);
+    }
+  });
+}
+
+function handleAnimalClick(e){renderAnimalControls();}
+
+function toggleDevPanel(){document.getElementById('devPanel').classList.toggle('active');}
+function devAddMoney(){gameState.money+=5000;updateDisplay();showNotification('Added $5000');}
+function devAddStamina(){gameState.stamina=Math.min(gameState.maxStamina+100,gameState.stamina+100);gameState.maxStamina+=100;updateDisplay();showNotification('Added 100 stamina');}
+function devGrowCrops(){gameState.fields.forEach(field=>{if(field.state==='growing'||field.state==='planted')field.state='harvestable';});showNotification('All crops ready to harvest!');}
+function devAddSeeds(){Object.keys(gameState.inventory.seeds).forEach(seed=>{gameState.inventory.seeds[seed]+=50;});updateDisplay();showNotification('Added 50 of each seed');}
+function devMaxSkills(){Object.keys(gameState.skills).forEach(skill=>{gameState.skills[skill]=100;});updateDisplay();showNotification('Maxed all skills!');}
+function devAddMaterials(){Object.keys(gameState.inventory.materials).forEach(mat=>{gameState.inventory.materials[mat]+=100;});updateDisplay();showNotification('Added 100 of each material');}
+function devFeedAnimals(){gameState.animals.forEach(animal=>{animal.fed=true;animal.lastFed=Date.now();animal.productReady=true;});renderAnimalControls();showNotification('All animals fed and products ready!');}
+function devResetGame(){if(confirm('Are you sure you want to reset the game? This cannot be undone!')){localStorage.removeItem('southernFarmSave');location.reload();}}
+
+function updateDisplay(){
+  document.getElementById('moneyDisplay').textContent='$'+gameState.money;
+  document.getElementById('staminaDisplay').textContent=gameState.stamina+'/'+gameState.maxStamina;
+  document.getElementById('staminaBar').style.width=(gameState.stamina/gameState.maxStamina*100)+'%';
+  document.getElementById('waterDisplay').textContent=gameState.water+'/'+gameState.maxWater;
+  document.getElementById('wellWaterDisplay').textContent=gameState.water+'/'+gameState.maxWater;
+  document.getElementById('levelDisplay').textContent=gameState.level;
+  document.getElementById('xpDisplay').textContent=gameState.xp+'/'+gameState.xpToNext;
+  document.getElementById('timeDisplay').textContent='Day '+gameState.day;
+  document.getElementById('timeOfDay').textContent=gameState.timeOfDay;
+  document.getElementById('wormCount').textContent=gameState.inventory.materials['Worms']||0;
+  let tractorStatus='',irrigationStatus='';
+  if(gameState.upgrades.tractor)tractorStatus='🚜 Tractor: -50% farming stamina';
+  if(gameState.upgrades.irrigation)irrigationStatus='💧 Irrigation: -50% water usage';
+  document.getElementById('tractorStatus').textContent=tractorStatus;
+  document.getElementById('tractorStatus').style.color='#4CAF50';
+  document.getElementById('irrigationStatus').textContent=irrigationStatus;
+  document.getElementById('irrigationStatus').style.color='#4682B4';
+  document.getElementById('kitchenLevel').innerHTML=`Level ${gameState.upgrades.kitchenLevel} Kitchen<button class="btn" onclick="upgradeKitchen()" style="font-size:10px;margin-left:10px;">Upgrade ($${gameState.upgrades.kitchenLevel*1000})</button>`;
+}
+
+function showNotification(message){
+  const notif=document.getElementById('notification');
+  notif.textContent=message;notif.style.display='block';
+  setTimeout(()=>{notif.style.display='none';},3000);
+}
+
+function addXP(amount){
+  gameState.xp+=amount;
+  while(gameState.xp>=gameState.xpToNext){
+    gameState.xp-=gameState.xpToNext;gameState.level++;
+    gameState.xpToNext=Math.floor(gameState.xpToNext*1.5);
+    showNotification('Level Up! Now level '+gameState.level);
+  }
+  updateDisplay();
+}
+
+function useStamina(amount){
+  if(gameState.upgrades.tractor&&amount<=8)amount=Math.floor(amount/2);
+  if(gameState.stamina<amount){showNotification('Not enough stamina!');return false;}
+  gameState.stamina=Math.max(0,gameState.stamina-amount);updateDisplay();return true;
+}
+
+function addItem(category,item,amount=1){
+  if(!gameState.inventory[category][item])gameState.inventory[category][item]=0;
+  gameState.inventory[category][item]+=amount;updateDisplay();
+}
+
+function removeItem(category,item,amount=1){
+  if(!gameState.inventory[category][item]||gameState.inventory[category][item]<amount)return false;
+  gameState.inventory[category][item]-=amount;
+  if(gameState.inventory[category][item]<=0)delete gameState.inventory[category][item];
+  updateDisplay();return true;
+}
+
+function expandFields(){
+  if(gameState.money<500){showNotification('Not enough money!');return;}
+  gameState.money-=500;
+  const newFieldId=gameState.fields.length;
+  gameState.fields.push({id:newFieldId,state:'empty',crop:null,plantTime:0,waterLevel:0,fertilized:false,growthStage:0});
+  showNotification('Field expanded! Now have '+gameState.fields.length+' fields');
+  updateDisplay();
+}
+
+function openFieldPopup(fieldId){
+  selectedField=fieldId;
+  const field=gameState.fields[fieldId];
+  const popup=document.getElementById('fieldPopup');
+  const actions=document.getElementById('fieldActions');
+  document.getElementById('fieldTitle').textContent='Field '+(fieldId+1);
+  actions.innerHTML='';
+  if(field.state==='empty'){
+    const btn=document.createElement('button');
+    btn.className='btn btn-success';
+    btn.textContent='Plow Field (-5 stamina)';
+    btn.onclick=()=>plowField(fieldId);
+    actions.appendChild(btn);
+  }
+  if((field.state==='plowed'||field.state==='planted'||field.state==='growing')&&!field.fertilized){
+    const btn=document.createElement('button');
+    btn.className='btn';btn.style.background='#8B4513';
+    btn.textContent='Fertilize (+50% yield, optional)';
+    btn.onclick=()=>fertilizeField(fieldId);
+    actions.appendChild(btn);
+  }
+  if(field.state==='plowed'){
+    const plantDiv=document.createElement('div');
+    plantDiv.innerHTML='<div style="font-size:12px;margin-bottom:8px;font-weight:bold;">Plant:</div>';
+    Object.entries(CROPS).forEach(([name,data])=>{
+      const btn=document.createElement('button');
+      btn.className='btn btn-success';
+      btn.style.width='100%';btn.style.margin='4px 0';btn.style.fontSize='11px';
+      btn.textContent=`${data.icon} ${name} (${gameState.inventory.seeds[data.seeds]||0} seeds)`;
+      btn.disabled=!gameState.inventory.seeds[data.seeds];
+      btn.onclick=()=>plantCrop(fieldId,name);
+      plantDiv.appendChild(btn);
+    });
+    actions.appendChild(plantDiv);
+  }
+  if(field.state==='planted'||field.state==='growing'||field.state==='needsWater'){
+    const btn=document.createElement('button');
+    btn.className='btn';btn.style.background='#4682B4';
+    btn.textContent='Water Crop (-2 stamina, -5 water)';
+    btn.onclick=()=>waterField(fieldId);
+    actions.appendChild(btn);
+  }
+  if(field.state==='harvestable'){
+    const btn=document.createElement('button');
+    btn.className='btn btn-success';
+    btn.textContent='Harvest (-4 stamina)';
+    btn.onclick=()=>harvestCrop(fieldId);
+    actions.appendChild(btn);
+  }
+  popup.classList.add('active');
+}
+
+function closeFieldPopup(){document.getElementById('fieldPopup').classList.remove('active');selectedField=null;}
+
+function plowField(fieldId){
+  if(!useStamina(5))return;
+  gameState.fields[fieldId].state='plowed';addXP(2);
+  showNotification('Field plowed!');closeFieldPopup();
+}
+
+function fertilizeField(fieldId){
+  const field=gameState.fields[fieldId];
+  if(field.fertilized){showNotification('Already fertilized!');return;}
+  if(!gameState.inventory.materials['Fertilizer']||gameState.inventory.materials['Fertilizer']<1){
+    showNotification('No fertilizer available!');return;
+  }
+  if(!useStamina(3))return;
+  removeItem('materials','Fertilizer',1);
+  gameState.fields[fieldId].fertilized=true;
+  showNotification('Field fertilized! Harvest will be +50%');closeFieldPopup();
+}
+
+function plantCrop(fieldId,cropName){
+  const field=gameState.fields[fieldId];
+  const cropData=CROPS[cropName];
+  if(field.state!=='plowed'){showNotification('Plow the field first!');return;}
+  if(!removeItem('seeds',cropData.seeds,1)){showNotification('No seeds available!');return;}
+  if(!useStamina(3))return;
+  gameState.fields[fieldId]={...field,state:'planted',crop:cropName,plantTime:Date.now(),waterLevel:0,growthStage:0};
+  addXP(3);showNotification(cropName+' planted! Remember to water it.');closeFieldPopup();
+}
+
+function waterField(fieldId){
+  const field=gameState.fields[fieldId];
+  if(field.state!=='planted'&&field.state!=='growing'&&field.state!=='needsWater'){
+    showNotification('Nothing to water here!');return;
+  }
+  let waterCost=5;
+  if(gameState.upgrades.irrigation)waterCost=Math.floor(waterCost/2);
+  if(gameState.water<waterCost){showNotification('Not enough water! Refill at the well.');return;}
+  if(!useStamina(2))return;
+  gameState.fields[fieldId].state='growing';
+  gameState.fields[fieldId].waterLevel=100;
+  gameState.water-=waterCost;
+  addXP(1);showNotification('Crop watered!');updateDisplay();closeFieldPopup();
+}
+
+function harvestCrop(fieldId){
+  const field=gameState.fields[fieldId];
+  if(field.state!=='harvestable'){showNotification('Crop not ready!');return;}
+  if(!useStamina(4))return;
+  const cropName=field.crop;
+  const cropData=CROPS[cropName];
+  const baseYield=Math.floor(Math.random()*3)+2;
+  const yield=field.fertilized?Math.floor(baseYield*1.5):baseYield;
+  addItem('crops',cropName,yield);addXP(cropData.xp);
+  gameState.fields[fieldId]={id:fieldId,state:'empty',crop:null,plantTime:0,waterLevel:0,fertilized:false,growthStage:0};
+  const bonus=field.fertilized?' (Fertilizer Bonus!)':'';
+  showNotification('Harvested '+yield+' '+cropName+bonus);closeFieldPopup();
+}
+
+function refillWater(){if(!useStamina(3))return;gameState.water=gameState.maxWater;showNotification('Water can refilled!');updateDisplay();}
+
+function updateCrops(){
+  gameState.fields.forEach(field=>{
+    if(field.state==='growing'&&field.crop){
+      const elapsed=Date.now()-field.plantTime;
+      const cropData=CROPS[field.crop];
+      if(field.waterLevel>0){
+        field.waterLevel=Math.max(0,field.waterLevel-1);
+        if(elapsed>=cropData.growTime)field.state='harvestable';
+      }else{field.state='needsWater';}
+    }
+  });
+}
+
+function updateAnimals(){
+  gameState.animals.forEach(animal=>{
+    if(animal.fed&&!animal.productReady){
+      const elapsed=Date.now()-animal.lastFed;
+      const animalData=ANIMALS[animal.type];
+      if(elapsed>=animalData.productTime)animal.productReady=true;
+    }
+  });
+}
+
+function renderAnimalControls(){
+  const container=document.getElementById('animalControls');
+  container.innerHTML='';
+  if(gameState.animals.length===0)return;
+  const grouped={};
+  gameState.animals.forEach(animal=>{
+    if(!grouped[animal.type])grouped[animal.type]=[];
+    grouped[animal.type].push(animal);
+  });
+  Object.entries(grouped).forEach(([type,animals])=>{
+    const pen=document.createElement('div');
+    pen.className='farm-section';pen.style.marginBottom='15px';
+    pen.innerHTML=`<h3 style="margin-bottom:10px;">${type} Controls</h3>`;
+    const grid=document.createElement('div');
+    grid.style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;';
+    animals.forEach((animal,i)=>{
+      const card=document.createElement('div');
+      card.style='background:#f0f0f0;padding:10px;border-radius:8px;';
+      const animalData=ANIMALS[animal.type];
+      card.innerHTML=`<div style="font-size:24px;text-align:center;margin-bottom:5px;">${animalData.icon} #${i+1}</div><div style="font-size:10px;text-align:center;margin-bottom:8px;">${animal.fed?'✅ Fed':'❌ Hungry'}${animal.productReady?' | 🎁 Ready':''}</div>`;
+      const btnContainer=document.createElement('div');
+      btnContainer.style='display:flex;flex-direction:column;gap:5px;';
+      if(!animal.fed){
+        const feedBtn=document.createElement('button');
+        feedBtn.className='btn btn-success';feedBtn.style.fontSize='9px';
+        feedBtn.textContent=`Feed (${animalData.feedCost} feed)`;
+        feedBtn.onclick=()=>feedAnimal(animal.id);
+        btnContainer.appendChild(feedBtn);
+      }
+      if(animal.productReady){
+        const collectBtn=document.createElement('button');
+        collectBtn.className='btn btn-success';collectBtn.style.fontSize='9px';
+        collectBtn.textContent=`Collect ${animalData.product}`;
+        collectBtn.onclick=()=>collectProduct(animal.id);
+        btnContainer.appendChild(collectBtn);
+      }
+      const breedBtn=document.createElement('button');
+      breedBtn.className='btn';breedBtn.style='font-size:9px;background:#FF69B4;';
+      breedBtn.textContent='Breed ($300)';
+      breedBtn.onclick=()=>breedAnimal(animal.id);
+      btnContainer.appendChild(breedBtn);
+      const sellBtn=document.createElement('button');
+      sellBtn.className='btn btn-danger';sellBtn.style.fontSize='9px';
+      sellBtn.textContent=`Sell ($${animalData.sellPrice})`;
+      sellBtn.onclick=()=>sellAnimal(animal.id);
+      btnContainer.appendChild(sellBtn);
+      card.appendChild(btnContainer);grid.appendChild(card);
+    });
+    pen.appendChild(grid);container.appendChild(pen);
+  });
+}
+
+function feedAnimal(animalId){
+  const animal=gameState.animals.find(a=>a.id===animalId);
+  if(!animal)return;
+  const animalData=ANIMALS[animal.type];
+  if(!removeItem('materials','Animal Feed',animalData.feedCost)){
+    showNotification('Not enough animal feed!');return;
+  }
+  animal.fed=true;animal.lastFed=Date.now();animal.productReady=false;
+  showNotification(animal.type+' fed!');renderAnimalControls();
+}
+
+function collectProduct(animalId){
+  const animal=gameState.animals.find(a=>a.id===animalId);
+  if(!animal||!animal.productReady)return;
+  const animalData=ANIMALS[animal.type];
+  addItem('animalProducts',animalData.product,1);
+  animal.productReady=false;animal.lastFed=Date.now();
+  addXP(5);showNotification('Collected '+animalData.product+'!');renderAnimalControls();
+}
+
+function breedAnimal(animalId){
+  const animal=gameState.animals.find(a=>a.id===animalId);
+  if(!animal)return;
+  if(gameState.money<300){showNotification('Not enough money for breeding!');return;}
+  gameState.money-=300;
+  const penNumber=animal.pen;
+  gameState.animals.push({id:Date.now(),type:animal.type,pen:penNumber,fed:false,productReady:false,lastFed:0});
+  showNotification('New '+animal.type+' born! Added to pen '+(penNumber+1));
+  updateDisplay();renderAnimalControls();
+}
+
+function sellAnimal(animalId){
+  const animal=gameState.animals.find(a=>a.id===animalId);
+  if(!animal)return;
+  const animalData=ANIMALS[animal.type];
+  if(confirm(`Sell this ${animal.type} for $${animalData.sellPrice}?`)){
+    gameState.money+=animalData.sellPrice;
+    gameState.animals=gameState.animals.filter(a=>a.id!==animalId);
+    showNotification(`Sold ${animal.type} for $${animalData.sellPrice}!`);
+    updateDisplay();renderAnimalControls();
+  }
+}
+
+function selectAppliance(appliance){
+  selectedAppliance=appliance;
+  document.querySelectorAll('.appliance-card').forEach(card=>{card.classList.remove('selected');});
+  document.getElementById('appliance-'+appliance).classList.add('selected');
+  renderKitchen();
+}
+
+function renderKitchen(){
+  if(!selectedAppliance){
+    document.getElementById('cookingRecipes').innerHTML='<div style="text-align:center;padding:20px;color:#666;">Select an appliance to see recipes</div>';
+    return;
+  }
+  const container=document.getElementById('cookingRecipes');
+  container.innerHTML='';
+  const recipes=APPLIANCE_RECIPES[selectedAppliance];
+  recipes.forEach(recipe=>{
+    const card=document.createElement('div');
+    card.style='background:rgba(255,255,255,0.9);padding:15px;border-radius:8px;margin-bottom:10px;';
+    const ingredientsText=Object.entries(recipe.ingredients).map(([ing,amt])=>amt+' '+ing).join(', ');
+    card.innerHTML=`<div style="font-weight:bold;margin-bottom:5px;font-size:12px;">${recipe.name}</div><div style="font-size:10px;margin-bottom:5px;">Ingredients: ${ingredientsText}</div><div style="font-size:10px;margin-bottom:8px;color:#4CAF50;">Restores: ${recipe.stamina} stamina | Sells for: $${recipe.value}</div><button class="btn btn-success" onclick="cookRecipe('${recipe.name}')" style="font-size:10px;width:100%;">Cook</button>`;
+    container.appendChild(card);
+  });
+}
+
+function cookRecipe(recipeName){
+  let recipe=null;
+  for(const appliance in APPLIANCE_RECIPES){
+    recipe=APPLIANCE_RECIPES[appliance].find(r=>r.name===recipeName);
+    if(recipe)break;
+  }
+  if(!recipe)return;
+  for(const [ingredient,amount] of Object.entries(recipe.ingredients)){
+    const inCrops=gameState.inventory.crops[ingredient]||0;
+    const inProducts=gameState.inventory.animalProducts[ingredient]||0;
+    const inFish=gameState.inventory.fish[ingredient]||0;
+    if(inCrops+inProducts+inFish<amount){
+      showNotification('Not enough '+ingredient+'!');return;
+    }
+  }
+  for(const [ingredient,amount] of Object.entries(recipe.ingredients)){
+    if(gameState.inventory.crops[ingredient]){
+      removeItem('crops',ingredient,amount);
+    }else if(gameState.inventory.animalProducts[ingredient]){
+      removeItem('animalProducts',ingredient,amount);
+    }else if(gameState.inventory.fish[ingredient]){
+      removeItem('fish',ingredient,amount);
+    }
+  }
+  addItem('cooked',recipeName,1);addXP(8);
+  showNotification(recipeName+' cooked!');renderInventory();
+}
+
+function upgradeKitchen(){
+  const cost=gameState.upgrades.kitchenLevel*1000;
+  if(gameState.money<cost){showNotification('Not enough money!');return;}
+  gameState.money-=cost;gameState.upgrades.kitchenLevel++;
+  showNotification('Kitchen upgraded to level '+gameState.upgrades.kitchenLevel+'!');
+  updateDisplay();
+}
+
+function renderWorkshop(){
+  const container=document.getElementById('farmUpgradesList');
+  container.innerHTML='';
+  const upgrades=[
+    {name:'tractor',display:'🚜 Tractor',desc:'Reduces farming stamina cost by 50%',cost:2000,materials:{'Wood':50,'Iron Ore':20}},
+    {name:'irrigation',display:'💧 Irrigation System',desc:'Reduces water usage by 50%',cost:1500,materials:{'Wood':30,'Stone':40}},
+    {name:'shed',display:'🏚️ Tool Shed',desc:'Unlocks advanced tool upgrades',cost:3000,materials:{'Wood':100,'Stone':50,'Iron Ore':30}}
+  ];
+  upgrades.forEach(upgrade=>{
+    if(gameState.upgrades[upgrade.name])return;
+    const card=document.createElement('div');
+    card.style='background:#f0f0f0;padding:15px;border-radius:8px;margin-bottom:10px;';
+    const materialsText=Object.entries(upgrade.materials).map(([mat,amt])=>amt+' '+mat).join(', ');
+    card.innerHTML=`<div style="font-weight:bold;margin-bottom:5px;">${upgrade.display}</div><div style="font-size:10px;margin-bottom:5px;">${upgrade.desc}</div><div style="font-size:10px;margin-bottom:8px;color:#666;">Requires: ${materialsText}</div><button class="btn btn-success" onclick="buyUpgrade('${upgrade.name}',${upgrade.cost},${JSON.stringify(upgrade.materials).replace(/"/g,'&quot;')})" style="font-size:10px;">Build ($${upgrade.cost})</button>`;
+    container.appendChild(card);
+  });
+}
+
+function buyUpgrade(upgradeName,cost,materials){
+  if(gameState.money<cost){showNotification('Not enough money!');return;}
+  for(const [mat,amt] of Object.entries(materials)){
+    if((gameState.inventory.materials[mat]||0)<amt){
+      showNotification('Not enough '+mat+'!');return;
+    }
+  }
+  for(const [mat,amt] of Object.entries(materials)){
+    removeItem('materials',mat,amt);
+  }
+  gameState.money-=cost;gameState.upgrades[upgradeName]=true;
+  showNotification(upgradeName+' upgraded!');updateDisplay();renderWorkshop();
+}
+
+function craftAnimalFeed(){
+  if((gameState.inventory.crops['Wheat']||0)<5){
+    showNotification('Need 5 Wheat!');return;
+  }
+  removeItem('crops','Wheat',5);addItem('materials','Animal Feed',20);
+  showNotification('Created 20 Animal Feed!');
+}
+
+function updateShopItemSelect(){
+  const select=document.getElementById('shopItemSelect');
+  select.innerHTML='<option value="">-- Choose Item --</option>';
+  Object.entries(gameState.inventory.crops).forEach(([name,amount])=>{
+    if(amount>0){
+      const option=document.createElement('option');
+      option.value=`crops|${name}`;
+      option.textContent=`${CROPS[name]?.icon} ${name} (${amount}) - $${CROPS[name]?.value} each`;
+      select.appendChild(option);
+    }
+  });
+  Object.entries(gameState.inventory.cooked).forEach(([name,amount])=>{
+    if(amount>0){
+      let value=20;
+      for(const appliance in APPLIANCE_RECIPES){
+        const recipe=APPLIANCE_RECIPES[appliance].find(r=>r.name===name);
+        if(recipe){value=recipe.value;break;}
+      }
+      const option=document.createElement('option');
+      option.value=`cooked|${name}`;
+      option.textContent=`🍽️ ${name} (${amount}) - $${value} each`;
+      select.appendChild(option);
+    }
+  });
+  Object.entries(gameState.inventory.animalProducts).forEach(([name,amount])=>{
+    if(amount>0){
+      const option=document.createElement('option');
+      option.value=`animalProducts|${name}`;
+      option.textContent=`${name} (${amount})`;
+      select.appendChild(option);
+    }
+  });
+}
+
+function listItemInShop(){
+  const select=document.getElementById('shopItemSelect');
+  const quantityInput=document.getElementById('shopQuantity');
+  const selectedValue=select.value;
+  const quantity=parseInt(quantityInput.value)||1;
+  if(!selectedValue){showNotification('Please select an item!');return;}
+  const [category,itemName]=selectedValue.split('|');
+  if((gameState.inventory[category][itemName]||0)<quantity){
+    showNotification('Not enough items!');return;
+  }
+  let unitValue=10;
+  if(category==='crops'){
+    unitValue=CROPS[itemName]?.value||10;
+  }else if(category==='cooked'){
+    for(const appliance in APPLIANCE_RECIPES){
+      const recipe=APPLIANCE_RECIPES[appliance].find(r=>r.name===itemName);
+      if(recipe){unitValue=recipe.value;break;}
+    }
+  }
+  const totalValue=unitValue*quantity;
+  removeItem(category,itemName,quantity);
+  gameState.shopListings.push({category:category,item:itemName,amount:quantity,value:totalValue});
+  showNotification(`Listed ${quantity} ${itemName} for $${totalValue}!`);
+  renderShop();renderInventory();
+}
+
+function removeFromShop(index){
+  const listing=gameState.shopListings[index];
+  addItem(listing.category,listing.item,listing.amount);
+  gameState.shopListings.splice(index,1);
+  showNotification(`Removed ${listing.item} from shop!`);
+  renderShop();renderInventory();
+}
+
+function renderShop(){
+  updateShopItemSelect();
+  const container=document.getElementById('shopListings');
+  container.innerHTML='';
+  if(gameState.shopListings.length===0){
+    container.innerHTML='<div style="text-align:center;padding:20px;color:#666;">No items listed</div>';
+    return;
+  }
+  gameState.shopListings.forEach((listing,i)=>{
+    const card=document.createElement('div');
+    card.style='background:#f0f0f0;padding:10px;border-radius:8px;text-align:center;font-size:11px;margin-bottom:8px;';
+    card.innerHTML=`<div>${listing.item}</div><div style="font-weight:bold;margin-top:5px;margin-bottom:8px;">${listing.amount} for $${listing.value}</div><button class="btn btn-danger" onclick="removeFromShop(${i})" style="font-size:10px;">Remove</button>`;
+    container.appendChild(card);
+  });
+}
+
+function sellShopItems(){
+  if(gameState.shopListings.length===0)return;
+  let totalEarned=0;
+  gameState.shopListings.forEach(listing=>{totalEarned+=listing.value;});
+  gameState.money+=totalEarned;gameState.shopListings=[];
+  showNotification('Shop sold overnight! Earned $'+totalEarned);
+  updateDisplay();renderShop();
+}
+
+function generateNPCOrders(){
+  const npcs=[
+    {name:'Ms. Betty',requests:['Tomato','Collards','Cornbread']},
+    {name:'Mr. Johnson',requests:['Corn','Wheat','Egg']},
+    {name:'Doc Smith',requests:['Sweet Potato','Milk','Grilled Bass']}
+  ];
+  gameState.npcOrders=npcs.map(npc=>({
+    npc:npc.name,
+    item:npc.requests[Math.floor(Math.random()*npc.requests.length)],
+    amount:Math.floor(Math.random()*3)+2,
+    reward:Math.floor(Math.random()*200)+100,
+    fulfilled:false
+  }));
+  renderNPCs();
+}
+
+function renderNPCs(){
+  const container=document.getElementById('npcContainer');
+  container.innerHTML='';
+  gameState.npcOrders.forEach((order,i)=>{
+    const card=document.createElement('div');
+    card.className='farm-section';
+    card.style='margin-bottom:15px;border:2px solid #4CAF50;';
+    const statusHtml=order.fulfilled
+      ?'<div style="color:#4CAF50;font-weight:bold;font-size:12px;">✅ Fulfilled! New orders coming soon...</div>'
+      :`<button class="btn btn-success" onclick="fulfillOrder(${i})" style="font-size:11px;">Fulfill Order</button>`;
+    card.innerHTML=`<h3 style="margin-bottom:10px;">${order.npc}</h3><div style="background:rgba(76,175,80,0.1);padding:10px;border-radius:8px;margin-bottom:10px;"><div style="font-size:12px;margin-bottom:5px;">Wants: ${order.amount} ${order.item}</div><div style="font-size:11px;color:#4CAF50;font-weight:bold;">Reward: $${order.reward}</div></div>${statusHtml}`;
+    container.appendChild(card);
+  });
+}
+
+function fulfillOrder(orderIndex){
+  const order=gameState.npcOrders[orderIndex];
+  const inCrops=gameState.inventory.crops[order.item]||0;
+  const inCooked=gameState.inventory.cooked[order.item]||0;
+  const inProducts=gameState.inventory.animalProducts[order.item]||0;
+  if(inCrops+inCooked+inProducts<order.amount){
+    showNotification('Not enough items!');return;
+  }
+  if(inCrops>=order.amount){
+    removeItem('crops',order.item,order.amount);
+  }else if(inCooked>=order.amount){
+    removeItem('cooked',order.item,order.amount);
+  }else if(inProducts>=order.amount){
+    removeItem('animalProducts',order.item,order.amount);
+  }
+  gameState.money+=order.reward;
+  gameState.npcOrders[orderIndex].fulfilled=true;
+  showNotification('Order fulfilled! Earned $'+order.reward);
+  addXP(15);updateDisplay();renderNPCs();
+  setTimeout(()=>{generateNPCOrders();},3000);
+}
+
+function renderInventory(){
+  let html='';
+  Object.entries(gameState.inventory.seeds).forEach(([name,amount])=>{
+    html+=`<div style="padding:10px;background:#f0f0f0;border-radius:8px;text-align:center;font-size:11px;"><div>${name}</div><div style="font-weight:bold;margin-top:5px;">${amount}</div></div>`;
+  });
+  document.getElementById('inventorySeeds').innerHTML=html;
+  html='';
+  Object.entries(gameState.inventory.crops).forEach(([name,amount])=>{
+    html+=`<div style="padding:10px;background:#f0f0f0;border-radius:8px;text-align:center;font-size:11px;"><div>${CROPS[name]?.icon} ${name}</div><div style="font-weight:bold;margin-top:5px;">${amount}</div></div>`;
+  });
+  document.getElementById('inventoryCrops').innerHTML=html||'<div style="text-align:center;color:#666;padding:20px;">No crops</div>';
+  html='';
+  Object.entries(gameState.inventory.fish).forEach(([name,amount])=>{
+    html+=`<div style="padding:10px;background:#f0f0f0;border-radius:8px;text-align:center;font-size:11px;"><div>🐟 ${name}</div><div style="font-weight:bold;margin-top:5px;">${amount}</div></div>`;
+  });
+  document.getElementById('inventoryFish').innerHTML=html||'<div style="text-align:center;color:#666;padding:20px;">No fish</div>';
+  html='';
+  Object.entries(gameState.inventory.cooked).forEach(([name,amount])=>{
+    html+=`<div onclick="eatFood('${name}')" style="padding:10px;background:#4CAF50;color:white;border-radius:8px;text-align:center;font-size:11px;cursor:pointer;"><div>🍽️ ${name}</div><div style="font-weight:bold;margin-top:5px;">${amount}</div></div>`;
+  });
+  document.getElementById('inventoryCooked').innerHTML=html||'<div style="text-align:center;color:#666;padding:20px;">No cooked food</div>';
+  html='';
+  Object.entries(gameState.inventory.materials).forEach(([name,amount])=>{
+    html+=`<div style="padding:10px;background:#f0f0f0;border-radius:8px;text-align:center;font-size:11px;"><div>${name}</div><div style="font-weight:bold;margin-top:5px;">${amount}</div></div>`;
+  });
+  document.getElementById('inventoryMaterials').innerHTML=html;
+}
+
+function eatFood(foodName){
+  let stamina=30;
+  for(const appliance in APPLIANCE_RECIPES){
+    const recipe=APPLIANCE_RECIPES[appliance].find(r=>r.name===foodName);
+    if(recipe){stamina=recipe.stamina;break;}
+  }
+  if(!removeItem('cooked',foodName,1)){showNotification('No food to eat!');return;}
+  gameState.stamina=Math.min(gameState.maxStamina,gameState.stamina+stamina);
+  showNotification('Ate '+foodName+'! +'+stamina+' stamina');
+  updateDisplay();renderInventory();
+}
+
+function castLine(){
+  if(!useStamina(8))return;
+  if(!removeItem('materials','Worms',1)){
+    showNotification('No worms! Dig for some in Explore.');return;
+  }
+  fishingActive=true;
+  document.getElementById('castBtn').style.display='none';
+  const biteTime=Math.random()*5000+3000;
+  setTimeout(()=>{
+    if(!fishingActive)return;
+    fishBiting=true;
+    document.getElementById('reelBtn').style.display='inline-block';
+    showNotification('Fish is biting! Reel in!');
+    setTimeout(()=>{
+      if(fishBiting){
+        fishingActive=false;fishBiting=false;
+        document.getElementById('castBtn').style.display='inline-block';
+        document.getElementById('reelBtn').style.display='none';
+        showNotification('Fish got away!');
+      }
+    },3000);
+  },biteTime);
+}
+
+function reelIn(){
+  if(!fishBiting)return;
+  const fishTypes=['Bass','Catfish','Trout','Bluegill'];
+  const caughtFish=fishTypes[Math.floor(Math.random()*fishTypes.length)];
+  addItem('fish',caughtFish,1);
+  fishingActive=false;fishBiting=false;
+  document.getElementById('castBtn').style.display='inline-block';
+  document.getElementById('reelBtn').style.display='none';
+  showNotification('Caught a '+caughtFish+'!');
+  addXP(10);renderInventory();
+}
+
+function chopWood(){if(!useStamina(6))return;const amount=Math.floor(Math.random()*3)+3;addItem('materials','Wood',amount);addXP(5);showNotification('Gathered '+amount+' Wood!');}
+function digWorms(){if(!useStamina(4))return;const amount=Math.floor(Math.random()*2)+2;addItem('materials','Worms',amount);addXP(3);showNotification('Gathered '+amount+' Worms!');}
+function mineStone(){if(!useStamina(8))return;const amount=Math.floor(Math.random()*3)+2;addItem('materials','Stone',amount);addXP(6);showNotification('Gathered '+amount+' Stone!');}
+function mineIron(){if(!useStamina(12))return;const amount=Math.floor(Math.random()*2)+1;addItem('materials','Iron Ore',amount);addXP(10);showNotification('Gathered '+amount+' Iron Ore!');}
+
+function renderMarket(){
+  const container=document.getElementById('marketContent');
+  container.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;"><div class="farm-section"><h3 style="margin-bottom:10px;">Buy Seeds</h3><div id="marketBuySeeds"></div></div><div class="farm-section"><h3 style="margin-bottom:10px;">Sell Crops</h3><div id="marketSellCrops"></div></div></div>`;
+  let buyHtml='';
+  Object.entries(CROPS).forEach(([name,data])=>{
+    buyHtml+=`<div style="background:#f0f0f0;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:11px;">${data.icon} ${data.seeds}</span><button class="btn btn-success" onclick="buySeeds('${data.seeds}')" style="font-size:10px;">Buy 5 ($50)</button></div>`;
+  });
+  document.getElementById('marketBuySeeds').innerHTML=buyHtml;
+  let sellHtml='';
+  Object.entries(gameState.inventory.crops).forEach(([name,amount])=>{
+    sellHtml+=`<div style="background:#f0f0f0;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:11px;">${CROPS[name]?.icon} ${name} (${amount})</span><button class="btn btn-success" onclick="sellCrop('${name}')" style="font-size:10px;">Sell ($${CROPS[name].value})</button></div>`;
+  });
+  document.getElementById('marketSellCrops').innerHTML=sellHtml||'<div style="text-align:center;color:#666;padding:20px;">No crops to sell</div>';
+}
+
+function buySeeds(seedName){
+  if(gameState.money<50){showNotification('Not enough money!');return;}
+  gameState.money-=50;addItem('seeds',seedName,5);
+  showNotification('Bought 5 '+seedName+'!');updateDisplay();renderInventory();
+}
+
+function sellCrop(cropName){
+  if(!removeItem('crops',cropName,1)){showNotification('No crops to sell!');return;}
+  const value=CROPS[cropName].value;gameState.money+=value;
+  showNotification('Sold '+cropName+' for $'+value+'!');
+  updateDisplay();renderInventory();renderMarket();
+}
+
+function renderTrade(){
+  const container=document.getElementById('tradeContent');
+  container.innerHTML='<div class="farm-section"><h3 style="margin-bottom:15px;text-align:center;">Buy Livestock</h3><div id="tradeAnimals"></div></div>';
+  let html='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">';
+  Object.entries(ANIMALS).forEach(([type,data])=>{
+    html+=`<div style="background:#f0f0f0;padding:15px;border-radius:8px;text-align:center;"><div style="font-size:48px;margin-bottom:10px;">${data.icon}</div><div style="font-weight:bold;margin-bottom:5px;font-size:14px;">${type}</div><div style="font-size:11px;margin-bottom:5px;">Produces: ${data.product}</div><div style="font-size:11px;margin-bottom:10px;color:#666;">Feed Cost: ${data.feedCost}/day</div><button class="btn btn-success" onclick="buyAnimal('${type}')" style="font-size:11px;">Buy ($${data.cost})</button></div>`;
+  });
+  html+='</div>';
+  document.getElementById('tradeAnimals').innerHTML=html;
+}
+
+function buyAnimal(animalType){
+  const animalData=ANIMALS[animalType];
+  if(gameState.money<animalData.cost){showNotification('Not enough money!');return;}
+  gameState.money-=animalData.cost;
+  const sameTypeAnimals=gameState.animals.filter(a=>a.type===animalType);
+  const penNumber=sameTypeAnimals.length;
+  gameState.animals.push({id:Date.now(),type:animalType,pen:penNumber,fed:false,productReady:false,lastFed:0});
+  showNotification(animalType+' purchased!');updateDisplay();renderAnimalControls();
+}
+
+function takeNap(){
+  if(gameState.stamina>=gameState.maxStamina){showNotification('Already at full stamina!');return;}
+  gameState.stamina=Math.min(gameState.maxStamina,gameState.stamina+30);
+  showNotification('Napped! +30 stamina');updateDisplay();
+}
+
+function endDay(){
+  sellShopItems();
+  gameState.day++;gameState.stamina=gameState.maxStamina;gameState.water=gameState.maxWater;
+  gameState.timeOfDay='Morning';
+  gameState.animals.forEach(a=>{a.fed=false;a.productReady=false;});
+  showNotification('New day begins! Day '+gameState.day);
+  updateDisplay();renderAnimalControls();
+}
+
+function renderSkills(){
+  const container=document.getElementById('skillsDisplay');
+  let html='';
+  Object.entries(gameState.skills).forEach(([skill,level])=>{
+    html+=`<div style="background:#f0f0f0;padding:10px;border-radius:8px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;"><span style="text-transform:capitalize;">${skill}</span><span style="font-weight:bold;">Level ${level}</span></div><div style="width:100%;height:8px;background:#ddd;border-radius:4px;overflow:hidden;"><div style="width:${(level/100)*100}%;height:100%;background:linear-gradient(90deg,#FFD700,#FFA500);"></div></div></div>`;
+  });
+  container.innerHTML=html;
+}
+
+function showPage(pageName){
+  document.querySelectorAll('.nav-btn').forEach(btn=>{btn.classList.remove('active');});
+  event.target.classList.add('active');
+  document.querySelectorAll('.page').forEach(page=>{page.classList.remove('active');});
+  document.getElementById(pageName).classList.add('active');
+  if(pageName==='animals')renderAnimalControls();
+  if(pageName==='inventory')renderInventory();
+  if(pageName==='kitchen')renderKitchen();
+  if(pageName==='workshop')renderWorkshop();
+  if(pageName==='shop')renderShop();
+  if(pageName==='npcs')renderNPCs();
+  if(pageName==='market')renderMarket();
+  if(pageName==='trade')renderTrade();
+  if(pageName==='character')renderSkills();
+}
+
+function saveGame(){
+  const saveData=JSON.stringify(gameState);
+  try{localStorage.setItem('southernFarmSave',saveData);showNotification('Game saved!');}
+  catch(e){showNotification('Save failed - using memory only');}
+}
+
+function loadGame(){
+  try{
+    const saveData=localStorage.getItem('southernFarmSave');
+    if(saveData){gameState=JSON.parse(saveData);showNotification('Game loaded!');updateDisplay();}
+    else{showNotification('No save found');}
+  }catch(e){showNotification('Load failed');}
+}
+
+setInterval(saveGame,30000);
+initGame();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- stem -->
+  <path d="M16 30 L16 23" stroke="#4a7a46" stroke-width="1.8" stroke-linecap="round" opacity="0.70"/>
+  <!-- outer leaf left -->
+  <path d="M16 24 C9 21 5 13 6 7 C9 4 14 9 15 16 C15 20 16 24 16 24Z" fill="#5d8a5a" opacity="0.70"/>
+  <!-- outer leaf right -->
+  <path d="M16 24 C23 21 27 13 26 7 C23 4 18 9 17 16 C17 20 16 24 16 24Z" fill="#6a9a5a" opacity="0.65"/>
+  <!-- middle leaf left -->
+  <path d="M16 21 C10 18 7 11 9 6 C11 4 15 8 15 14 C15 18 16 21 16 21Z" fill="#78ac60" opacity="0.55"/>
+  <!-- middle leaf right -->
+  <path d="M16 21 C22 18 25 11 23 6 C21 4 17 8 17 14 C17 18 16 21 16 21Z" fill="#78ac60" opacity="0.55"/>
+  <!-- inner leaf left -->
+  <path d="M16 18 C12 15 11 10 13 6 C15 5 16 9 16 14 C16 16 16 18 16 18Z" fill="#90c070" opacity="0.50"/>
+  <!-- inner leaf right -->
+  <path d="M16 18 C20 15 21 10 19 6 C17 5 16 9 16 14 C16 16 16 18 16 18Z" fill="#90c070" opacity="0.50"/>
+  <!-- center highlight -->
+  <path d="M16 24 L16 10" stroke="white" stroke-width="0.8" fill="none" opacity="0.18"/>
+  <!-- vein lines -->
+  <path d="M15 16 C11 13 8 9" stroke="#3a6a36" stroke-width="0.6" fill="none" opacity="0.30"/>
+  <path d="M17 16 C21 13 24 9" stroke="#3a6a36" stroke-width="0.6" fill="none" opacity="0.30"/>
+</svg>

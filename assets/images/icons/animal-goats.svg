@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <radialGradient id="gt-body" cx="40%" cy="42%" r="56%">
+      <stop offset="0%" stop-color="#d8b878" stop-opacity="0.88"/>
+      <stop offset="55%" stop-color="#b8925a" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#7a5830" stop-opacity="0.50"/>
+    </radialGradient>
+    <radialGradient id="gt-head" cx="38%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#c8a060" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#7a5830" stop-opacity="0.62"/>
+    </radialGradient>
+  </defs>
+  <!-- shadow -->
+  <ellipse cx="26" cy="46" rx="13" ry="2" fill="#3a2a18" opacity="0.10"/>
+  <!-- body -->
+  <path d="M10 32 C10 21 16 15 26 15 C36 15 43 21 43 30 C43 39 37 43 27 44 C17 44 10 38 10 32Z" fill="url(#gt-body)"/>
+  <!-- belly light -->
+  <path d="M14 31 C14 23 19 18 26 18 C33 18 38 23 38 29 C38 36 33 40 26 40 C19 40 14 36 14 31Z" fill="#e8c888" opacity="0.36"/>
+  <!-- body highlight -->
+  <path d="M18 18 C22 15 30 16 34 19" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.18"/>
+  <!-- head -->
+  <path d="M3 22 C3 13 8 9 13 9 C18 9 20 13 19 19 C18 24 14 26 10 25 C6 24 3 23 3 22Z" fill="url(#gt-head)"/>
+  <!-- muzzle lighter -->
+  <path d="M3 21 C3 26 7 28 11 27 C9 24 7 21 4 20 C3.5 20 3 20.5 3 21Z" fill="#d4b070" opacity="0.52"/>
+  <!-- nostril -->
+  <ellipse cx="5" cy="24" rx="0.9" ry="0.6" fill="#3a2010" opacity="0.55"/>
+  <ellipse cx="8" cy="24.5" rx="0.9" ry="0.6" fill="#3a2010" opacity="0.55"/>
+  <!-- eye -->
+  <ellipse cx="13" cy="14" rx="2.2" ry="1.8" fill="#20332a" opacity="0.85"/>
+  <circle cx="13.7" cy="13.3" r="0.7" fill="white" opacity="0.55"/>
+  <!-- ear -->
+  <path d="M14 10 C19 6 21 11 17 13 C16 13 13 12 14 10Z" fill="#9a7040" opacity="0.62"/>
+  <!-- horn left -->
+  <path d="M10 9 C11 4 13 7" stroke="#8a6820" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.72"/>
+  <!-- horn right -->
+  <path d="M13 8 C16 3 17 7" stroke="#8a6820" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <!-- beard -->
+  <path d="M5 26 C5 30 6.5 32 6.5 32" stroke="#9a7840" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <path d="M7 26 C7.5 30 8.5 32 8 32" stroke="#9a7840" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.45"/>
+  <!-- legs front -->
+  <rect x="14" y="41" width="5" height="7" rx="2.5" fill="#7a5830" opacity="0.68"/>
+  <rect x="21" y="41" width="5" height="7" rx="2.5" fill="#7a5830" opacity="0.62"/>
+  <!-- legs back -->
+  <rect x="30" y="41" width="5" height="7" rx="2.5" fill="#7a5830" opacity="0.62"/>
+  <rect x="37" y="40" width="5" height="7" rx="2.5" fill="#7a5830" opacity="0.58"/>
+  <!-- tail -->
+  <path d="M42 27 C47 24 46 31 42 32" stroke="#9a7840" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.55"/>
+</svg>

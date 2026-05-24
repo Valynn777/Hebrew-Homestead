@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <radialGradient id="ch-body" cx="42%" cy="40%" r="58%">
+      <stop offset="0%" stop-color="#f0c060" stop-opacity="0.90"/>
+      <stop offset="55%" stop-color="#d4882a" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#9c5418" stop-opacity="0.50"/>
+    </radialGradient>
+    <radialGradient id="ch-head" cx="40%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#e8a840" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#9c5418" stop-opacity="0.62"/>
+    </radialGradient>
+  </defs>
+  <!-- ground shadow -->
+  <ellipse cx="23" cy="45" rx="11" ry="2" fill="#3a2a18" opacity="0.11"/>
+  <!-- tail feathers -->
+  <path d="M35 24 C38 17 43 14 41 24 C40 28 37 26 35 24Z" fill="#b87028" opacity="0.55"/>
+  <path d="M37 21 C42 13 46 13 43 23 C42 27 38 24 37 21Z" fill="#d4a040" opacity="0.38"/>
+  <!-- body -->
+  <path d="M10 29 C10 19 17 14 24 14 C32 14 38 19 38 28 C38 37 31 41 23 41 C15 41 10 37 10 29Z" fill="url(#ch-body)"/>
+  <!-- wing -->
+  <path d="M11 28 C10 21 15 18 19 21 C17 25 14 29 11 28Z" fill="#c07020" opacity="0.44"/>
+  <!-- body highlight -->
+  <path d="M17 19 C21 16 29 17 32 21" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.15"/>
+  <!-- neck -->
+  <path d="M20 14 C21 10 23 8 25 9 C27 10 28 13 26 16 C24 16 22 15 20 14Z" fill="#c87828" opacity="0.78"/>
+  <!-- head -->
+  <path d="M18 13 C18 6 21 3 25 3 C29 4 31 8 30 12 C29 16 26 17 23 17 C20 16 18 15 18 13Z" fill="url(#ch-head)"/>
+  <!-- comb -->
+  <path d="M19 5 C20 2 21 5" fill="#c83030" opacity="0.88"/>
+  <path d="M21 4 C22 1 23 4" fill="#c83030" opacity="0.88"/>
+  <path d="M23 5 C24 2 25 5" fill="#c83030" opacity="0.85"/>
+  <!-- wattle -->
+  <path d="M24 13 C27 12 28 15 27 17 C26 18 24 17 24 13Z" fill="#c83030" opacity="0.70"/>
+  <!-- beak -->
+  <path d="M29 9 L33 11 L29 13Z" fill="#d4a020" opacity="0.92"/>
+  <!-- eye -->
+  <circle cx="26" cy="8" r="2" fill="#20332a" opacity="0.85"/>
+  <circle cx="26.5" cy="7.3" r="0.7" fill="white" opacity="0.60"/>
+  <!-- legs -->
+  <line x1="18" y1="41" x2="15" y2="47" stroke="#c87828" stroke-width="1.5" stroke-linecap="round" opacity="0.68"/>
+  <line x1="15" y1="47" x2="12" y2="47" stroke="#c87828" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
+  <line x1="15" y1="47" x2="14" y2="48" stroke="#c87828" stroke-width="1.2" stroke-linecap="round" opacity="0.62"/>
+  <line x1="26" y1="41" x2="23" y2="47" stroke="#c87828" stroke-width="1.5" stroke-linecap="round" opacity="0.68"/>
+  <line x1="23" y1="47" x2="20" y2="47" stroke="#c87828" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
+  <line x1="23" y1="47" x2="22" y2="48" stroke="#c87828" stroke-width="1.2" stroke-linecap="round" opacity="0.62"/>
+</svg>

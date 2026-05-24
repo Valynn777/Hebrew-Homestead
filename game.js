@@ -12,13 +12,17 @@ const weatherCycle = ["Clear", "Gentle Clouds", "Light Rain", "Warm Breeze", "St
 
 const sceneImages = {
   overview: "assets/images/scenes/homestead-overview.png",
-  cabin: "assets/images/scenes/cabin-entry.png",
-  kitchen: "assets/images/scenes/kitchen.png",
-  livingRoom: "assets/images/scenes/living-room.png",
-  bedroom: "assets/images/scenes/bedroom.png",
-  bathroom: "assets/images/scenes/bathroom.png",
+  cabin: "assets/images/scenes/cabin/cabin-entry.png",
+  kitchen: "assets/images/scenes/cabin/kitchen.png",
+  livingRoom: "assets/images/scenes/cabin/living-room.png",
+  bedroom: "assets/images/scenes/cabin/bedroom.png",
+  bathroom: "assets/images/scenes/cabin/bathroom.png",
   pantry: "assets/images/scenes/pantry.png",
-  barn: "assets/images/scenes/barn.png",
+  barn: "assets/images/scenes/barn/barn.png",
+  chickenCoop: "assets/images/scenes/barn/chicken-coop.png",
+  cowPasture: "assets/images/scenes/barn/cows.png",
+  goatPen: "assets/images/scenes/barn/goats.png",
+  sheepPasture: "assets/images/scenes/barn/sheep.png",
   garden: "assets/images/scenes/garden.png",
   workshed: "assets/images/scenes/workshed.png",
   forest: "assets/images/scenes/forest.png",
@@ -47,15 +51,17 @@ const scenes = {
   cabin: {
     id: "cabin",
     title: "Cabin Entry",
-    description: "A quiet entry room for rest, tidying, and preparing the household for the week.",
+    description: "A quiet homestead cabin with four rooms — each visible from above.",
     background: sceneImages.cabin,
     hotspots: [
-      hs("kitchen", "Kitchen", 15, 20, 16, 43, "navigate", { target: "kitchen" }),
-      hs("livingRoom", "Living Room", 84, 20, 14, 48, "navigate", { target: "livingRoom" }),
-      hs("outside", "Back Outside", 39, 16, 15, 51, "navigate", { target: "overview" }),
-      hs("journal", "Journal", 65, 40, 17, 19, "modal", { modal: "journal" }),
-      hs("dustBench", "Sweep Dust", 2, 61, 22, 27, "cleanRoomChore", { room: "cabin", chore: "dust", effect: "tidy", message: "The entry bench is swept clean." }),
-      hs("putAwayBooks", "Put Books Away", 65, 40, 17, 19, "cleanRoomChore", { room: "cabin", chore: "books", effect: "tidy", message: "The books are set neatly in place." })
+      hs("kitchen", "Kitchen", 18, 4, 5, 5, "navigate", { target: "kitchen" }),
+      hs("livingRoom", "Living Room", 66, 4, 5, 5, "navigate", { target: "livingRoom" }),
+      hs("bedroom", "Bedroom", 17, 50, 5, 5, "navigate", { target: "bedroom" }),
+      hs("bathroom", "Bathroom", 70, 50, 5, 5, "navigate", { target: "bathroom" }),
+      hs("outside", "Back Outside", 44, 86, 5, 5, "navigate", { target: "overview" }),
+      hs("journal", "Journal", 52, 68, 5, 5, "modal", { modal: "journal" }),
+      hs("dustBench", "Sweep Dust", 34, 74, 5, 5, "cleanRoomChore", { room: "cabin", chore: "dust", effect: "tidy", message: "The entry bench is swept clean." }),
+      hs("putAwayBooks", "Put Books Away", 58, 74, 5, 5, "cleanRoomChore", { room: "cabin", chore: "books", effect: "tidy", message: "The books are set neatly in place." })
     ]
   },
   livingRoom: {
@@ -132,17 +138,62 @@ const scenes = {
     description: "Clean animals, feed, eggs, milk, wool, and careful stewardship are managed here.",
     background: sceneImages.barn,
     hotspots: [
-      hs("chickens", "Chickens", 34, 63, 22, 24, "animal", { animal: "chickens" }),
-      hs("goats", "Goats", 2, 70, 29, 26, "animal", { animal: "goats" }),
-      hs("sheep", "Sheep", 50, 56, 22, 26, "animal", { animal: "sheep" }),
-      hs("cattle", "Cattle", 43, 36, 35, 26, "animal", { animal: "cattle" }),
-      hs("feedTrough", "Add Feed", 7, 53, 21, 18, "addFeedTrough"),
-      hs("waterTrough", "Add Water", 73, 62, 22, 23, "addWaterTrough"),
-      hs("cleanBarn", "Clean Barn", 37, 55, 30, 28, "cleanBarn"),
-      hs("storage", "Storage Loft", 16, 2, 45, 18, "modal", { modal: "inventory" }),
-      hs("shop", "Animal Market", 28, 30, 18, 18, "modal", { modal: "shop" }),
-      hs("sweepHay", "Sweep Loose Straw", 38, 62, 28, 22, "cleanRoomChore", { room: "barn", chore: "straw", effect: "tidy", message: "Loose straw is swept into a neat pile." }),
-      hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
+      hs("cattle",            "Cows",               3, 18, 11,  9, "navigate", { target: "cowPasture" }),
+      hs("sheep",             "Sheep",             16, 18,  9,  9, "navigate", { target: "sheepPasture" }),
+      hs("chickens",          "Chickens",          27, 18, 11,  9, "navigate", { target: "chickenCoop" }),
+      hs("goats",             "Goats",             70, 18, 10,  9, "navigate", { target: "goatPen" }),
+      hs("storage",           "Extra Animals",     82, 18, 10,  9, "modal",    { modal: "inventory" }),
+      hs("feedArea",          "Feed Area",          1, 78, 10, 12, "addFeedTrough"),
+      hs("waterTrough",       "Water Trough",      39, 63, 11, 12, "addWaterTrough"),
+      hs("shop",              "Animal Market",     87, 18, 10, 11, "modal",    { modal: "shop" }),
+      hs("animalMaintenance", "Animal Maintenance",86, 41, 11, 12, "modal",    { modal: "animalMaintenance" }),
+      hs("cleanBarn",         "Clean Barn",        43, 50, 11, 12, "cleanBarn"),
+      hs("sweepHay",          "Sweep Loose Straw", 27, 62, 10, 10, "cleanRoomChore", { room: "barn", chore: "straw", effect: "tidy", message: "Loose straw is swept into a neat pile." }),
+      hs("outside",           "Back Outside",      38, 13, 13, 12, "navigate", { target: "overview" })
+    ]
+  },
+  chickenCoop: {
+    id: "chickenCoop",
+    title: "Chicken Coop",
+    description: "A warm coop where your chickens roost, scratch, and lay their eggs.",
+    background: sceneImages.chickenCoop,
+    hotspots: [
+      hs("chickens", "Chickens", 24, 42, 5, 5, "animal", { animal: "chickens" }),
+      hs("eggBasket", "Egg Basket", 72, 65, 5, 5, "animal", { animal: "chickens" }),
+      hs("back", "Back to Barn", 44, 87, 5, 5, "navigate", { target: "barn" })
+    ]
+  },
+  cowPasture: {
+    id: "cowPasture",
+    title: "Cow Pasture",
+    description: "Sturdy dairy cattle rest and graze in their stall.",
+    background: sceneImages.cowPasture,
+    hotspots: [
+      hs("cattle", "Cattle", 36, 36, 5, 5, "animal", { animal: "cattle" }),
+      hs("milkPail", "Milk Pail", 79, 58, 5, 5, "animal", { animal: "cattle" }),
+      hs("back", "Back to Barn", 43, 87, 5, 5, "navigate", { target: "barn" })
+    ]
+  },
+  goatPen: {
+    id: "goatPen",
+    title: "Goat Pen",
+    description: "Nimble goats browse their pen, producing rich milk for the household.",
+    background: sceneImages.goatPen,
+    hotspots: [
+      hs("goats", "Goats", 29, 40, 5, 5, "animal", { animal: "goats" }),
+      hs("milkBasket", "Milk Supplies", 78, 53, 5, 5, "animal", { animal: "goats" }),
+      hs("back", "Back to Barn", 79, 40, 5, 5, "navigate", { target: "barn" })
+    ]
+  },
+  sheepPasture: {
+    id: "sheepPasture",
+    title: "Sheep Pasture",
+    description: "Gentle sheep rest in the hay, ready for shearing and care.",
+    background: sceneImages.sheepPasture,
+    hotspots: [
+      hs("sheep", "Sheep", 35, 38, 5, 5, "animal", { animal: "sheep" }),
+      hs("woolBasket", "Wool Basket", 76, 62, 5, 5, "animal", { animal: "sheep" }),
+      hs("back", "Back to Barn", 79, 41, 5, 5, "navigate", { target: "barn" })
     ]
   },
   garden: {
@@ -1282,6 +1333,8 @@ function createNewState() {
     upgrades: { tractor: false },
     crops: createGardenBeds(),
     barnAnimals: createBarnAnimals(),
+    barnFeedStore: 0,
+    barnWaterStore: 0,
     kitchenChores: { dishes: false, counters: false, floor: false },
     roomChores: createRoomChores(),
     pendingOrders: [],
@@ -1410,7 +1463,8 @@ function hydrateState(savedState) {
     messages: savedState.messages?.length ? savedState.messages : ["Saved homestead loaded."],
     dailyStats: { ...createDailyStats(), ...(savedState.dailyStats || {}) },
     dailyGoals: savedState.dailyGoals || [],
-    staminaFrac: savedState.staminaFrac || 0
+    staminaFrac: savedState.staminaFrac || 0,
+    hotspotDebug: false
   };
 }
 
@@ -2717,7 +2771,7 @@ function openAnimalModal(animalId) {
       <p>${catalog.cleanNote}</p>
     </article>`,
     ailmentCard,
-    buttonCard("Feed", `Requires ${catalog.feedNeed} hay or feed. Feeding is ordinary care and may be done as necessity.`, () => feedAnimal(animalId), group.count <= 0 || !hasAnimalFeed(catalog.feedNeed)),
+    buttonCard("Feed", `Uses ${catalog.feedNeed} from the feed area (${state.barnFeedStore || 0} available). Stock the feed area in the barn first.`, () => feedAnimal(animalId), group.count <= 0 || (state.barnFeedStore || 0) < catalog.feedNeed),
     buttonCard("Clean", "Clean the stall and keep the animals healthy.", () => cleanAnimal(animalId), group.count <= 0),
     buttonCard(catalog.productLabel, animalProductText(catalog), () => collectAnimalProduct(animalId), group.count <= 0 || !!group.ailment || group.productCollectedToday || !animalProductToolReady(catalog) || isSabbath()),
     animalId === "chickens" ? buttonCard("Collect Feathers", "Gather loose feathers for arrow crafting.", () => collectChickenFeathers(), group.count <= 0 || group.feathersCollectedToday || isSabbath()) : "",
@@ -2804,12 +2858,12 @@ function feedAnimal(animalId) {
     pushMessage(`You do not own any ${catalog.name.toLowerCase()} yet.`);
     return;
   }
-  if (!hasAnimalFeed(catalog.feedNeed)) {
-    pushMessage(`You need ${catalog.feedNeed} hay or feed for the ${catalog.name.toLowerCase()}.`);
+  if ((state.barnFeedStore || 0) < catalog.feedNeed) {
+    pushMessage(`The feed area holds ${state.barnFeedStore || 0} units. Stock it with at least ${catalog.feedNeed} to feed the ${catalog.name.toLowerCase()}.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(2)) return;
-  spendAnimalFeed(catalog.feedNeed);
+  state.barnFeedStore -= catalog.feedNeed;
   group.fedToday = true;
   learnFrom("animalCare");
   state.dailyStats.animalGroupsCared += 1;
@@ -2913,32 +2967,478 @@ function harvestAnimal(animalId) {
 
 function openBarnCareModal() {
   const totalAnimals = Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
-  const canWater = totalAnimals > 0 && (state.inventory.water || 0) >= totalAnimals;
   const neededFeed = Object.entries(animalCatalog).reduce((sum, [id, catalog]) => {
     return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? catalog.feedNeed : 0);
   }, 0);
-  openCustomModal("Water / Cleaning", `<div class="card-grid">
+  const feedStore = state.barnFeedStore || 0;
+  const waterStore = state.barnWaterStore || 0;
+  const invFeed = (state.inventory.hay || 0) + (state.inventory.feed || 0);
+  openCustomModal("Barn Care", `<div class="card-grid">
     <article class="modal-card">
-      <h3>Add Feed</h3>
-      <p>Requires ${neededFeed} hay or feed for all owned animal groups.</p>
-      <button type="button" data-modal-action="addfeed" ${totalAnimals > 0 && hasAnimalFeed(neededFeed) ? "" : "disabled"}>Add Feed</button>
+      <h3>Stock Feed Area</h3>
+      <p>Feed store: <strong>${feedStore}</strong> units. Inventory: ${invFeed} hay/feed.</p>
+      <button type="button" data-modal-action="addfeed" ${invFeed > 0 ? "" : "disabled"}>Stock Feed Area</button>
+    </article>
+    <article class="modal-card">
+      <h3>Feed Animals</h3>
+      <p>Needs ${neededFeed} from the feed store (${feedStore} available).</p>
+      <button type="button" data-modal-action="feedanimals" ${totalAnimals > 0 && feedStore >= neededFeed ? "" : "disabled"}>Feed All Animals</button>
+    </article>
+    <article class="modal-card">
+      <h3>Fill Water Trough</h3>
+      <p>Water store: <strong>${waterStore}</strong> units. Inventory: ${state.inventory.water || 0} water.</p>
+      <button type="button" data-modal-action="filltrough" ${(state.inventory.water || 0) > 0 ? "" : "disabled"}>Fill Water Trough</button>
     </article>
     <article class="modal-card">
       <h3>Water Animals</h3>
-      <p>Requires ${totalAnimals} water for all owned barn animals.</p>
-      <button type="button" data-modal-action="wateranimals" ${canWater ? "" : "disabled"}>Water Animals</button>
+      <p>Needs ${totalAnimals} from the water trough (${waterStore} available).</p>
+      <button type="button" data-modal-action="wateranimals" ${totalAnimals > 0 && waterStore >= totalAnimals ? "" : "disabled"}>Water All Animals</button>
     </article>
     <article class="modal-card">
       <h3>Clean Barn</h3>
       <p>Collect manure for fertilizer while tidying the barn.</p>
       <button type="button" data-modal-action="cleanbarn" ${totalAnimals > 0 ? "" : "disabled"}>Clean Barn</button>
     </article>
-    <article class="modal-card">
-      <h3>Barn Summary</h3>
-      <p>${barnAnimalSummary()}</p>
-    </article>
   </div>`);
-  bindModalActions({ addfeed: addFeedTrough, wateranimals: waterBarnAnimals, cleanbarn: cleanBarnForManure });
+  bindModalActions({ addfeed: addFeedTrough, feedanimals: feedAllAnimals, filltrough: addWaterTrough, wateranimals: waterBarnAnimals, cleanbarn: cleanBarnForManure });
+}
+
+function openAnimalMaintenanceModal() {
+  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, g) => sum + g.count, 0);
+  const neededFeed = Object.entries(animalCatalog).reduce((sum, [id, cat]) => {
+    return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? cat.feedNeed : 0);
+  }, 0);
+  const feedStore = state.barnFeedStore || 0;
+  const waterStore = state.barnWaterStore || 0;
+  const canFeedAll = totalAnimals > 0 && feedStore >= neededFeed;
+  const canWaterAll = totalAnimals > 0 && waterStore >= totalAnimals;
+
+  const perAnimalCards = Object.entries(animalCatalog).map(([id, catalog]) => {
+    const group = state.barnAnimals[id];
+    if (!group || group.count === 0) return "";
+    const ailmentNote = group.ailment
+      ? `<p class="hint-text" style="color:var(--danger)">Unwell: ${group.ailment.label}</p>`
+      : "";
+    const canFeedThis = feedStore >= catalog.feedNeed && !group.fedToday;
+    const canCollect = group.count > 0 && !group.ailment && !group.productCollectedToday && animalProductToolReady(catalog) && !isSabbath();
+    const featherBtn = id === "chickens"
+      ? `<button type="button" data-modal-action="feathers-${id}" ${group.feathersCollectedToday || isSabbath() ? "disabled" : ""}>Feathers</button>`
+      : "";
+    return `<article class="modal-card">
+      <h3>${catalog.name} <small>(${group.count})</small></h3>
+      <p>${animalStatus(group)}</p>
+      ${ailmentNote}
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+        <button type="button" data-modal-action="feed-${id}" ${canFeedThis ? "" : "disabled"}>Feed</button>
+        <button type="button" data-modal-action="collect-${id}" ${canCollect ? "" : "disabled"}>${catalog.productLabel}</button>
+        ${featherBtn}
+      </div>
+    </article>`;
+  }).filter(Boolean).join("");
+
+  openCustomModal("Animal Maintenance", `<div class="card-grid">
+    <article class="modal-card">
+      <h3>Bulk Care</h3>
+      <p>Feed store: <strong>${feedStore}</strong> &nbsp;|&nbsp; Water trough: <strong>${waterStore}</strong></p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+        <button type="button" data-modal-action="feed-all" ${canFeedAll ? "" : "disabled"}>Feed All</button>
+        <button type="button" data-modal-action="water-all" ${canWaterAll ? "" : "disabled"}>Water All</button>
+        <button type="button" data-modal-action="clean-all" ${totalAnimals > 0 ? "" : "disabled"}>Clean All</button>
+      </div>
+    </article>
+    ${perAnimalCards || `<article class="modal-card"><h3>No Animals</h3><p>Purchase animals from the Animal Market to begin care.</p></article>`}
+  </div>`);
+
+  const actionMap = {
+    "feed-all": () => { feedAllAnimals(); openAnimalMaintenanceModal(); },
+    "water-all": () => { waterBarnAnimals(); openAnimalMaintenanceModal(); },
+    "clean-all": () => { cleanBarnForManure(); openAnimalMaintenanceModal(); }
+  };
+  Object.keys(animalCatalog).forEach((id) => {
+    actionMap[`feed-${id}`] = () => { feedAnimal(id); openAnimalMaintenanceModal(); };
+    actionMap[`collect-${id}`] = () => { collectAnimalProduct(id); openAnimalMaintenanceModal(); };
+    actionMap[`feathers-${id}`] = () => { collectChickenFeathers(); openAnimalMaintenanceModal(); };
+  });
+  bindModalActions(actionMap);
+}
+
+// ── Homestead Maintenance Panel ───────────────────────────────────────
+
+const HM_ANIMAL_ICONS = {
+  chickens: '<img class="hm-icon-lg" src="assets/images/icons/animal-chicken.svg" alt="Chickens">',
+  cattle:   '<img class="hm-icon-lg" src="assets/images/icons/animal-cattle.svg" alt="Cattle">',
+  sheep:    '<img class="hm-icon-lg" src="assets/images/icons/animal-sheep.svg" alt="Sheep">',
+  goats:    '<img class="hm-icon-lg" src="assets/images/icons/animal-goats.svg" alt="Goats">',
+};
+const HM_CROP_ICONS = {
+  grain:     '<img class="hm-icon-sm" src="assets/images/icons/crop-grain.svg" alt="">',
+  legume:    '<img class="hm-icon-sm" src="assets/images/icons/crop-legume.svg" alt="">',
+  vegetable: '<img class="hm-icon-sm" src="assets/images/icons/crop-vegetable.svg" alt="">',
+  herb:      '<img class="hm-icon-sm" src="assets/images/icons/crop-herb.svg" alt="">',
+  fruit:     '<img class="hm-icon-sm" src="assets/images/icons/crop-fruit.svg" alt="">',
+};
+
+function openHomesteadMaintenanceModal(activeTab = "animals") {
+  const tabs = ["animals", "garden", "inventory", "supply"];
+  const tabLabels = {
+    animals:   '<img class="hm-tab-icon" src="assets/images/icons/tab-animals.svg" alt=""> Animals',
+    garden:    '<img class="hm-tab-icon" src="assets/images/icons/tab-garden.svg" alt=""> Garden',
+    inventory: '<img class="hm-tab-icon" src="assets/images/icons/tab-inventory.svg" alt=""> Inventory',
+    supply:    '<img class="hm-tab-icon" src="assets/images/icons/tab-supply.svg" alt=""> Craft & Supply',
+  };
+  const tabsHTML = tabs.map((t) =>
+    `<button class="hm-tab${t === activeTab ? " active" : ""}" data-hm-tab="${t}">${tabLabels[t]}</button>`
+  ).join("");
+  const contentsHTML = tabs.map((t) =>
+    `<div class="hm-tab-content${t === activeTab ? " active" : ""}" id="hm-${t}">${hmBuildTab(t)}</div>`
+  ).join("");
+  openCustomModal("Homestead Maintenance", `<div class="hm-tabs">${tabsHTML}</div>${contentsHTML}`);
+  const hmPanel = document.querySelector(".modal-panel");
+  hmPanel.classList.add("hm-modal");
+  ["tl", "tr", "bl", "br"].forEach((pos) => {
+    const s = document.createElement("span");
+    s.className = `hm-corner hm-corner-${pos}`;
+    s.setAttribute("aria-hidden", "true");
+    hmPanel.appendChild(s);
+  });
+  bindHomesteadMaintenance();
+}
+
+function hmBuildTab(tab) {
+  if (tab === "animals")   return hmAnimalsTab();
+  if (tab === "garden")    return hmGardenTab();
+  if (tab === "inventory") return hmInventoryTab();
+  if (tab === "supply")    return hmSupplyTab();
+  return "";
+}
+
+function hmAnimalsTab() {
+  const totalAnimals = Object.values(state.barnAnimals).reduce((s, g) => s + g.count, 0);
+  const neededFeed = Object.entries(animalCatalog).reduce((s, [id, c]) => s + ((state.barnAnimals[id]?.count || 0) > 0 ? c.feedNeed : 0), 0);
+  const feedStore  = state.barnFeedStore  || 0;
+  const waterStore = state.barnWaterStore || 0;
+  const invFeed    = (state.inventory.hay || 0) + (state.inventory.feed || 0);
+  const invWater   = state.inventory.water || 0;
+  const canFeedAll = totalAnimals > 0 && feedStore >= neededFeed;
+  const canWaterAll= totalAnimals > 0 && waterStore >= totalAnimals;
+
+  const resourceBar = `<div class="hm-resource-bar">
+    <div class="hm-res"><span class="hm-res-label">🌾 Feed store</span><span class="hm-res-val">${feedStore}</span></div>
+    <div class="hm-res"><span class="hm-res-label">💧 Water trough</span><span class="hm-res-val">${waterStore}</span></div>
+    <div class="hm-res"><span class="hm-res-label">📦 Inv. hay/feed</span><span class="hm-res-val">${invFeed}</span></div>
+    <div class="hm-res"><span class="hm-res-label">💰 Coins</span><span class="hm-res-val">${state.inventory.coins || 0}</span></div>
+  </div>`;
+
+  const bulkActions = `<div class="hm-actions">
+    <button type="button" data-hm-action="stock-feed"  ${invFeed   > 0           ? "" : "disabled"}>🌾 Stock Feed</button>
+    <button type="button" data-hm-action="fill-water"  ${invWater  > 0           ? "" : "disabled"}>💧 Fill Trough</button>
+    <button type="button" data-hm-action="feed-all"    ${canFeedAll               ? "" : "disabled"}>Feed All</button>
+    <button type="button" data-hm-action="water-all"   ${canWaterAll              ? "" : "disabled"}>Water All</button>
+    <button type="button" data-hm-action="clean-barn"  ${totalAnimals > 0        ? "" : "disabled"}>🧹 Clean Barn</button>
+  </div>`;
+
+  const animalCards = Object.entries(animalCatalog).map(([id, catalog]) => {
+    const group = state.barnAnimals[id];
+    if (!group || group.count === 0) return "";
+    const icon = HM_ANIMAL_ICONS[id] || "";
+    const badges = [
+      group.fedToday        ? `<span class="hm-badge hm-badge-ok">✓ Fed</span>`          : `<span class="hm-badge hm-badge-warn">Needs Feed</span>`,
+      group.wateredToday    ? `<span class="hm-badge hm-badge-ok">✓ Watered</span>`       : `<span class="hm-badge hm-badge-warn">Needs Water</span>`,
+      group.cleanedToday    ? `<span class="hm-badge hm-badge-ok">✓ Clean</span>`         : `<span class="hm-badge hm-badge-warn">Needs Clean</span>`,
+      group.productCollectedToday ? `<span class="hm-badge hm-badge-ok">✓ Collected</span>` : `<span class="hm-badge hm-badge-warn">${catalog.productLabel}</span>`,
+      group.ailment         ? `<span class="hm-badge hm-badge-alert">⚠ ${group.ailment.label}</span>` : `<span class="hm-badge hm-badge-ok">✓ Healthy</span>`
+    ].join("");
+    const canFeedThis = feedStore >= catalog.feedNeed && !group.fedToday;
+    const canCollect  = !group.ailment && !group.productCollectedToday && animalProductToolReady(catalog) && !isSabbath();
+    const featherBtn  = id === "chickens"
+      ? `<button type="button" data-hm-action="feathers-${id}" ${group.feathersCollectedToday || isSabbath() ? "disabled" : ""}>🪶 Feathers</button>`
+      : "";
+    const treatBtn = group.ailment
+      ? `<button type="button" data-hm-action="treat-${id}" ${(state.inventory[group.ailment.remedy] || 0) <= 0 ? "disabled" : ""}>💊 Treat (need: ${itemLabels[group.ailment.remedy]})</button>`
+      : "";
+    return `<article class="modal-card hm-animal-card">
+      <div class="hm-animal-hdr">
+        <span class="hm-animal-icon">${icon}</span>
+        <div><h3>${catalog.name} <small>(${group.count})</small></h3></div>
+      </div>
+      <div class="hm-badge-row">${badges}</div>
+      ${group.ailment ? `<p style="font-size:0.77rem;color:var(--danger);margin:0 0 4px">Remedy: ${itemLabels[group.ailment.remedy]} — have ${state.inventory[group.ailment.remedy] || 0}</p>` : ""}
+      <div class="hm-animal-btns">
+        <button type="button" data-hm-action="feed-${id}"    ${canFeedThis                                         ? "" : "disabled"}>Feed</button>
+        <button type="button" data-hm-action="clean-${id}"   ${group.count > 0 && !isSabbath()                    ? "" : "disabled"}>Clean</button>
+        <button type="button" data-hm-action="collect-${id}" ${group.count > 0 && canCollect                      ? "" : "disabled"}>${catalog.productLabel}</button>
+        ${featherBtn}${treatBtn}
+        <button type="button" data-hm-action="harvest-${id}" ${group.count > 0 && canPreviewLabor("harvest")      ? "" : "disabled"}>Harvest</button>
+      </div>
+    </article>`;
+  }).filter(Boolean).join("");
+
+  const empty = !animalCards
+    ? `<p class="hint-text">No animals yet — buy some in the <strong>Craft &amp; Supply</strong> tab.</p>`
+    : "";
+
+  return `${resourceBar}${bulkActions}<div class="card-grid">${animalCards}${empty}</div>`;
+}
+
+function hmGardenTab() {
+  const bedIds = ["bed1","bed2","bed3","bed4","bed5","bed6","bed7","bed8","bed9","bed10","bed11","bed12","bed13","bed14","bed15"];
+  const planted   = bedIds.filter((id) => (state.crops[id]?.plantings?.length || 0) > 0);
+  const ready     = bedIds.filter((id) => state.crops[id]?.plantings?.some((p) => p.readyToHarvest));
+  const needWater = bedIds.filter((id) => (state.crops[id]?.plantings?.length || 0) > 0 && !state.crops[id].wateredToday);
+  const weedy     = bedIds.filter((id) => state.crops[id]?.hasWeeds);
+  const canWater  = (state.inventory.wateringCanWater || 0) > 0 && !isSabbath();
+
+  const statsBar = `<div class="hm-resource-bar">
+    <div class="hm-res"><span class="hm-res-label">🌱 Planted</span><span class="hm-res-val">${planted.length}/15</span></div>
+    <div class="hm-res"><span class="hm-res-label">🌾 Ready</span><span class="hm-res-val">${ready.length}</span></div>
+    <div class="hm-res"><span class="hm-res-label">💧 Need water</span><span class="hm-res-val" style="${needWater.length ? "color:var(--gold)" : ""}">${needWater.length}</span></div>
+    <div class="hm-res"><span class="hm-res-label">🌿 Weeds</span><span class="hm-res-val" style="${weedy.length ? "color:var(--danger)" : ""}">${weedy.length}</span></div>
+    <div class="hm-res"><span class="hm-res-label">💧 Can water</span><span class="hm-res-val">${state.inventory.wateringCanWater || 0} left</span></div>
+  </div>`;
+
+  const bedCards = bedIds.map((id) => {
+    const bed    = state.crops[id];
+    const def    = gardenBeds[id];
+    const name   = bed.name || def.defaultName;
+    const has    = (bed.plantings?.length || 0) > 0;
+    const rdyCount = (bed.plantings || []).filter((p) => p.readyToHarvest).length;
+    let cropSummary = "";
+    if (has) {
+      const grouped = {};
+      (bed.plantings || []).forEach((p) => { grouped[p.cropType] = (grouped[p.cropType] || 0) + 1; });
+      cropSummary = Object.entries(grouped).map(([type, cnt]) => {
+        const crop = cropTypes[type];
+        const icon = HM_CROP_ICONS[crop.category] || "";
+        return `${icon} ${crop.name}${cnt > 1 ? ` ×${cnt}` : ""}`;
+      }).join(", ");
+    }
+    let badges = "";
+    if (rdyCount > 0)         badges += `<span class="hm-badge hm-badge-ok">✓ ${rdyCount} ready</span>`;
+    else if (has && !bed.wateredToday) badges += `<span class="hm-badge hm-badge-warn">💧 needed</span>`;
+    else if (has && bed.wateredToday)  badges += `<span class="hm-badge hm-badge-ok">✓ watered</span>`;
+    if (bed.hasWeeds) badges += `<span class="hm-badge hm-badge-alert">⚠ weeds</span>`;
+    const cardClass = rdyCount > 0 ? "hm-bed-card has-ready" : bed.hasWeeds ? "hm-bed-card has-weeds" : "hm-bed-card";
+    return `<div class="${cardClass}">
+      <div class="hm-bed-name">${name}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin:2px 0">${badges}</div>
+      <div class="hm-bed-crop">${has ? cropSummary : "<em>Empty</em>"}</div>
+      <div class="hm-bed-btns">
+        <button type="button" data-hm-bed="water"   data-hm-bed-id="${id}" title="Water"   ${has && canWater        ? "" : "disabled"}>💧</button>
+        <button type="button" data-hm-bed="weed"    data-hm-bed-id="${id}" title="Weed"    ${bed.hasWeeds && !isSabbath() ? "" : "disabled"}>🌿</button>
+        <button type="button" data-hm-bed="harvest" data-hm-bed-id="${id}" title="Harvest" ${rdyCount > 0 && !isSabbath() ? "" : "disabled"}>🌾</button>
+        <button type="button" data-hm-bed="open"    data-hm-bed-id="${id}" title="Manage"  >⚙</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `${statsBar}<div class="hm-garden-grid">${bedCards}</div>
+  <p class="hint-text" style="margin-top:10px;font-size:0.77rem">💧 Water &nbsp;|&nbsp; 🌿 Remove Weeds &nbsp;|&nbsp; 🌾 Harvest &nbsp;|&nbsp; ⚙ Open Bed Panel</p>`;
+}
+
+function hmInventoryTab() {
+  const categories = [
+    { label: "Resources",        icon: "🪵", keys: ["water","wood","logs","stone","herbs","hay","feed","plantMatter","jars","lampOil","cloth","ironToolHead","extraBasket","coins","flax","wateringCanWater","arrows"] },
+    { label: "Seeds",            icon: "🌰", keys: ["barleySeeds","lentilSeeds","cucumberSeeds","wheatSeeds","onionSeeds","garlicSeeds","figSeedlings","grapeSeedlings","leekSeeds","hyssopSeeds","mintSeeds","cuminSeeds","corianderSeeds","dillSeeds"] },
+    { label: "Crops & Produce",  icon: "🌾", keys: ["barley","lentils","cucumbers","wheat","onions","garlic","figs","grapes","leeks","hyssop","mint","cumin","coriander","dill"] },
+    { label: "Animal Products",  icon: "🥚", keys: ["eggs","milk","cheese","wool","feathers","manure","fertilizer","hide","fur"] },
+    { label: "Meat & Fish",      icon: "🍖", keys: ["chickenMeat","mutton","goatMeat","beef","venison","cleanFish","trout","salmon"] },
+    { label: "Prepared Food",    icon: "🍲", keys: ["preparedFood","refrigeratedFood","barleyFlatbread","lentilStew","cucumberHerbSalad","herbTea","simpleSabbathMeal","cleanFishMeal","venisonStew","eggBreakfast","chickenSoup","muttonStew","goatStew","beefStew","wheatBread","stuffedFlatbread","onionLentilSoup","gardenSalad","garlicHerbSoup","leekSoup","harvestStew","figPreserve","grapeJuice","troutMeal","salmonMeal"] },
+    { label: "Remedies & Herbs", icon: "🌿", keys: ["hyssopRemedy","mintTonic","cuminPoultice","corianderSalve","dillTonic"] }
+  ];
+  const eatFoods = new Set(Object.keys(FOOD_EAT_VALUES));
+  const sections = categories.map(({ label, icon, keys }) => {
+    const items = keys.filter((k) => (state.inventory[k] || 0) > 0);
+    if (!items.length) return "";
+    const rows = items.map((key) => {
+      const amt = state.inventory[key] || 0;
+      const breakdown = qualityBreakdown(key);
+      const eatBtn = eatFoods.has(key)
+        ? `<button type="button" class="hm-inv-eat" data-hm-eat="${key}">Eat</button>`
+        : "";
+      return `<div class="hm-inv-item">
+        <span class="hm-inv-name" title="${itemLabels[key] || key}">${itemLabels[key] || key}${breakdown ? `<br><small style="color:var(--muted);font-size:0.7em">${breakdown}</small>` : ""}</span>
+        <span class="hm-inv-qty">${amt}</span>${eatBtn}
+      </div>`;
+    }).join("");
+    return `<div class="hm-inv-section"><h4>${icon} ${label}</h4><div class="hm-inv-grid">${rows}</div></div>`;
+  }).join("");
+  return sections || `<p class="hint-text">Inventory is empty.</p>`;
+}
+
+function hmSupplyTab() {
+  const coins = state.inventory.coins || 0;
+
+  // Crafting
+  const craftCards = craftingRecipes.map((item) => {
+    const owned = item.type === "tool" && state.tools[item.id];
+    const canCraft = !owned && hasIngredients(item.ingredients) && !isSabbath();
+    return `<article class="modal-card">
+      <h3>${item.name}</h3>
+      <p class="hint-text" style="margin:0;font-size:0.78rem">${item.description}</p>
+      <p style="font-size:0.8rem"><strong>Needs:</strong> ${ingredientList(item.ingredients)}</p>
+      <button type="button" data-hm-craft="${item.id}" ${canCraft ? "" : "disabled"}>${owned ? "✓ Owned" : "Craft"}</button>
+    </article>`;
+  }).join("");
+
+  // Shop — buy items & animals
+  const shopCards = shopBuyItems.map((item) => {
+    const owned = item.type === "tool" && state.tools[item.id];
+    const canBuy = !owned && coins >= item.cost && !isSabbath();
+    const animalKey = item.id;
+    const icon = item.type === "animal" ? `<img class="hm-icon-sm" src="assets/images/icons/animal-${animalKey}.svg" alt="">` : "";
+    return `<article class="modal-card">
+      <h3>${icon} ${item.name}</h3>
+      <p style="font-size:0.8rem">${item.amount} for <strong>${item.cost}</strong> coins${item.type === "animal" ? ` · own ${state.barnAnimals[item.id]?.count || 0}` : ""}</p>
+      <button type="button" data-hm-shop-buy="${item.id}" ${canBuy ? "" : "disabled"}>${owned ? "✓ Owned" : "Buy"}</button>
+    </article>`;
+  }).join("");
+
+  // Sell items
+  const sellCards = shopSellItems.map((item) => {
+    const have = state.inventory[item.id] || 0;
+    return `<article class="modal-card">
+      <h3>${itemLabels[item.id] || item.id}</h3>
+      <p style="font-size:0.8rem">Have: <strong>${have}</strong> · Sell for <strong>${item.price}</strong> coins</p>
+      <button type="button" data-hm-shop-sell="${item.id}" ${have <= 0 || isSabbath() ? "disabled" : ""}>Sell 1</button>
+    </article>`;
+  }).join("");
+
+  // Supply orders (catalogItems — arrive in days)
+  const orderCards = catalogItems.map((item) => `
+    <article class="modal-card">
+      <h3>${item.name}</h3>
+      <p style="font-size:0.8rem"><strong>${item.cost}</strong> coins · arrives in <strong>${item.days}</strong> day${item.days === 1 ? "" : "s"}</p>
+      <button type="button" data-hm-order="${item.id}" ${coins < item.cost || isSabbath() ? "disabled" : ""}>Order</button>
+    </article>`).join("");
+
+  const pendingList = state.pendingOrders.length
+    ? state.pendingOrders.map((o) => `<li>${o.name} — arrives Day ${o.arriveDay}</li>`).join("")
+    : "<li class='hint-text'>None pending.</li>";
+
+  // Community orders
+  const activeOrders = (state.communityOrders || []);
+  const communityCards = activeOrders.length
+    ? activeOrders.map((order) => {
+        const needed = Object.entries(order.items).map(([k, v]) => `${v} ${itemLabels[k] || k}`).join(", ");
+        const canFill = hasIngredients(order.items);
+        const daysLeft = order.dueDay - state.day;
+        const urgency = daysLeft <= 1 ? `<strong style="color:var(--danger)"> — due tomorrow!</strong>` : ` — ${daysLeft}d left`;
+        return `<article class="modal-card">
+          <h3>${order.label}</h3>
+          <p style="font-size:0.8rem">Need: ${needed}</p>
+          <p style="font-size:0.8rem">Reward: <strong>${order.reward}</strong> coins${urgency}</p>
+          <button type="button" data-hm-fill-order="${order.id}" ${!canFill || isSabbath() ? "disabled" : ""}>${canFill ? "Fill Order" : "Missing items"}</button>
+        </article>`;
+      }).join("")
+    : `<p class="hint-text">No active orders. New requests arrive each morning.</p>`;
+
+  return `
+    <div class="hm-section">
+      <div class="hm-resource-bar"><div class="hm-res"><span class="hm-res-label">💰 Coins</span><span class="hm-res-val">${coins}</span></div></div>
+    </div>
+    <div class="hm-section">
+      <div class="hm-section-head">🔨 Crafting</div>
+      <div class="card-grid">${craftCards}</div>
+    </div>
+    <div class="hm-section">
+      <div class="hm-section-head">🛒 Buy from Market</div>
+      <div class="card-grid">${shopCards}</div>
+    </div>
+    <div class="hm-section">
+      <div class="hm-section-head">💰 Sell Goods</div>
+      <div class="card-grid">${sellCards}</div>
+    </div>
+    <div class="hm-section">
+      <div class="hm-section-head">📦 Order Supplies</div>
+      <div class="card-grid">${orderCards}</div>
+      <h4 style="margin:12px 0 4px;font-size:0.82rem">Pending Orders</h4>
+      <ul style="padding-left:18px;margin:0;font-size:0.82rem">${pendingList}</ul>
+      <p class="hint-text" style="font-size:0.74rem;margin-top:6px">In-game only — never real money or external shopping.</p>
+    </div>
+    <div class="hm-section">
+      <div class="hm-section-head">🤝 Community Orders</div>
+      <div class="card-grid">${communityCards}</div>
+    </div>
+  `;
+}
+
+function bindHomesteadMaintenance() {
+  // Tab switching (pure DOM toggle — no re-render)
+  document.querySelectorAll("[data-hm-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".hm-tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".hm-tab-content").forEach((c) => c.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`hm-${btn.dataset.hmTab}`)?.classList.add("active");
+    });
+  });
+
+  // Eat food buttons
+  document.querySelectorAll("[data-hm-eat]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      eatFood(btn.dataset.hmEat);
+      render();
+      openHomesteadMaintenanceModal("inventory");
+    });
+  });
+
+  // Animal bulk + per-animal actions
+  const reopenAnimals = () => { render(); openHomesteadMaintenanceModal("animals"); };
+  document.querySelectorAll("[data-hm-action]").forEach((btn) => {
+    const a = btn.dataset.hmAction;
+    btn.addEventListener("click", () => {
+      if (a === "stock-feed")          { addFeedTrough();        reopenAnimals(); }
+      else if (a === "fill-water")     { addWaterTrough();       reopenAnimals(); }
+      else if (a === "feed-all")       { feedAllAnimals();       reopenAnimals(); }
+      else if (a === "water-all")      { waterBarnAnimals();     reopenAnimals(); }
+      else if (a === "clean-barn")     { cleanBarnForManure();   reopenAnimals(); }
+      else if (a.startsWith("feed-"))    { feedAnimal(a.slice(5));          reopenAnimals(); }
+      else if (a.startsWith("clean-"))   { cleanAnimal(a.slice(6));         reopenAnimals(); }
+      else if (a.startsWith("collect-")) { collectAnimalProduct(a.slice(8)); reopenAnimals(); }
+      else if (a.startsWith("feathers-")){ collectChickenFeathers();         reopenAnimals(); }
+      else if (a.startsWith("treat-"))   { treatAnimal(a.slice(6));          reopenAnimals(); }
+      else if (a.startsWith("harvest-")) { harvestAnimal(a.slice(8));        reopenAnimals(); }
+    });
+  });
+
+  // Garden bed actions
+  const reopenGarden = () => { render(); openHomesteadMaintenanceModal("garden"); };
+  document.querySelectorAll("[data-hm-bed]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id  = btn.dataset.hmBedId;
+      const act = btn.dataset.hmBed;
+      if (act === "water")   { waterCrop(id);   reopenGarden(); }
+      else if (act === "weed")    { weedCrop(id);    reopenGarden(); }
+      else if (act === "harvest") { harvestCrop(id); reopenGarden(); }
+      else if (act === "open")    { openCropModal(id); }
+    });
+  });
+
+  // Crafting
+  const reopenSupply = () => { render(); openHomesteadMaintenanceModal("supply"); };
+  document.querySelectorAll("[data-hm-craft]").forEach((btn) => {
+    btn.addEventListener("click", () => { craftItem(btn.dataset.hmCraft); reopenSupply(); });
+  });
+
+  // Shop buy
+  document.querySelectorAll("[data-hm-shop-buy]").forEach((btn) => {
+    btn.addEventListener("click", () => { buyShopItem(btn.dataset.hmShopBuy); reopenSupply(); });
+  });
+
+  // Shop sell
+  document.querySelectorAll("[data-hm-shop-sell]").forEach((btn) => {
+    btn.addEventListener("click", () => { sellShopItem(btn.dataset.hmShopSell); reopenSupply(); });
+  });
+
+  // Supply orders
+  document.querySelectorAll("[data-hm-order]").forEach((btn) => {
+    btn.addEventListener("click", () => { placeOrder(btn.dataset.hmOrder); reopenSupply(); });
+  });
+
+  // Community orders
+  document.querySelectorAll("[data-hm-fill-order]").forEach((btn) => {
+    btn.addEventListener("click", () => { fulfillCommunityOrder(Number(btn.dataset.hmFillOrder)); reopenSupply(); });
+  });
 }
 
 function waterBarnAnimals() {
@@ -2947,12 +3447,12 @@ function waterBarnAnimals() {
     pushMessage("There are no animals to water yet.");
     return;
   }
-  if ((state.inventory.water || 0) < totalAnimals) {
-    pushMessage("Gather more water before watering all animals.");
+  if ((state.barnWaterStore || 0) < totalAnimals) {
+    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Fill it with at least ${totalAnimals} to water all animals.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  state.inventory.water -= totalAnimals;
+  state.barnWaterStore -= totalAnimals;
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.wateredToday = true;
   });
@@ -2960,55 +3460,65 @@ function waterBarnAnimals() {
   triggerSceneEffect("barnWater");
   markPrep("gatherWater");
   closeModal();
-  pushMessage("All barn animals were watered.");
+  pushMessage(`All barn animals were watered. (${state.barnWaterStore} units remaining.)`);
 }
 
 function addFeedTrough() {
-  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
+  const hay = state.inventory.hay || 0;
+  const feed = state.inventory.feed || 0;
+  const total = hay + feed;
+  if (!total) {
+    pushMessage("You need hay or feed in your inventory to stock the feed area.");
+    return;
+  }
+  if (!canDoLabor("animalCare") || !spendStamina(2)) return;
+  spendQualityItem("hay", hay);
+  spendQualityItem("feed", feed);
+  state.inventory.hay = 0;
+  state.inventory.feed = 0;
+  state.barnFeedStore = (state.barnFeedStore || 0) + total;
+  triggerSceneEffect("barnFeed");
+  closeModal();
+  pushMessage(`Feed area stocked with ${total}. Trough holds ${state.barnFeedStore} units.`);
+}
+
+function feedAllAnimals() {
+  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, g) => sum + g.count, 0);
   if (!totalAnimals) {
-    pushMessage("Buy animals before filling the feed trough.");
+    pushMessage("Buy animals before feeding from the trough.");
     return;
   }
   const needed = Object.entries(animalCatalog).reduce((sum, [id, catalog]) => {
     return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? catalog.feedNeed : 0);
   }, 0);
-  if (!hasAnimalFeed(needed)) {
-    pushMessage(`You need ${needed} hay or feed to fill the trough for all animal groups.`);
+  if ((state.barnFeedStore || 0) < needed) {
+    pushMessage(`The feed area holds ${state.barnFeedStore || 0} units. Stock it with at least ${needed} to feed all animals.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  spendAnimalFeed(needed);
-  const fedGroups = Object.values(state.barnAnimals).filter((group) => group.count > 0).length;
-  Object.values(state.barnAnimals).forEach((group) => {
-    if (group.count > 0) group.fedToday = true;
-  });
+  state.barnFeedStore -= needed;
+  const fedGroups = Object.values(state.barnAnimals).filter((g) => g.count > 0).length;
+  Object.values(state.barnAnimals).forEach((g) => { if (g.count > 0) g.fedToday = true; });
   learnFrom("animalCare");
   state.dailyStats.animalGroupsCared += fedGroups;
   triggerSceneEffect("barnFeed");
   closeModal();
-  pushMessage("Feed was added to the trough. All animal groups are fed.");
+  pushMessage(`All animals fed from the trough. (${state.barnFeedStore} units remaining.)`);
 }
 
 function addWaterTrough() {
-  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
-  if (!totalAnimals) {
-    pushMessage("Buy animals before filling the water trough.");
+  const water = state.inventory.water || 0;
+  if (!water) {
+    pushMessage("You need water in your inventory to fill the water trough.");
     return;
   }
-  if ((state.inventory.water || 0) < totalAnimals) {
-    pushMessage(`You need ${totalAnimals} water to fill the trough for all animals.`);
-    return;
-  }
-  if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  state.inventory.water -= totalAnimals;
-  Object.values(state.barnAnimals).forEach((group) => {
-    if (group.count > 0) group.wateredToday = true;
-  });
-  learnFrom("animalCare");
+  if (!canDoLabor("animalCare") || !spendStamina(2)) return;
+  state.inventory.water = 0;
+  state.barnWaterStore = (state.barnWaterStore || 0) + water;
   triggerSceneEffect("barnWater");
   markPrep("gatherWater");
   closeModal();
-  pushMessage("Water was added to the trough. All animals are watered.");
+  pushMessage(`Water trough filled with ${water}. Trough holds ${state.barnWaterStore} units.`);
 }
 
 function cleanBarnForManure() {
@@ -3559,6 +4069,9 @@ function openModal(type, titleOverride) {
   const modalTitle = document.getElementById("modalTitle");
   const modalBody = document.getElementById("modalBody");
   document.getElementById("modalBackdrop").classList.remove("hidden");
+  const panel = document.querySelector(".modal-panel");
+  panel.classList.remove("hm-modal");
+  panel.querySelectorAll(".hm-corner").forEach((el) => el.remove());
 
   if (type === "inventory") {
     modalTitle.textContent = titleOverride || "Inventory";
@@ -3603,6 +4116,12 @@ function openModal(type, titleOverride) {
   }
   if (type === "barnCare") {
     openBarnCareModal();
+  }
+  if (type === "animalMaintenance") {
+    openAnimalMaintenanceModal();
+  }
+  if (type === "homesteadMaintenance") {
+    openHomesteadMaintenanceModal();
   }
   if (type === "iceBox") {
     modalTitle.textContent = "Ice Box";
@@ -3668,6 +4187,9 @@ function openCustomModal(title, body) {
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("modalBody").innerHTML = body;
   document.getElementById("modalBackdrop").classList.remove("hidden");
+  const panel = document.querySelector(".modal-panel");
+  panel.classList.remove("hm-modal");
+  panel.querySelectorAll(".hm-corner").forEach((el) => el.remove());
 }
 
 function closeModal() {
@@ -5071,6 +5593,7 @@ function onGameTick() {
 
 function bindEvents() {
   document.querySelector(".topbar h1")?.addEventListener("click", handleTitleTesterTap);
+  document.getElementById("homesteadBtn").addEventListener("click", () => openHomesteadMaintenanceModal());
   document.getElementById("statusBtn").addEventListener("click", () => openModal("status"));
   document.getElementById("areasBtn").addEventListener("click", () => openModal("areas"));
   document.getElementById("inventoryBtn").addEventListener("click", () => openModal("inventory"));

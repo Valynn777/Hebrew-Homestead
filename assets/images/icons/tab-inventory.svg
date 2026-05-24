@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- basket handle -->
+  <path d="M8 14 Q16 4 24 14" stroke="#a07830" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.70"/>
+  <!-- basket body -->
+  <path d="M4 17 C4 28 9 30 16 30 C23 30 28 28 28 17 C28 13 24 12 16 12 C8 12 4 13 4 17Z" fill="#c8a060" opacity="0.70"/>
+  <!-- basket bottom shadow -->
+  <path d="M6 24 C7 28 12 30 16 30 C20 30 25 28 26 24" fill="#a07830" opacity="0.22"/>
+  <!-- weave horizontal -->
+  <path d="M5 18 C12 20 20 20 27 18" stroke="#a07830" stroke-width="0.9" fill="none" opacity="0.42"/>
+  <path d="M4 22 C11 24 21 24 28 22" stroke="#a07830" stroke-width="0.9" fill="none" opacity="0.40"/>
+  <path d="M5 26 C11 27 21 27 27 26" stroke="#a07830" stroke-width="0.9" fill="none" opacity="0.35"/>
+  <!-- weave vertical -->
+  <line x1="9" y1="13" x2="8" y2="29" stroke="#a07830" stroke-width="0.7" opacity="0.32"/>
+  <line x1="13" y1="12" x2="12.5" y2="30" stroke="#a07830" stroke-width="0.7" opacity="0.32"/>
+  <line x1="16" y1="12" x2="16" y2="30" stroke="#a07830" stroke-width="0.7" opacity="0.32"/>
+  <line x1="19" y1="12" x2="19.5" y2="30" stroke="#a07830" stroke-width="0.7" opacity="0.32"/>
+  <line x1="23" y1="13" x2="24" y2="29" stroke="#a07830" stroke-width="0.7" opacity="0.32"/>
+  <!-- contents peek -->
+  <circle cx="11" cy="15" r="2" fill="#d4a830" opacity="0.42"/>
+  <circle cx="16" cy="14" r="2" fill="#5d8a5a" opacity="0.38"/>
+  <circle cx="21" cy="15" r="1.8" fill="#c87020" opacity="0.35"/>
+</svg>

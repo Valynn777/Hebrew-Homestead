@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- barn body -->
+  <rect x="3" y="14" width="26" height="16" rx="1.5" fill="#9a6a42" opacity="0.68"/>
+  <!-- barn body shadow -->
+  <rect x="3" y="22" width="26" height="8" rx="1.5" fill="#7a4e2e" opacity="0.28"/>
+  <!-- roof left face -->
+  <path d="M2 15 L16 4 L16 14 L3 14Z" fill="#b07838" opacity="0.72"/>
+  <!-- roof right face -->
+  <path d="M30 15 L16 4 L16 14 L29 14Z" fill="#8a5a28" opacity="0.72"/>
+  <!-- roof ridge line -->
+  <path d="M2 15 L16 4 L30 15" stroke="#6a3e1a" stroke-width="1.2" fill="none" stroke-linejoin="round" opacity="0.55"/>
+  <!-- barn door arch -->
+  <path d="M11 30 L11 22 Q16 18 21 22 L21 30Z" fill="#5a3418" opacity="0.68"/>
+  <!-- door arch top -->
+  <path d="M11 22 Q16 18 21 22" fill="#4a2a10" opacity="0.60"/>
+  <!-- window left -->
+  <rect x="4" y="17" width="6" height="5" rx="0.8" fill="#c8a860" opacity="0.48"/>
+  <line x1="7" y1="17" x2="7" y2="22" stroke="#a07830" stroke-width="0.7" opacity="0.40"/>
+  <!-- window right -->
+  <rect x="22" y="17" width="6" height="5" rx="0.8" fill="#c8a860" opacity="0.48"/>
+  <line x1="25" y1="17" x2="25" y2="22" stroke="#a07830" stroke-width="0.7" opacity="0.40"/>
+  <!-- hay peek inside door -->
+  <path d="M12 29 C14 27 18 27 20 29" stroke="#d4a830" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.48"/>
+</svg>
