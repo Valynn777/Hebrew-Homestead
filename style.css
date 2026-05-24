@@ -106,6 +106,11 @@ small {
   gap: 8px;
 }
 
+.mobile-toggle,
+.goal-toggle {
+  display: none;
+}
+
 .game-layout {
   display: flex;
   flex-direction: column;
@@ -1180,9 +1185,22 @@ small {
 .weed-pull,
 .harvest-sweep,
 .basket-fill,
-.compost-toss {
+.compost-toss,
+.resource-effect,
+.falling-wood,
+.falling-stone,
+.resource-ground-shadow {
   position: absolute;
   pointer-events: none;
+}
+
+.resource-effect {
+  left: var(--fx-x, 50%);
+  top: var(--fx-y, 50%);
+  width: clamp(120px, 16vw, 190px);
+  height: clamp(120px, 16vw, 190px);
+  transform: translate(-50%, -50%);
+  overflow: visible;
 }
 
 .plant-hand {
@@ -1217,6 +1235,58 @@ small {
   background: radial-gradient(ellipse, rgba(124, 78, 42, 0.72), rgba(124, 78, 42, 0.18) 54%, transparent 72%);
   animation: dirtPuff 0.8s ease-out forwards;
   animation-delay: var(--delay);
+}
+
+.falling-wood,
+.falling-stone {
+  left: var(--x);
+  top: -18%;
+  opacity: 0;
+  animation: resourceFall 1.15s cubic-bezier(.18,.72,.28,1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.falling-wood {
+  width: 34px;
+  height: 17px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a4327, #b8743c);
+  box-shadow: inset 5px 0 0 rgba(245, 198, 117, 0.42), 0 5px 8px rgba(34, 25, 16, 0.25);
+}
+
+.falling-wood.small {
+  width: 22px;
+  height: 9px;
+}
+
+.falling-stone {
+  width: 24px;
+  height: 19px;
+  border-radius: 30% 45% 35% 50%;
+  background: linear-gradient(135deg, #b8bbb0, #6f756d);
+  clip-path: polygon(16% 5%, 88% 12%, 100% 62%, 42% 100%, 0 54%);
+  box-shadow: 0 5px 8px rgba(34, 25, 16, 0.22);
+}
+
+.falling-stone.small {
+  width: 15px;
+  height: 12px;
+}
+
+.resource-ground-shadow {
+  left: 30%;
+  top: 74%;
+  width: 42%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(124, 78, 42, 0.38), rgba(124, 78, 42, 0.12) 58%, transparent 74%);
+  filter: blur(1px);
+  opacity: 0;
+  animation: resourceGroundShadow 1.25s ease-out forwards;
+}
+
+.resource-ground-shadow.stone {
+  background: radial-gradient(ellipse, rgba(117, 123, 112, 0.42), rgba(117, 123, 112, 0.14) 58%, transparent 74%);
 }
 
 .watering-can-effect {
@@ -1731,10 +1801,15 @@ small {
   }
 
   .topbar {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
     gap: 6px;
     margin-bottom: 6px;
+  }
+
+  .topbar > div:first-child {
+    min-width: 0;
+    flex: 1;
   }
 
   .topbar h1 {
@@ -1746,19 +1821,55 @@ small {
     display: none;
   }
 
+  .mobile-toggle,
+  .goal-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    padding: 6px 11px;
+    background: rgba(255, 253, 246, 0.96);
+  }
+
   .top-actions {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    z-index: 8;
+    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
-    padding-bottom: 3px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(248, 243, 231, 0.98);
+    box-shadow: var(--shadow);
+  }
+
+  .top-actions.open {
+    display: grid;
   }
 
   .top-actions button {
-    flex: 0 0 auto;
     min-height: 40px;
     font-size: 0.8rem;
     padding: 6px 10px;
+  }
+
+  .scene-shell {
+    display: flex;
+    align-items: center;
+  }
+
+  .scene-stage {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    background-size: contain;
+    background-color: #263b31;
   }
 
   .scene-actions button {
@@ -1789,6 +1900,73 @@ small {
     bottom: 72px;
     font-size: 0.9rem;
   }
+
+  .goal-toggle {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .goal-strip {
+    display: none;
+    max-height: 32svh;
+    overflow: auto;
+    padding: 6px 0 0;
+  }
+
+  .goal-strip.open {
+    display: flex;
+  }
+
+  .goal-item {
+    width: 100%;
+    justify-content: space-between;
+    white-space: normal;
+  }
+
+  .modal-backdrop {
+    padding: 6px;
+  }
+
+  .modal-panel,
+  .modal-panel.hm-modal {
+    width: 100%;
+    max-height: calc(100svh - 12px);
+    border-radius: 8px;
+  }
+
+  .modal-header {
+    padding: 10px 12px;
+  }
+
+  .modal-header h2,
+  .modal-panel.hm-modal .modal-header h2 {
+    font-size: 1rem;
+    padding: 4px 12px;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .modal-panel.hm-modal {
+    box-shadow: inset 0 0 0 3px #f0e8d4, inset 0 0 0 5px #6bbcc8,
+                0 12px 34px rgba(0, 0, 0, 0.26);
+  }
+
+  .hm-corner {
+    display: none;
+  }
+
+  .hm-tabs {
+    gap: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .hm-tab {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
 }
 
 /* Landscape mobile: phones rotated (viewport height ≤ 500px) */
@@ -1816,18 +1994,54 @@ small {
     display: none;
   }
 
+  .mobile-toggle,
+  .goal-toggle {
+    display: inline-flex;
+    min-height: 30px;
+    padding: 4px 9px;
+    font-size: 0.73rem;
+  }
+
   .top-actions {
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: auto;
+    z-index: 8;
+    display: none;
+    grid-template-columns: repeat(4, minmax(92px, 1fr));
+    min-width: min(720px, 100vw - 20px);
     gap: 5px;
-    padding-bottom: 2px;
+    padding: 7px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(248, 243, 231, 0.98);
+    box-shadow: var(--shadow);
+  }
+
+  .top-actions.open {
+    display: grid;
   }
 
   .top-actions button {
-    flex: 0 0 auto;
     min-height: 30px;
     padding: 4px 8px;
     font-size: 0.73rem;
+  }
+
+  .scene-stage {
+    background-size: contain;
+    background-color: #263b31;
+  }
+
+  .goal-strip {
+    display: none;
+    max-height: 34svh;
+    overflow: auto;
+  }
+
+  .goal-strip.open {
+    display: flex;
   }
 
   .scene-actions button {
@@ -1848,7 +2062,7 @@ small {
 
 @media (orientation: portrait) and (max-width: 900px) {
   .landscape-hint {
-    display: flex;
+    display: none;
     position: fixed;
     inset: 0;
     z-index: 500;
@@ -2232,6 +2446,39 @@ small {
   100% {
     opacity: 0;
     transform: translate(34px, 44px) rotate(18deg);
+  }
+}
+
+@keyframes resourceFall {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -10px) rotate(0deg) scale(0.85);
+  }
+  18% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+    transform: translate(-50%, 112px) rotate(var(--rot, 18deg)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 132px) rotate(var(--rot, 18deg)) scale(0.96);
+  }
+}
+
+@keyframes resourceGroundShadow {
+  0%, 18% {
+    opacity: 0;
+    transform: scale(0.58);
+  }
+  62% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
   }
 }
 

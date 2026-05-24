@@ -13,7 +13,8 @@
         <h1>Hebrew Homestead</h1>
         <p class="subtitle">A click-based homestead stewardship prototype</p>
       </div>
-      <div class="top-actions">
+      <button id="mobileMenuBtn" class="mobile-toggle" type="button" aria-expanded="false" aria-controls="topActions">Menu</button>
+      <div id="topActions" class="top-actions">
         <button id="homesteadBtn" type="button">⚙ Homestead</button>
         <button id="statusBtn" type="button">Status</button>
         <button id="areasBtn" type="button">Areas</button>
@@ -45,6 +46,7 @@
           <div id="vitalBar" class="vital-bar" aria-live="polite"></div>
         </div>
       </section>
+      <button id="goalToggleBtn" class="goal-toggle" type="button" aria-expanded="false" aria-controls="goalStrip">Daily Goals</button>
       <div id="goalStrip" class="goal-strip"></div>
     </main>
   </div>

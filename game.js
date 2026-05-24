@@ -23,9 +23,12 @@ const sceneImages = {
   cowPasture: "assets/images/scenes/barn/cows.png",
   goatPen: "assets/images/scenes/barn/goats.png",
   sheepPasture: "assets/images/scenes/barn/sheep.png",
-  garden: "assets/images/scenes/garden.png",
-  workshed: "assets/images/scenes/workshed.png",
-  forest: "assets/images/scenes/forest.png",
+  garden: "assets/images/scenes/garden/garden.png",
+  apiary: "assets/images/scenes/garden/apiary.png",
+  workshed: "assets/images/scenes/workshed/workshed.png",
+  forest: "assets/images/scenes/forest/forest.png",
+  treeFarm: "assets/images/scenes/forest/trees.png",
+  rockQuarry: "assets/images/scenes/forest/rock quarry.png",
   well: "assets/images/scenes/well.png",
   sabbath: "assets/images/scenes/sabbath-area.png"
 };
@@ -222,8 +225,21 @@ const scenes = {
       hs("bed14", "Garden Bed 14", 56, 62, 10, 14, "crop", { crop: "bed14" }),
       hs("bed15", "Garden Bed 15", 69, 62, 10, 14, "crop", { crop: "bed15" }),
       hs("fieldsGate", "More Fields", 33, 4, 22, 16, "fieldsPanel"),
+      hs("apiary", "Apiary", 78, 52, 13, 17, "navigate", { target: "apiary" }),
       hs("rakeGarden", "Rake Garden Path", 4, 62, 14, 22, "gatherHay", { amount: 1, stamina: 3, source: "garden path" }),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" })
+    ]
+  },
+  apiary: {
+    id: "apiary",
+    title: "Apiary",
+    description: "Beehives hum at the garden edge, ready for careful honey and beeswax harvests.",
+    background: sceneImages.apiary,
+    hotspots: [
+      hs("hiveLeft", "Harvest Hive", 22, 38, 15, 23, "harvestHive"),
+      hs("hiveCenter", "Harvest Hive", 43, 34, 15, 24, "harvestHive"),
+      hs("hiveRight", "Harvest Hive", 65, 39, 15, 23, "harvestHive"),
+      hs("backGarden", "Back to Garden", 4, 8, 17, 13, "navigate", { target: "garden" })
     ]
   },
   fields: {
@@ -263,12 +279,37 @@ const scenes = {
     background: sceneImages.forest,
     hotspots: [
       hs("branches", "Fallen Branches", 3, 56, 30, 25, "forestGather", { resource: "wood", amount: 2, stamina: 5 }),
-      hs("trees", "Harvest Trees", 0, 0, 31, 51, "harvestTrees"),
-      hs("stonePile", "Stone Pile", 58, 63, 27, 24, "stonePile"),
+      hs("treeFarm", "Tree Farm", 4, 19, 22, 34, "navigate", { target: "treeFarm" }),
+      hs("rockQuarry", "Rock Quarry", 58, 63, 27, 24, "navigate", { target: "rockQuarry" }),
       hs("herbs", "Herb Forage", 74, 51, 20, 30, "forestGather", { resource: "herbs", amount: 2, stamina: 4, prep: "gatherHerbs" }),
       hs("pond", "Pond / Stream", 43, 33, 24, 16, "fishPond"),
       hs("deer", "Deer", 52, 26, 24, 18, "huntDeer"),
       hs("home", "Back Home", 4, 8, 17, 13, "navigate", { target: "overview" })
+    ]
+  },
+  treeFarm: {
+    id: "treeFarm",
+    title: "Tree Farm",
+    description: "Managed trees provide wood and logs when harvested with a sound axe.",
+    background: sceneImages.treeFarm,
+    hotspots: [
+      hs("treeLeft", "Harvest Tree", 12, 19, 14, 46, "treeHarvestPanel"),
+      hs("treeCenter", "Harvest Tree", 42, 11, 17, 56, "treeHarvestPanel"),
+      hs("treeRight", "Harvest Tree", 70, 19, 16, 47, "treeHarvestPanel"),
+      hs("backForest", "Back to Forest", 4, 8, 17, 13, "navigate", { target: "forest" })
+    ]
+  },
+  rockQuarry: {
+    id: "rockQuarry",
+    title: "Rock Quarry",
+    description: "Stone outcrops can be worked with a pickaxe for building and crafting supplies.",
+    background: sceneImages.rockQuarry,
+    hotspots: [
+      hs("quarryLeft", "Harvest Stone", 13, 45, 19, 23, "stoneHarvestPanel"),
+      hs("quarryCenter", "Harvest Stone", 38, 38, 22, 28, "stoneHarvestPanel"),
+      hs("quarryRight", "Harvest Stone", 64, 48, 21, 24, "stoneHarvestPanel"),
+      hs("looseStone", "Loose Stone", 37, 69, 24, 16, "stonePile"),
+      hs("backForest", "Back to Forest", 4, 8, 17, 13, "navigate", { target: "forest" })
     ]
   },
   well: {
@@ -389,6 +430,8 @@ const itemLabels = {
   leekSeeds: "Heirloom Leek Seed",
   trout: "Trout",
   salmon: "Salmon",
+  honey: "Honey",
+  beeswax: "Beeswax",
   wheatBread: "Wheat Bread",
   stuffedFlatbread: "Stuffed Flatbread",
   onionLentilSoup: "Onion Lentil Soup",
@@ -484,6 +527,8 @@ const starterInventory = {
   leekSeeds: 0,
   trout: 0,
   salmon: 0,
+  honey: 0,
+  beeswax: 0,
   wheatBread: 0,
   stuffedFlatbread: 0,
   onionLentilSoup: 0,
@@ -531,6 +576,11 @@ const starterTools = {
   compostBin: false,
   gardenBed: false,
   sabbathBasket: false
+};
+
+const toolDurabilityMax = {
+  basicAxe: 12,
+  pickaxe: 14
 };
 
 const cropTypes = {
@@ -768,6 +818,7 @@ const edibleItems = {
   leeks: { cleanStatus: "clean", category: "vegetable" },
   trout: { cleanStatus: "clean", category: "fish with fins and scales" },
   salmon: { cleanStatus: "clean", category: "fish with fins and scales" },
+  honey: { cleanStatus: "clean", category: "sweetener" },
   wheatBread: { cleanStatus: "clean", category: "prepared clean food" },
   stuffedFlatbread: { cleanStatus: "clean", category: "prepared clean food" },
   onionLentilSoup: { cleanStatus: "clean", category: "prepared clean food" },
@@ -1255,6 +1306,8 @@ let hiddenTesterBuffer = "";
 let titleTapCount = 0;
 let lastTitleTap = 0;
 let gameTick = null;
+let mobileMenuOpen = false;
+let dailyGoalsOpen = false;
 const GAME_TICK_MS = 3000;        // 3 real seconds = 1 game minute
 const STAMINA_REGEN_PER_TICK = 0.1; // ~10 stamina per 5 min; full regen from 0 in ~17 min
 
@@ -1330,6 +1383,7 @@ function createNewState() {
     skills: createSkills(),
     clothing: createClothing(),
     tools: { ...starterTools },
+    toolDurability: createToolDurability(starterTools),
     upgrades: { tractor: false },
     crops: createGardenBeds(),
     barnAnimals: createBarnAnimals(),
@@ -1377,6 +1431,19 @@ function createBarnAnimals() {
 
 function emptyAnimalGroup() {
   return { count: 0, fedToday: false, wateredToday: false, cleanedToday: false, productCollectedToday: false, feathersCollectedToday: false, ailment: null };
+}
+
+function createToolDurability(tools = {}) {
+  return Object.fromEntries(Object.entries(toolDurabilityMax).map(([key, max]) => [key, tools[key] ? max : 0]));
+}
+
+function hydrateToolDurability(savedState, tools) {
+  const saved = savedState.toolDurability || {};
+  return Object.fromEntries(Object.entries(toolDurabilityMax).map(([key, max]) => {
+    if (!tools[key]) return [key, 0];
+    const uses = saved[key] ?? max;
+    return [key, Math.max(0, Math.min(max, uses))];
+  }));
 }
 
 function createRoomChores() {
@@ -1437,6 +1504,11 @@ function loadGame() {
 }
 
 function hydrateState(savedState) {
+  const tools = { ...starterTools, ...(savedState.tools || {}) };
+  const toolDurability = hydrateToolDurability(savedState, tools);
+  Object.keys(toolDurabilityMax).forEach((key) => {
+    if (toolDurability[key] <= 0) tools[key] = false;
+  });
   return {
     ...createNewState(),
     ...savedState,
@@ -1444,7 +1516,8 @@ function hydrateState(savedState) {
     qualityInventory: hydrateQualityInventory(savedState),
     skills: { ...createSkills(), ...(savedState.skills || {}) },
     clothing: mergeClothing(savedState.clothing || {}),
-    tools: { ...starterTools, ...(savedState.tools || {}) },
+    tools,
+    toolDurability,
     upgrades: { tractor: false, ...(savedState.upgrades || {}) },
     crops: mergeGardenBeds(savedState.crops || {}),
     barnAnimals: mergeBarnAnimals(savedState.barnAnimals || {}),
@@ -1997,6 +2070,9 @@ function handleHotspot(hotspot) {
   if (action === "gatherHay") gatherHay(hotspot);
   if (action === "smallTree") chopSmallTree();
   if (action === "harvestTrees") harvestTrees();
+  if (action === "harvestHive") harvestHive();
+  if (action === "treeHarvestPanel") openTreeHarvestModal(hotspot);
+  if (action === "stoneHarvestPanel") openStoneHarvestModal(hotspot);
   if (action === "stonePile") stonePile();
   if (action === "fishPond") fishPond();
   if (action === "huntDeer") huntDeer();
@@ -2288,17 +2364,61 @@ function forestGather(hotspot) {
   pushMessage(`Gathered ${hotspot.amount} ${itemLabels[hotspot.resource]}.`);
 }
 
+function toolUsesLeft(tool) {
+  if (!state.tools[tool]) return 0;
+  if (!state.toolDurability) state.toolDurability = createToolDurability(state.tools);
+  if (state.toolDurability[tool] === undefined) state.toolDurability[tool] = toolDurabilityMax[tool] || 0;
+  const uses = Math.max(0, Math.min(toolDurabilityMax[tool] || 0, state.toolDurability[tool]));
+  if (toolDurabilityMax[tool] && uses <= 0) state.tools[tool] = false;
+  return uses;
+}
+
+function toolDurabilitySummary(tool) {
+  const max = toolDurabilityMax[tool] || 0;
+  const uses = toolUsesLeft(tool);
+  const percent = max ? Math.round((uses / max) * 100) : 100;
+  return `${percent}% durability, ${uses}/${max} use${max === 1 ? "" : "s"} left`;
+}
+
+function readyTool(tool) {
+  state.tools[tool] = true;
+  if (!state.toolDurability) state.toolDurability = createToolDurability(state.tools);
+  if (toolDurabilityMax[tool]) state.toolDurability[tool] = toolDurabilityMax[tool];
+}
+
+function useDurableTool(tool, uses) {
+  if (!state.tools[tool] || toolUsesLeft(tool) <= 0) {
+    pushMessage(`You need a usable ${toolLabels[tool] || tool} first.`);
+    return false;
+  }
+  if (toolUsesLeft(tool) < uses) {
+    pushMessage(`${toolLabels[tool] || tool} only has ${toolUsesLeft(tool)} use${toolUsesLeft(tool) === 1 ? "" : "s"} left.`);
+    return false;
+  }
+  state.toolDurability[tool] -= uses;
+  if (state.toolDurability[tool] <= 0) {
+    state.toolDurability[tool] = 0;
+    state.tools[tool] = false;
+  }
+  return true;
+}
+
+function harvestHive() {
+  if (!canDoLabor("harvest") || !spendStamina(4, 15)) return;
+  const bonus = consumeProductionBuff();
+  addItem("honey", 2 + bonus);
+  addItem("beeswax", 1);
+  learnFrom("gathering");
+  triggerSceneEffect("harvest");
+  pushMessage(`Harvested honey and beeswax from the hive.${bonus ? " Clean Laundry added 1 extra honey." : ""}`);
+}
+
 function chopSmallTree() {
   if (!state.tools.basicAxe) {
     pushMessage("You need an axe to chop this tree.");
     return;
   }
-  if (!canDoLabor("chop") || !spendStamina(12)) return;
-  addItem("wood", 4);
-  addItem("logs", 1);
-  learnFrom("gathering");
-  state.dailyStats.woodGathered += 1;
-  pushMessage("Used the basic axe to chop a small tree and gather extra wood.");
+  harvestWoodWithAxe(2);
 }
 
 function harvestTrees() {
@@ -2306,27 +2426,101 @@ function harvestTrees() {
     pushMessage("You need an axe to harvest trees.");
     return;
   }
-  if (!canDoLabor("chop") || !spendStamina(12)) return;
-  addItem("wood", 5);
-  addItem("logs", 2);
+  harvestWoodWithAxe(Math.min(3, toolUsesLeft("basicAxe")));
+}
+
+function openTreeHarvestModal(hotspot = null) {
+  const uses = toolUsesLeft("basicAxe");
+  const maxHarvest = Math.min(5, uses);
+  const choices = [...new Set([1, 3, maxHarvest].filter((value) => value > 0))];
+  openCustomModal("Tree Harvest", `<div class="card-grid">
+    <article class="modal-card">
+      <h3>Equipped Tool</h3>
+      <p><strong>${state.tools.basicAxe ? toolLabels.basicAxe : "No axe equipped"}</strong></p>
+      <p>${state.tools.basicAxe ? toolDurabilitySummary("basicAxe") : "Craft a Basic Axe at the workshed before harvesting trees."}</p>
+    </article>
+    <article class="modal-card">
+      <h3>Harvest Wood</h3>
+      <p>Each axe use gathers 2 wood. Every 2 uses also produces 1 log.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${choices.map((count) => `<button type="button" data-modal-action="axe-${count}">Harvest ${count} use${count === 1 ? "" : "s"}</button>`).join("")}
+        ${!choices.length ? `<button type="button" disabled>No axe uses left</button>` : ""}
+      </div>
+    </article>
+  </div>`);
+  bindModalActions(Object.fromEntries(choices.map((count) => [`axe-${count}`, () => harvestWoodWithAxe(count, hotspot)])));
+}
+
+function harvestWoodWithAxe(uses, hotspot = null) {
+  uses = Math.max(1, Math.floor(Number(uses) || 1));
+  if (!canDoLabor("chop")) return;
+  if (!hasStamina(4 * uses)) return;
+  if (!useDurableTool("basicAxe", uses)) return;
+  spendStamina(4 * uses, 10 * uses);
+  const bonus = consumeProductionBuff();
+  addItem("wood", uses * 2 + bonus);
+  const logs = Math.floor(uses / 2);
+  if (logs) addItem("logs", logs);
   learnFrom("gathering");
-  state.dailyStats.woodGathered += 1;
-  pushMessage("Used the basic axe to harvest wood from the forest trees.");
+  state.dailyStats.woodGathered += uses;
+  triggerSceneEffect("woodHarvest", hotspotCenter(hotspot) || { x: 50, y: 46 });
+  closeModal();
+  const broken = !state.tools.basicAxe ? " The axe wore out." : "";
+  pushMessage(`Used the basic axe ${uses} time${uses === 1 ? "" : "s"} and gathered ${uses * 2 + bonus} wood${logs ? ` and ${logs} log${logs === 1 ? "" : "s"}` : ""}.${bonus ? " Clean Laundry added 1 extra wood." : ""}${broken}`);
 }
 
 function stonePile() {
   if (!canDoLabor("mine")) return;
   if (state.tools.pickaxe) {
-    if (!spendStamina(8)) return;
-    addItem("stone", 4);
-    learnFrom("gathering");
-    pushMessage("Used the pickaxe to gather stone from the forest pile.");
+    harvestStoneWithPickaxe(1);
     return;
   }
   if (!spendStamina(5)) return;
   addItem("stone", 1);
   learnFrom("gathering");
   pushMessage("Picked up loose stones by hand. A pickaxe would gather more.");
+}
+
+function openStoneHarvestModal(hotspot = null) {
+  const uses = toolUsesLeft("pickaxe");
+  const maxHarvest = Math.min(5, uses);
+  const choices = [...new Set([1, 3, maxHarvest].filter((value) => value > 0))];
+  openCustomModal("Stone Harvest", `<div class="card-grid">
+    <article class="modal-card">
+      <h3>Equipped Tool</h3>
+      <p><strong>${state.tools.pickaxe ? toolLabels.pickaxe : "No pickaxe equipped"}</strong></p>
+      <p>${state.tools.pickaxe ? toolDurabilitySummary("pickaxe") : "Craft a Pickaxe at the workshed before quarrying stone."}</p>
+    </article>
+    <article class="modal-card">
+      <h3>Harvest Stone</h3>
+      <p>Each pickaxe use gathers 2 stone from the quarry.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${choices.map((count) => `<button type="button" data-modal-action="pickaxe-${count}">Harvest ${count} use${count === 1 ? "" : "s"}</button>`).join("")}
+        ${!choices.length ? `<button type="button" disabled>No pickaxe uses left</button>` : ""}
+      </div>
+    </article>
+  </div>`);
+  bindModalActions(Object.fromEntries(choices.map((count) => [`pickaxe-${count}`, () => harvestStoneWithPickaxe(count, hotspot)])));
+}
+
+function harvestStoneWithPickaxe(uses, hotspot = null) {
+  uses = Math.max(1, Math.floor(Number(uses) || 1));
+  if (!canDoLabor("mine")) return;
+  if (!hasStamina(3 * uses)) return;
+  if (!useDurableTool("pickaxe", uses)) return;
+  spendStamina(3 * uses, 10 * uses);
+  const amount = uses * 2;
+  addItem("stone", amount);
+  learnFrom("gathering");
+  triggerSceneEffect("stoneHarvest", hotspotCenter(hotspot) || { x: 50, y: 54 });
+  closeModal();
+  const broken = !state.tools.pickaxe ? " The pickaxe wore out." : "";
+  pushMessage(`Used the pickaxe ${uses} time${uses === 1 ? "" : "s"} and gathered ${amount} stone.${broken}`);
+}
+
+function hotspotCenter(hotspot) {
+  if (!hotspot) return null;
+  return { x: hotspot.x + hotspot.w / 2, y: hotspot.y + hotspot.h / 2 };
 }
 
 // ── Fishing Minigame ─────────────────────────────────────────────────────────
@@ -2966,12 +3160,13 @@ function harvestAnimal(animalId) {
 }
 
 function openBarnCareModal() {
-  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
+  const totalAnimals = barnAnimalCount();
   const neededFeed = Object.entries(animalCatalog).reduce((sum, [id, catalog]) => {
     return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? catalog.feedNeed : 0);
   }, 0);
   const feedStore = state.barnFeedStore || 0;
   const waterStore = state.barnWaterStore || 0;
+  const waterNeed = barnWaterNeed();
   const invFeed = (state.inventory.hay || 0) + (state.inventory.feed || 0);
   openCustomModal("Barn Care", `<div class="card-grid">
     <article class="modal-card">
@@ -2986,13 +3181,13 @@ function openBarnCareModal() {
     </article>
     <article class="modal-card">
       <h3>Fill Water Trough</h3>
-      <p>Water store: <strong>${waterStore}</strong> units. Inventory: ${state.inventory.water || 0} water.</p>
-      <button type="button" data-modal-action="filltrough" ${(state.inventory.water || 0) > 0 ? "" : "disabled"}>Fill Water Trough</button>
+      <p>Trough: <strong>${waterStore}/${totalAnimals || 0}</strong>. Inventory: ${state.inventory.water || 0} water. Filling waters animals automatically when enough is available.</p>
+      <button type="button" data-modal-action="filltrough" ${totalAnimals > 0 && ((state.inventory.water || 0) > 0 || waterStore >= waterNeed) ? "" : "disabled"}>Fill Water Trough</button>
     </article>
     <article class="modal-card">
       <h3>Water Animals</h3>
-      <p>Needs ${totalAnimals} from the water trough (${waterStore} available).</p>
-      <button type="button" data-modal-action="wateranimals" ${totalAnimals > 0 && waterStore >= totalAnimals ? "" : "disabled"}>Water All Animals</button>
+      <p>Needs ${waterNeed} from the water trough (${waterStore} available).</p>
+      <button type="button" data-modal-action="wateranimals" ${waterNeed > 0 && waterStore >= waterNeed ? "" : "disabled"}>Water All Animals</button>
     </article>
     <article class="modal-card">
       <h3>Clean Barn</h3>
@@ -3113,14 +3308,15 @@ function hmBuildTab(tab) {
 }
 
 function hmAnimalsTab() {
-  const totalAnimals = Object.values(state.barnAnimals).reduce((s, g) => s + g.count, 0);
+  const totalAnimals = barnAnimalCount();
   const neededFeed = Object.entries(animalCatalog).reduce((s, [id, c]) => s + ((state.barnAnimals[id]?.count || 0) > 0 ? c.feedNeed : 0), 0);
   const feedStore  = state.barnFeedStore  || 0;
   const waterStore = state.barnWaterStore || 0;
+  const waterNeed  = barnWaterNeed();
   const invFeed    = (state.inventory.hay || 0) + (state.inventory.feed || 0);
   const invWater   = state.inventory.water || 0;
   const canFeedAll = totalAnimals > 0 && feedStore >= neededFeed;
-  const canWaterAll= totalAnimals > 0 && waterStore >= totalAnimals;
+  const canWaterAll= waterNeed > 0 && waterStore >= waterNeed;
 
   const resourceBar = `<div class="hm-resource-bar">
     <div class="hm-res"><span class="hm-res-label">🌾 Feed store</span><span class="hm-res-val">${feedStore}</span></div>
@@ -3131,7 +3327,7 @@ function hmAnimalsTab() {
 
   const bulkActions = `<div class="hm-actions">
     <button type="button" data-hm-action="stock-feed"  ${invFeed   > 0           ? "" : "disabled"}>🌾 Stock Feed</button>
-    <button type="button" data-hm-action="fill-water"  ${invWater  > 0           ? "" : "disabled"}>💧 Fill Trough</button>
+    <button type="button" data-hm-action="fill-water"  ${totalAnimals > 0 && (invWater > 0 || waterStore >= waterNeed) ? "" : "disabled"}>💧 Fill Trough</button>
     <button type="button" data-hm-action="feed-all"    ${canFeedAll               ? "" : "disabled"}>Feed All</button>
     <button type="button" data-hm-action="water-all"   ${canWaterAll              ? "" : "disabled"}>Water All</button>
     <button type="button" data-hm-action="clean-barn"  ${totalAnimals > 0        ? "" : "disabled"}>🧹 Clean Barn</button>
@@ -3237,9 +3433,9 @@ function hmGardenTab() {
 
 function hmInventoryTab() {
   const categories = [
-    { label: "Resources",        icon: "🪵", keys: ["water","wood","logs","stone","herbs","hay","feed","plantMatter","jars","lampOil","cloth","ironToolHead","extraBasket","coins","flax","wateringCanWater","arrows"] },
+    { label: "Resources",        icon: "🪵", keys: ["water","wood","logs","stone","herbs","hay","feed","plantMatter","jars","lampOil","cloth","ironToolHead","extraBasket","coins","flax","wateringCanWater","arrows","beeswax"] },
     { label: "Seeds",            icon: "🌰", keys: ["barleySeeds","lentilSeeds","cucumberSeeds","wheatSeeds","onionSeeds","garlicSeeds","figSeedlings","grapeSeedlings","leekSeeds","hyssopSeeds","mintSeeds","cuminSeeds","corianderSeeds","dillSeeds"] },
-    { label: "Crops & Produce",  icon: "🌾", keys: ["barley","lentils","cucumbers","wheat","onions","garlic","figs","grapes","leeks","hyssop","mint","cumin","coriander","dill"] },
+    { label: "Crops & Produce",  icon: "🌾", keys: ["barley","lentils","cucumbers","wheat","onions","garlic","figs","grapes","leeks","honey","hyssop","mint","cumin","coriander","dill"] },
     { label: "Animal Products",  icon: "🥚", keys: ["eggs","milk","cheese","wool","feathers","manure","fertilizer","hide","fur"] },
     { label: "Meat & Fish",      icon: "🍖", keys: ["chickenMeat","mutton","goatMeat","beef","venison","cleanFish","trout","salmon"] },
     { label: "Prepared Food",    icon: "🍲", keys: ["preparedFood","refrigeratedFood","barleyFlatbread","lentilStew","cucumberHerbSalad","herbTea","simpleSabbathMeal","cleanFishMeal","venisonStew","eggBreakfast","chickenSoup","muttonStew","goatStew","beefStew","wheatBread","stuffedFlatbread","onionLentilSoup","gardenSalad","garlicHerbSoup","leekSoup","harvestStew","figPreserve","grapeJuice","troutMeal","salmonMeal"] },
@@ -3442,25 +3638,47 @@ function bindHomesteadMaintenance() {
 }
 
 function waterBarnAnimals() {
-  const totalAnimals = Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
+  const totalAnimals = barnAnimalCount();
   if (!totalAnimals) {
     pushMessage("There are no animals to water yet.");
     return;
   }
-  if ((state.barnWaterStore || 0) < totalAnimals) {
-    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Fill it with at least ${totalAnimals} to water all animals.`);
+  const need = barnWaterNeed();
+  if (!need) {
+    pushMessage("The barn animals are already watered.");
+    return;
+  }
+  if ((state.barnWaterStore || 0) < need) {
+    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Fill it with at least ${need} to water all animals.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  state.barnWaterStore -= totalAnimals;
+  autoWaterBarnAnimals();
+  closeModal();
+  pushMessage(`All barn animals were watered. (${state.barnWaterStore} units remaining.)`);
+}
+
+function barnAnimalCount() {
+  return Object.values(state.barnAnimals).reduce((sum, group) => sum + group.count, 0);
+}
+
+function barnWaterNeed() {
+  return Object.values(state.barnAnimals).reduce((sum, group) => {
+    return sum + (group.count > 0 && !group.wateredToday ? group.count : 0);
+  }, 0);
+}
+
+function autoWaterBarnAnimals({ showEffect = true, recordCare = true } = {}) {
+  const need = barnWaterNeed();
+  if (!need || (state.barnWaterStore || 0) < need) return false;
+  state.barnWaterStore -= need;
   Object.values(state.barnAnimals).forEach((group) => {
     if (group.count > 0) group.wateredToday = true;
   });
-  learnFrom("animalCare");
-  triggerSceneEffect("barnWater");
+  if (recordCare) learnFrom("animalCare");
   markPrep("gatherWater");
-  closeModal();
-  pushMessage(`All barn animals were watered. (${state.barnWaterStore} units remaining.)`);
+  if (showEffect) triggerSceneEffect("barnWater");
+  return true;
 }
 
 function addFeedTrough() {
@@ -3507,18 +3725,41 @@ function feedAllAnimals() {
 }
 
 function addWaterTrough() {
+  const totalAnimals = barnAnimalCount();
+  if (!totalAnimals) {
+    pushMessage("Buy animals before filling the water trough.");
+    return;
+  }
+  const capacity = totalAnimals;
+  const current = state.barnWaterStore || 0;
+  const neededToFull = Math.max(0, capacity - current);
   const water = state.inventory.water || 0;
+  if (!neededToFull) {
+    if (autoWaterBarnAnimals()) {
+      closeModal();
+      pushMessage(`The full water trough watered the animals automatically. (${state.barnWaterStore} units remaining.)`);
+      return;
+    }
+    pushMessage(`The water trough is already full (${current}/${capacity}).`);
+    return;
+  }
   if (!water) {
     pushMessage("You need water in your inventory to fill the water trough.");
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(2)) return;
-  state.inventory.water = 0;
-  state.barnWaterStore = (state.barnWaterStore || 0) + water;
-  triggerSceneEffect("barnWater");
+  const added = Math.min(water, neededToFull);
+  state.inventory.water -= added;
+  state.barnWaterStore = current + added;
   markPrep("gatherWater");
+  const watered = autoWaterBarnAnimals();
+  if (!watered) triggerSceneEffect("barnWater");
   closeModal();
-  pushMessage(`Water trough filled with ${water}. Trough holds ${state.barnWaterStore} units.`);
+  if (watered) {
+    pushMessage(`Water trough filled with ${added} and the animals were watered automatically. (${state.barnWaterStore} units remaining.)`);
+    return;
+  }
+  pushMessage(`Added ${added} water to the trough. It holds ${state.barnWaterStore}/${capacity}; add ${barnWaterNeed() - state.barnWaterStore} more to water all animals automatically.`);
 }
 
 function cleanBarnForManure() {
@@ -3814,7 +4055,7 @@ function craftItem(id) {
   const spent = spendIngredients(item.ingredients);
   const quality = improveQualityByLearning(qualityFromSpent(spent), "crafting");
   if (item.type === "tool") {
-    state.tools[id] = true;
+    readyTool(id);
   } else {
     Object.entries(item.bonus || { [id]: 1 }).forEach(([key, value]) => addItem(key, value, quality));
   }
@@ -4051,6 +4292,9 @@ function resetBarnAnimalDailyCare() {
     group.productCollectedToday = false;
     group.feathersCollectedToday = false;
   });
+  if (autoWaterBarnAnimals({ showEffect: false, recordCare: false })) {
+    pushMessage("Water left in the barn trough watered the animals automatically.");
+  }
 }
 
 function resetSabbathPrep() {
@@ -4238,8 +4482,13 @@ function inventoryItemMarkup(key, amount) {
 
 function toolsMarkup() {
   return `<div class="tool-list">${Object.entries(toolLabels).map(([key, label]) => `
-    <div class="tool-item ${state.tools[key] ? "owned" : ""}"><strong>${label}</strong><br><small>${state.tools[key] ? "Owned" : "Not owned yet"}</small></div>
+    <div class="tool-item ${state.tools[key] ? "owned" : ""}"><strong>${label}</strong><br><small>${toolStatusText(key)}</small></div>
   `).join("")}</div>`;
+}
+
+function toolStatusText(key) {
+  if (!state.tools[key]) return "Not owned yet";
+  return toolDurabilityMax[key] ? toolDurabilitySummary(key) : "Owned";
 }
 
 function characterMarkup() {
@@ -4487,7 +4736,7 @@ function buyShopItem(id) {
     return;
   }
   state.inventory.coins -= item.cost;
-  if (item.type === "tool") state.tools[item.id] = true;
+  if (item.type === "tool") readyTool(item.id);
   if (item.type === "animal") state.barnAnimals[item.id].count += item.amount;
   if (item.type === "item") addItem(item.id, item.amount);
   pushMessage(`Bought ${item.name}.`);
@@ -4835,7 +5084,7 @@ function testerStarterBundle() {
 
 function testerUnlockAllTools(showMessage = true) {
   Object.keys(toolLabels).forEach((key) => {
-    state.tools[key] = true;
+    readyTool(key);
   });
   if (showMessage) pushMessage("All tools unlocked for testing.");
 }
@@ -4854,7 +5103,7 @@ function testerGardenKit() {
   addItem("water", 30);
   state.inventory.wateringCanWater = 6;
   addItem("fertilizer", 12);
-  state.tools.wateringCan = true;
+  readyTool("wateringCan");
   pushMessage("Garden testing kit added.");
 }
 
@@ -4862,7 +5111,7 @@ function testerCompleteSabbathPrep() {
   Object.keys(state.sabbathPrep).forEach((key) => {
     state.sabbathPrep[key] = true;
   });
-  state.tools.sabbathBasket = true;
+  readyTool("sabbathBasket");
   addItem("preparedFood", 5);
   addItem("water", 5);
   addItem("herbs", 5);
@@ -4887,7 +5136,7 @@ function testerGrantItem() {
 function testerGrantTool() {
   const key = document.getElementById("testerTool")?.value;
   if (!key) return;
-  state.tools[key] = true;
+  readyTool(key);
   pushMessage(`Tester unlocked ${toolLabels[key] || key}.`);
 }
 
@@ -5046,8 +5295,11 @@ function areaMenuMarkup() {
     ["pantry", "Pantry"],
     ["barn", "Barn"],
     ["garden", "Garden"],
+    ["apiary", "Apiary"],
     ["workshed", "Workshed"],
     ["forest", "Forest"],
+    ["treeFarm", "Tree Farm"],
+    ["rockQuarry", "Rock Quarry"],
     ["well", "Well / Water Area"],
     ["sabbath", "Sabbath Area"]
   ];
@@ -5134,7 +5386,7 @@ function decorationMarkup(sceneId) {
       <span class="well-shimmer" style="--x: 27%; --y: 49%; --w: 23%; --h: 12%;"></span>
     `;
   }
-  if (sceneId === "forest") {
+  if (sceneId === "forest" || sceneId === "treeFarm") {
     return `
       ${effect}
       ${buffs}
@@ -5142,6 +5394,9 @@ function decorationMarkup(sceneId) {
       <span class="leaf" style="--x: 18%; --duration: 16s; --delay: -4s;"></span>
       <span class="leaf" style="--x: 82%; --duration: 20s; --delay: -10s;"></span>
     `;
+  }
+  if (sceneId === "rockQuarry") {
+    return `${effect}${buffs}`;
   }
   if (sceneId === "garden" || sceneId === "fields") {
     return `
@@ -5153,6 +5408,15 @@ function decorationMarkup(sceneId) {
       <span class="dew-shimmer" style="--x: 62%; --y: 70%; --w: 20%; --h: 12%;"></span>
       <span class="compost-steam" style="--x: 83%; --y: 27%; --delay: 0s;"></span>
       <span class="compost-steam" style="--x: 87%; --y: 25%; --delay: 1.4s;"></span>
+    `;
+  }
+  if (sceneId === "apiary") {
+    return `
+      ${effect}
+      ${buffs}
+      <span class="garden-ambient bee" style="--x: 35%; --y: 48%; --delay: -2s;"></span>
+      <span class="garden-ambient bee" style="--x: 64%; --y: 43%; --delay: -5s;"></span>
+      <span class="dew-shimmer" style="--x: 51%; --y: 66%; --w: 20%; --h: 12%;"></span>
     `;
   }
   if (sceneId === "kitchen") {
@@ -5277,9 +5541,16 @@ function playSceneEffect(effect) {
   if (!layer) return;
   const type = typeof effect === "string" ? effect : effect.type;
   const target = typeof effect === "string" ? null : effect.target;
-  const targetBed = target ? gardenBeds[target] : null;
-  const effectStyle = targetBed ? ` style="--fx-x:${targetBed.x}%; --fx-y:${targetBed.y}%;"` : "";
+  const targetBed = typeof target === "string" ? gardenBeds[target] : null;
+  const targetPoint = !targetBed && target && typeof target === "object" ? target : null;
+  let effectStyle = "";
+  if (targetBed) {
+    effectStyle = ` style="--fx-x:${targetBed.x}%; --fx-y:${targetBed.y}%;"`;
+  } else if (targetPoint) {
+    effectStyle = ` style="--fx-x:${targetPoint.x}%; --fx-y:${targetPoint.y}%;"`;
+  }
   const bedEffect = (inner) => targetBed ? `<span class="bed-effect"${effectStyle}>${inner}</span>` : inner;
+  const positionedEffect = (inner) => effectStyle ? `<span class="resource-effect"${effectStyle}>${inner}</span>` : inner;
   const markup = {
     tidy: `
       <span class="tidy-sparkle" style="--x: 18%; --y: 70%; --delay: 0s;"></span>
@@ -5348,6 +5619,22 @@ function playSceneEffect(effect) {
       <span class="compost-toss"></span>
       <span class="soil-darken"></span>
       <span class="compost-steam burst" style="--x: 52%; --y: 56%; --delay: 0s;"></span>
+    `),
+    woodHarvest: positionedEffect(`
+      <span class="falling-wood" style="--x:38%;--delay:0s;--rot:-18deg;"></span>
+      <span class="falling-wood" style="--x:51%;--delay:0.12s;--rot:12deg;"></span>
+      <span class="falling-wood" style="--x:63%;--delay:0.24s;--rot:28deg;"></span>
+      <span class="falling-wood small" style="--x:45%;--delay:0.32s;--rot:-34deg;"></span>
+      <span class="falling-wood small" style="--x:58%;--delay:0.42s;--rot:22deg;"></span>
+      <span class="resource-ground-shadow"></span>
+    `),
+    stoneHarvest: positionedEffect(`
+      <span class="falling-stone" style="--x:37%;--delay:0s;--rot:-20deg;"></span>
+      <span class="falling-stone" style="--x:50%;--delay:0.1s;--rot:14deg;"></span>
+      <span class="falling-stone" style="--x:63%;--delay:0.2s;--rot:32deg;"></span>
+      <span class="falling-stone small" style="--x:44%;--delay:0.3s;--rot:-38deg;"></span>
+      <span class="falling-stone small" style="--x:57%;--delay:0.4s;--rot:24deg;"></span>
+      <span class="resource-ground-shadow stone"></span>
     `),
     barnFeed: `
       <span class="hay-strand" style="--x: 32%; --y: 35%; --rot: -18deg; --rot2: 14deg; --delay: 0s;"></span>
@@ -5457,7 +5744,11 @@ function checkDailyGoals() {
 function renderGoalStrip() {
   const strip = document.getElementById("goalStrip");
   if (!strip) return;
-  if (!state.dailyGoals?.length) { strip.innerHTML = ""; return; }
+  if (!state.dailyGoals?.length) {
+    strip.innerHTML = "";
+    updateMobileGoalToggle();
+    return;
+  }
   strip.innerHTML = state.dailyGoals.map((saved) => {
     const goal = resolveGoal(saved);
     if (!goal) return "";
@@ -5467,6 +5758,38 @@ function renderGoalStrip() {
       <span class="goal-reward">+${goal.reward}¢</span>
     </div>`;
   }).join("");
+  updateMobileGoalToggle();
+}
+
+function updateMobileGoalToggle() {
+  const button = document.getElementById("goalToggleBtn");
+  const strip = document.getElementById("goalStrip");
+  if (!button || !strip) return;
+  const goals = state.dailyGoals || [];
+  const completed = goals.filter((goal) => goal.completed).length;
+  button.hidden = goals.length === 0;
+  button.setAttribute("aria-expanded", String(dailyGoalsOpen));
+  button.textContent = goals.length ? `Daily Goals ${completed}/${goals.length}` : "Daily Goals";
+  strip.classList.toggle("open", dailyGoalsOpen);
+}
+
+function updateMobileMenuToggle() {
+  const button = document.getElementById("mobileMenuBtn");
+  const actions = document.getElementById("topActions");
+  if (!button || !actions) return;
+  button.setAttribute("aria-expanded", String(mobileMenuOpen));
+  button.textContent = mobileMenuOpen ? "Hide Menu" : "Menu";
+  actions.classList.toggle("open", mobileMenuOpen);
+}
+
+function toggleMobileMenu() {
+  mobileMenuOpen = !mobileMenuOpen;
+  updateMobileMenuToggle();
+}
+
+function toggleGoalStrip() {
+  dailyGoalsOpen = !dailyGoalsOpen;
+  updateMobileGoalToggle();
 }
 
 function showDaySummary(afterNextDay = null) {
@@ -5593,6 +5916,14 @@ function onGameTick() {
 
 function bindEvents() {
   document.querySelector(".topbar h1")?.addEventListener("click", handleTitleTesterTap);
+  document.getElementById("mobileMenuBtn")?.addEventListener("click", toggleMobileMenu);
+  document.getElementById("goalToggleBtn")?.addEventListener("click", toggleGoalStrip);
+  document.getElementById("topActions")?.addEventListener("click", (event) => {
+    if (event.target.closest("button")) {
+      mobileMenuOpen = false;
+      updateMobileMenuToggle();
+    }
+  });
   document.getElementById("homesteadBtn").addEventListener("click", () => openHomesteadMaintenanceModal());
   document.getElementById("statusBtn").addEventListener("click", () => openModal("status"));
   document.getElementById("areasBtn").addEventListener("click", () => openModal("areas"));
@@ -5686,6 +6017,7 @@ function init() {
   loadGame();
   if (!state.dailyGoals?.length) generateDailyGoals();
   bindEvents();
+  updateMobileMenuToggle();
   render();
   startGameTick();
 }
