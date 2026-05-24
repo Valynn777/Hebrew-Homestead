@@ -297,6 +297,17 @@ small {
 }
 /* ── End seasonal particles ─────────────────────────────────────────── */
 
+/* ── Night overlay ─────────────────────────────────────────────────── */
+.night-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background: transparent;
+  transition: background 3s linear;
+}
+/* ── End night overlay ─────────────────────────────────────────────── */
+
 .scene-fallback {
   position: absolute;
   inset: 0;
@@ -2528,13 +2539,13 @@ small {
     transform: translate(0, 0) scale(0.4);
     opacity: 0;
   }
-  8% { opacity: 0.26; }
-  42% {
-    transform: translate(-22px, -72px) scale(1.5);
+  4% { opacity: 0.20; }
+  25% {
+    transform: translate(-20px, -65px) scale(1.4);
     opacity: 0;
   }
   100% {
-    transform: translate(-22px, -72px) scale(1.5);
+    transform: translate(-20px, -65px) scale(1.4);
     opacity: 0;
   }
 }

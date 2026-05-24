@@ -6037,6 +6037,41 @@ function generateSeasonParticles(season) {
   return "";
 }
 
+function updateNightOverlay() {
+  const overlay = document.getElementById("nightOverlay");
+  if (!overlay) return;
+
+  const isOutdoor = OUTDOOR_SCENES.has(state.currentScene);
+  const m = state.minute;
+
+  const GOLDEN_START = 16.5 * 60; // 4:30 PM — warm afternoon light begins
+  const DUSK_START   = 18.5 * 60; // 6:30 PM — golden fades to purple
+  const NIGHT_START  = 20 * 60;   // 8:00 PM — full night colour
+  const NIGHTFALL    = 22 * 60;   // 10:00 PM
+
+  if (!isOutdoor || m < GOLDEN_START) {
+    overlay.style.background = "transparent";
+    return;
+  }
+
+  let bg;
+  if (m < DUSK_START) {
+    const t = (m - GOLDEN_START) / (DUSK_START - GOLDEN_START);
+    bg = `rgba(240, 130, 30, ${(t * 0.18).toFixed(3)})`;
+  } else if (m < NIGHT_START) {
+    const t = (m - DUSK_START) / (NIGHT_START - DUSK_START);
+    const r = Math.round(240 - 215 * t);
+    const g = Math.round(130 - 95 * t);
+    const b = Math.round(30 + 65 * t);
+    bg = `rgba(${r}, ${g}, ${b}, ${(0.18 + t * 0.32).toFixed(3)})`;
+  } else {
+    const t = Math.min(1, (m - NIGHT_START) / (NIGHTFALL - NIGHT_START));
+    bg = `rgba(12, 20, 75, ${(0.50 + t * 0.18).toFixed(3)})`;
+  }
+
+  overlay.style.background = bg;
+}
+
 function updateSeasonLayer() {
   const layer = document.getElementById("seasonLayer");
   if (!layer) return;
@@ -6057,6 +6092,7 @@ function renderScene() {
   document.getElementById("sceneDescriptionOverlay").textContent = scene.description;
   stage.dataset.season = seasons[state.seasonIndex].toLowerCase();
   updateSeasonLayer();
+  updateNightOverlay();
   document.getElementById("sceneDecorations").innerHTML = decorationMarkup(scene.id);
   if (pendingSceneEffect) {
     playSceneEffect(pendingSceneEffect);
