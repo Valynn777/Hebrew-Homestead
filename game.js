@@ -6037,6 +6037,29 @@ function generateSeasonParticles(season) {
   return "";
 }
 
+function nightWarmGlows(sceneId, t) {
+  if (t <= 0) return "";
+  const g = (cx, cy, r, a) =>
+    `radial-gradient(circle ${r} at ${cx} ${cy}, rgba(255,205,90,${(a * t).toFixed(3)}), transparent 65%)`;
+  if (sceneId === "overview") {
+    return [
+      g("26%", "27%", "7%",  0.38),  // cabin left window
+      g("36%", "32%", "5%",  0.30),  // cabin right window
+      g("50%", "44%", "5%",  0.42),  // central lantern
+      g("88%", "68%", "4%",  0.28),  // lower-right lantern
+      g("12%", "38%", "4%",  0.22),  // barn lantern
+    ].join(", ") + ", ";
+  }
+  if (sceneId === "cabin") {
+    return [
+      g("46%", "6%",  "5%",  0.44),  // front door lantern
+      g("12%", "20%", "4%",  0.34),  // side wall lantern
+      g("74%", "46%", "4%",  0.34),  // right-side lantern
+    ].join(", ") + ", ";
+  }
+  return "";
+}
+
 function updateNightOverlay() {
   const overlay = document.getElementById("nightOverlay");
   if (!overlay) return;
@@ -6054,33 +6077,41 @@ function updateNightOverlay() {
     return;
   }
 
-  let bg;
+  // night_t: 0 at dusk → 1 at nightfall, used to scale warm glow intensity
+  const nightT = Math.max(0, Math.min(1, (m - DUSK_START) / (NIGHTFALL - DUSK_START)));
+
+  let base;
   if (m < DUSK_START) {
     const t = (m - GOLDEN_START) / (DUSK_START - GOLDEN_START);
-    bg = `rgba(240, 130, 30, ${(t * 0.18).toFixed(3)})`;
+    base = `rgba(240, 130, 30, ${(t * 0.18).toFixed(3)})`;
   } else if (m < NIGHT_START) {
     const t = (m - DUSK_START) / (NIGHT_START - DUSK_START);
     const r = Math.round(240 - 215 * t);
     const g = Math.round(130 - 95 * t);
     const b = Math.round(30 + 65 * t);
-    bg = `rgba(${r}, ${g}, ${b}, ${(0.18 + t * 0.32).toFixed(3)})`;
+    base = `rgba(${r}, ${g}, ${b}, ${(0.18 + t * 0.32).toFixed(3)})`;
   } else {
     const t = Math.min(1, (m - NIGHT_START) / (NIGHTFALL - NIGHT_START));
-    bg = `rgba(12, 20, 75, ${(0.50 + t * 0.18).toFixed(3)})`;
+    base = `rgba(12, 20, 75, ${(0.50 + t * 0.18).toFixed(3)})`;
   }
 
-  overlay.style.background = bg;
+  const wg = nightWarmGlows(state.currentScene, nightT);
+  overlay.style.background = wg ? `${wg}${base}` : base;
 }
 
 function updateSeasonLayer() {
   const layer = document.getElementById("seasonLayer");
   if (!layer) return;
-  const season = seasons[state.seasonIndex];
   const isOutdoor = OUTDOOR_SCENES.has(state.currentScene);
-  const cacheKey = isOutdoor ? season : "indoor";
-  if (layer.dataset.renderedSeason === cacheKey) return;
-  layer.dataset.renderedSeason = cacheKey;
-  layer.innerHTML = isOutdoor ? generateSeasonParticles(season) : "";
+  if (!isOutdoor) {
+    layer.innerHTML = "";
+    layer.dataset.renderedSeason = "";
+    return;
+  }
+  const season = seasons[state.seasonIndex];
+  if (layer.dataset.renderedSeason === season) return;
+  layer.dataset.renderedSeason = season;
+  layer.innerHTML = generateSeasonParticles(season);
 }
 
 function renderScene() {
@@ -6162,8 +6193,8 @@ function decorationMarkup(sceneId) {
       ${effect}
       ${buffs}
       <span class="well-shimmer" style="--x: 45%; --y: 35%; --w: 22%; --h: 13%;"></span>
-      <span class="leaf" style="--x: 18%; --duration: 16s; --delay: -4s;"></span>
-      <span class="leaf" style="--x: 82%; --duration: 20s; --delay: -10s;"></span>
+      <span class="leaf" style="--x: 18%; --duration: 28s; --delay: 0s;"></span>
+      <span class="leaf" style="--x: 82%; --duration: 34s; --delay: 14s;"></span>
     `;
   }
   if (sceneId === "rockQuarry") {
@@ -6225,8 +6256,8 @@ function decorationMarkup(sceneId) {
     <span class="well-shimmer" style="--x: 61.7%; --y: 72%; --w: 7.4%; --h: 7.5%;"></span>
     <span class="drift" style="--y: 9%; --w: 18%; --h: 7%; --duration: 52s; --delay: -12s;"></span>
     <span class="drift" style="--y: 15%; --w: 11%; --h: 4%; --duration: 64s; --delay: -34s;"></span>
-    <span class="leaf" style="--x: 72%; --duration: 14s; --delay: -2s;"></span>
-    <span class="leaf" style="--x: 78%; --duration: 18s; --delay: -9s;"></span>
+    <span class="leaf" style="--x: 72%; --duration: 32s; --delay: 0s;"></span>
+    <span class="leaf" style="--x: 78%; --duration: 40s; --delay: 18s;"></span>
   `;
 }
 
