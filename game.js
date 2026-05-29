@@ -1377,6 +1377,102 @@ const CLOTHING_DEFINITIONS = {
 };
 const CRAFT_QUALITY_ITEMS = new Set(["feed", "hay", "cloth", "fertilizer", "arrows"]);
 
+const PEOPLE_DEFINITIONS = {
+  ruth: {
+    name: "Ruth",
+    role: "Garden Hand",
+    initials: "RT",
+    portrait: "assets/images/people/ruth.png",
+    detail: "Patient with seedlings, weeds, and steady watering."
+  },
+  caleb: {
+    name: "Caleb",
+    role: "Woodcutter",
+    initials: "CB",
+    portrait: "assets/images/people/caleb.png",
+    detail: "Strong at forest work and basic hauling."
+  },
+  miriam: {
+    name: "Miriam",
+    role: "Animal Keeper",
+    initials: "MR",
+    portrait: "assets/images/people/miriam.png",
+    detail: "Careful with feed, water, cleaning, and daily animal care."
+  },
+  hannah: {
+    name: "Hannah",
+    role: "Kitchen Helper",
+    initials: "HN",
+    portrait: "assets/images/people/hannah.png",
+    detail: "Turns simple staples into prepared household food."
+  },
+  ezra: {
+    name: "Ezra",
+    role: "Market Helper",
+    initials: "EZ",
+    portrait: "assets/images/people/ezra.png",
+    detail: "Good with fair prices, neighbors, and the market stall."
+  }
+};
+
+const WORKER_JOBS = {
+  rest: {
+    label: "Rest",
+    focus: "Household",
+    detail: "No work output. Keeps this person available for later."
+  },
+  homes: {
+    label: "Homes",
+    focus: "Care",
+    detail: "Refills worker home stores with food, water, and firewood from your inventory."
+  },
+  garden: {
+    label: "Garden",
+    focus: "Food",
+    detail: "Waters up to two planted beds and clears one weedy bed before the new day grows crops."
+  },
+  animals: {
+    label: "Animals",
+    focus: "Livestock",
+    detail: "Feeds, waters, and cleans up to two animal groups when supplies are available."
+  },
+  forest: {
+    label: "Forest",
+    focus: "Materials",
+    detail: "Brings back wood, plant matter, and herbs at the end of the work day."
+  },
+  kitchen: {
+    label: "Kitchen",
+    focus: "Meals",
+    detail: "Uses pantry staples to prepare simple food for the household."
+  },
+  market: {
+    label: "Market",
+    focus: "Coins",
+    detail: "Sells one small surplus item for coins if something useful is available."
+  }
+};
+
+const WORKER_SKILL_STAGES = [
+  { label: "Apprentice", threshold: 0, level: 1 },
+  { label: "Skilled", threshold: 6, level: 2 },
+  { label: "Seasoned", threshold: 18, level: 3 }
+];
+
+const WORKER_HOUSING_UPGRADES = {
+  2: { wood: 8, stone: 4, cloth: 1 },
+  3: { wood: 14, stone: 8, cloth: 2 }
+};
+
+const FAMILY_MEMBERS = {
+  home: {
+    name: "Household",
+    role: "Family Table",
+    initials: "HH",
+    detail: "Shared meals, rest, and steady routines can become the heart of the homestead."
+  }
+};
+
 let state = createNewState();
 let activeJournalId = "welcome";
 let messageTimeout = null;
@@ -1485,6 +1581,7 @@ function createNewState() {
     hotspotDebug: false,
     communityOrders: [],
     nextOrderId: 1,
+    people: createPeopleState(),
     sabbathActivities: { worshipped: false, strolled: false, gathered: false },
     lastRestMinute: -400,
     journalUnlocked: Object.fromEntries(journalEntries.map((item) => [item.id, item.id !== "shalomRest"])),
@@ -1493,6 +1590,28 @@ function createNewState() {
     dailyGoals: [],
     marketStall: createMarketStall()
   };
+}
+
+function hydratePeople(savedPeople = {}) {
+  const base = createPeopleState();
+  const savedWorkers = savedPeople.workers || {};
+  return {
+    ...base,
+    ...savedPeople,
+    workers: Object.fromEntries(Object.entries(base.workers).map(([id, worker]) => {
+      const savedWorker = savedWorkers[id] || {};
+      const assignment = WORKER_JOBS[savedWorker.assignment] ? savedWorker.assignment : worker.assignment;
+      return [id, { ...worker, ...savedWorker, assignment, skills: { ...(worker.skills || {}), ...(savedWorker.skills || {}) } }];
+    })),
+    housing: { ...base.housing, ...(savedPeople.housing || {}) },
+    family: { ...base.family, ...(savedPeople.family || {}) },
+    dailyLog: Array.isArray(savedPeople.dailyLog) ? savedPeople.dailyLog : []
+  };
+}
+
+function ensurePeople() {
+  state.people = hydratePeople(state.people || {});
+  return state.people;
 }
 
 function createGardenBeds() {
@@ -1556,6 +1675,32 @@ function createNeeds() {
 
 function createMarketStall() {
   return { isOpen: false, listings: {}, nextSaleMinute: 9999, recentSales: [], todayCoins: 0 };
+}
+
+function createPeopleState() {
+  return {
+    workers: Object.fromEntries(Object.keys(PEOPLE_DEFINITIONS).map((id, index) => [id, {
+      unlocked: index < 3,
+      resident: index < 3,
+      assignment: "rest",
+      relationship: 1,
+      skills: {},
+      needsMet: true,
+      lastNeedsNote: ""
+    }])),
+    housing: {
+      level: 1,
+      food: 3,
+      water: 3,
+      firewood: 3
+    },
+    family: {
+      warmth: 1,
+      sharedMeals: 0,
+      notes: ["The household is ready for a steadier rhythm."]
+    },
+    dailyLog: []
+  };
 }
 
 function createSkills() {
@@ -1628,6 +1773,7 @@ function hydrateState(savedState) {
     dailyGoals: savedState.dailyGoals || [],
     needs: hydrateNeeds(savedState.needs),
     hotspotDebug: false,
+    people: hydratePeople(savedState.people || {}),
     marketStall: { ...createMarketStall(), ...(savedState.marketStall || {}) }
   };
 }
@@ -4578,6 +4724,243 @@ function addItem(key, amount, quality = "standard") {
   addQualityItem(key, amount, quality);
 }
 
+function workerSkillStage(worker, jobId) {
+  const points = worker?.skills?.[jobId] || 0;
+  return WORKER_SKILL_STAGES.reduce((active, stage) => points >= stage.threshold ? stage : active, WORKER_SKILL_STAGES[0]);
+}
+
+function addWorkerSkill(worker, jobId, amount = 1) {
+  if (!worker || !WORKER_JOBS[jobId] || jobId === "rest") return;
+  worker.skills ||= {};
+  worker.skills[jobId] = (worker.skills[jobId] || 0) + amount;
+}
+
+function workerLevel(workerId, jobId) {
+  const worker = ensurePeople().workers[workerId];
+  return workerSkillStage(worker, jobId).level;
+}
+
+function residentWorkerEntries() {
+  const people = ensurePeople();
+  return Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.resident);
+}
+
+function workerHousingCapacity(people = ensurePeople()) {
+  return 2 + (people.housing?.level || 1);
+}
+
+function workerHousingStorageCapacity(people = ensurePeople()) {
+  return 4 + ((people.housing?.level || 1) * 3);
+}
+
+function stockWorkerHousingFromInventory(kind, amount = 1) {
+  const people = ensurePeople();
+  const housing = people.housing;
+  const capacity = workerHousingStorageCapacity(people);
+  let moved = 0;
+  while (moved < amount && (housing[kind] || 0) < capacity) {
+    if (!moveOneHousingSupply(kind)) break;
+    housing[kind] = (housing[kind] || 0) + 1;
+    moved += 1;
+  }
+  return moved;
+}
+
+function moveOneHousingSupply(kind) {
+  if (kind === "food") {
+    const foodOptions = ["preparedFood", "barley", "lentils", "cucumbers"];
+    const item = foodOptions.find((key) => (state.inventory[key] || 0) > 0);
+    return item ? spendItem(item, 1) : false;
+  }
+  if (kind === "water") return spendItem("water", 1);
+  if (kind === "firewood") return spendItem("wood", 1);
+  return false;
+}
+
+function consumeWorkerNeeds(workerId) {
+  const people = ensurePeople();
+  const worker = people.workers[workerId];
+  const person = PEOPLE_DEFINITIONS[workerId];
+  if (!worker?.resident) return true;
+  const housing = people.housing;
+  const missing = [];
+  ["food", "water", "firewood"].forEach((kind) => {
+    if ((housing[kind] || 0) <= 0) missing.push(kind);
+  });
+  if (missing.length) {
+    worker.needsMet = false;
+    worker.lastNeedsNote = `Needs ${missing.join(", ")}`;
+    people.dailyLog.push(`${person.name} could not work because their home lacked ${missing.join(", ")}.`);
+    return false;
+  }
+  housing.food -= 1;
+  housing.water -= 1;
+  housing.firewood -= 1;
+  worker.needsMet = true;
+  worker.lastNeedsNote = "Needs met";
+  return true;
+}
+
+function processWorkerDay() {
+  const people = ensurePeople();
+  people.dailyLog = [];
+  if (isSabbath()) {
+    people.dailyLog.push("The household kept Sabbath rest. Workers had the day off.");
+    Object.values(people.workers).forEach((worker) => {
+      if (worker.unlocked && worker.resident) {
+        worker.needsMet = true;
+        worker.lastNeedsNote = "Sabbath rest";
+      }
+    });
+    return;
+  }
+
+  const homekeeperEntries = Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.assignment === "homes");
+  homekeeperEntries.forEach(([id, worker]) => {
+    const result = workerHomekeeperJob(id);
+    if (result) people.dailyLog.push(result);
+    addWorkerSkill(worker, "homes", 1);
+  });
+
+  const readyWorkers = new Set();
+  residentWorkerEntries().forEach(([id]) => {
+    if (consumeWorkerNeeds(id)) readyWorkers.add(id);
+  });
+
+  Object.entries(people.workers).forEach(([id, worker]) => {
+    if (!worker.unlocked || worker.assignment === "rest" || worker.assignment === "homes") return;
+    if (worker.resident && !readyWorkers.has(id)) return;
+    const result = applyWorkerJob(id, worker.assignment);
+    if (result) {
+      people.dailyLog.push(result);
+      if (!result.includes("needed") && !result.includes("found no")) addWorkerSkill(worker, worker.assignment, 1);
+    }
+  });
+
+  if (people.dailyLog.length) {
+    pushMessage(`Worker report: ${people.dailyLog[0]}${people.dailyLog.length > 1 ? ` (+${people.dailyLog.length - 1} more)` : ""}`);
+  }
+}
+
+function applyWorkerJob(workerId, jobId) {
+  const person = PEOPLE_DEFINITIONS[workerId];
+  const name = person?.name || "A worker";
+  const level = workerLevel(workerId, jobId);
+  if (jobId === "garden") return workerGardenJob(name, level);
+  if (jobId === "animals") return workerAnimalJob(name, level);
+  if (jobId === "forest") return workerForestJob(name, level);
+  if (jobId === "kitchen") return workerKitchenJob(name, level);
+  if (jobId === "market") return workerMarketJob(name, level);
+  return "";
+}
+
+function workerHomekeeperJob(workerId) {
+  const person = PEOPLE_DEFINITIONS[workerId];
+  const worker = ensurePeople().workers[workerId];
+  const level = workerSkillStage(worker, "homes").level;
+  const amount = 1 + level;
+  const food = stockWorkerHousingFromInventory("food", amount);
+  const water = stockWorkerHousingFromInventory("water", amount);
+  const firewood = stockWorkerHousingFromInventory("firewood", amount);
+  const total = food + water + firewood;
+  if (!total) return `${person.name} tried to stock the worker homes, but supplies were missing.`;
+  return `${person.name} stocked worker homes with ${food} food, ${water} water, and ${firewood} firewood.`;
+}
+
+function workerGardenJob(name, level = 1) {
+  const plantedBeds = Object.entries(state.crops).filter(([bedId, bed]) => {
+    if (gardenBeds[bedId]?.requiresUpgrade && !state.upgrades?.[gardenBeds[bedId].requiresUpgrade]) return false;
+    return bed.plantings?.length && !bed.wateredToday;
+  });
+  const watered = plantedBeds.slice(0, 1 + level);
+  watered.forEach(([, bed]) => {
+    bed.wateredToday = true;
+    state.dailyStats.cropsWatered += 1;
+  });
+
+  const weedyBeds = Object.values(state.crops).filter((bed) => bed.hasWeeds).slice(0, level);
+  weedyBeds.forEach((bed) => {
+    bed.hasWeeds = false;
+    bed.weededToday = true;
+    state.dailyStats.cropsWeeded += 1;
+  });
+
+  if (!watered.length && !weedyBeds.length) return `${name} checked the garden, but nothing needed attention.`;
+  const parts = [];
+  if (watered.length) parts.push(`watered ${watered.length} planted bed${watered.length === 1 ? "" : "s"}`);
+  if (weedyBeds.length) parts.push(`cleared weeds from ${weedyBeds.length} bed${weedyBeds.length === 1 ? "" : "s"}`);
+  return `${name} ${parts.join(" and ")}.`;
+}
+
+function workerAnimalJob(name, level = 1) {
+  const groups = Object.entries(state.barnAnimals).filter(([, group]) => group.count > 0);
+  let cared = 0;
+  let blocked = false;
+  groups.slice(0, 1 + level).forEach(([animalId, group]) => {
+    const feedNeed = animalCatalog[animalId]?.feedNeed || 1;
+    const needsFeed = !group.fedToday;
+    const needsWater = !group.wateredToday;
+    if ((needsFeed && (state.inventory.feed || 0) < feedNeed) || (needsWater && (state.inventory.water || 0) < 1)) {
+      blocked = true;
+      return;
+    }
+    if (needsFeed) spendItem("feed", feedNeed);
+    if (needsWater) spendItem("water", 1);
+    group.fedToday = true;
+    group.wateredToday = true;
+    group.cleanedToday = true;
+    cared += 1;
+  });
+  if (cared) state.dailyStats.animalGroupsCared += cared;
+  if (cared) return `${name} cared for ${cared} animal group${cared === 1 ? "" : "s"}.`;
+  return blocked ? `${name} needed more feed or water before animal chores could be finished.` : `${name} found no animals needing care.`;
+}
+
+function workerForestJob(name, level = 1) {
+  const wood = 1 + level;
+  const herbs = level >= 2 ? 2 : 1;
+  addItem("wood", wood);
+  addItem("plantMatter", 1);
+  addItem("herbs", herbs);
+  state.dailyStats.woodGathered += wood;
+  return `${name} gathered ${wood} wood, 1 plant matter, and ${herbs} herbs.`;
+}
+
+function workerKitchenJob(name, level = 1) {
+  if ((state.inventory.barley || 0) < 1 || (state.inventory.lentils || 0) < 1) {
+    return `${name} needed barley and lentils before kitchen work could continue.`;
+  }
+  const meals = Math.min(level, state.inventory.barley || 0, state.inventory.lentils || 0);
+  spendItem("barley", meals);
+  spendItem("lentils", meals);
+  addItem("preparedFood", meals, level >= 3 ? "good" : "standard");
+  state.dailyStats.mealsCooked += meals;
+  return `${name} prepared ${meals} household food.`;
+}
+
+function workerMarketJob(name, level = 1) {
+  const saleOptions = [
+    ["eggs", 3],
+    ["cucumbers", 2],
+    ["herbs", 2],
+    ["preparedFood", 4]
+  ];
+  let sold = 0;
+  let coins = 0;
+  for (let i = 0; i < level; i += 1) {
+    const sale = saleOptions.find(([item]) => (state.inventory[item] || 0) > 0);
+    if (!sale) break;
+    const [item, price] = sale;
+    spendItem(item, 1);
+    coins += price;
+    sold += 1;
+  }
+  if (!sold) return `${name} found no small surplus to sell today.`;
+  state.inventory.coins += coins;
+  state.dailyStats.coinsEarned += coins;
+  return `${name} sold ${sold} item${sold === 1 ? "" : "s"} for ${coins} coins.`;
+}
+
 function absoluteMinute() {
   return (state.day - 1) * 840 + Math.max(0, state.minute - 420);
 }
@@ -4598,6 +4981,7 @@ function nextDay() {
   const wasSabbathRest = state.isSabbathRest;
   const hadShalom = state.shalomRestDays > 0;
   const hadRested = state.restedBuffDays > 0;
+  processWorkerDay();
   if (state.marketStall?.isOpen) {
     state.marketStall.isOpen = false;
     state.marketStall.nextSaleMinute = 9999;
@@ -4792,6 +5176,11 @@ function openModal(type, titleOverride) {
     modalTitle.textContent = "Market Stall";
     modalBody.innerHTML = marketStallMarkup();
     bindMarketStallButtons();
+  }
+  if (type === "people") {
+    modalTitle.textContent = "People";
+    modalBody.innerHTML = peopleMarkup();
+    bindPeopleButtons();
   }
   if (type === "barnCare") {
     openBarnCareModal();
@@ -5275,6 +5664,249 @@ function processPassiveStallSales() {
     stall.todayCoins = (stall.todayCoins || 0) + price;
     stall.nextSaleMinute = state.minute + 40 + Math.floor(Math.random() * 41);
   }
+}
+
+function peopleAssignmentSummary() {
+  const people = ensurePeople();
+  const assignments = Object.entries(people.workers)
+    .filter(([, worker]) => worker.unlocked && worker.assignment !== "rest")
+    .map(([id, worker]) => `${PEOPLE_DEFINITIONS[id].name}: ${WORKER_JOBS[worker.assignment]?.label || "Rest"}`);
+  return assignments.length ? assignments.join(", ") : "None assigned";
+}
+
+function workerHousingSummary() {
+  const people = ensurePeople();
+  const housing = people.housing;
+  return `${residentWorkerEntries().length}/${workerHousingCapacity(people)} housed, stores ${housing.food || 0}/${housing.water || 0}/${housing.firewood || 0}`;
+}
+
+function peopleMarkup() {
+  const people = ensurePeople();
+  const housing = people.housing;
+  const residents = residentWorkerEntries().length;
+  const homeCapacity = workerHousingCapacity(people);
+  const storeCapacity = workerHousingStorageCapacity(people);
+  const housingImage = `assets/images/housing/worker-house-${Math.min(3, housing.level || 1)}.png`;
+  const nextHousingCost = WORKER_HOUSING_UPGRADES[(housing.level || 1) + 1];
+  const housingUpgradeMarkup = nextHousingCost
+    ? `<button type="button" id="upgradeWorkerHousingBtn" ${!hasIngredients(nextHousingCost) ? "disabled" : ""}>Upgrade Housing (${costText(nextHousingCost)})</button>`
+    : `<button type="button" disabled>Housing Fully Upgraded</button>`;
+
+  const workerCards = Object.entries(PEOPLE_DEFINITIONS).map(([id, person]) => {
+    const worker = people.workers[id];
+    const job = WORKER_JOBS[worker.assignment] || WORKER_JOBS.rest;
+    const locked = !worker.unlocked;
+    const inviteCost = workerInviteCost(id);
+    const atCapacity = residents >= homeCapacity;
+    const stage = workerSkillStage(worker, worker.assignment);
+    const trainCost = workerTrainingCost(worker);
+    const jobButtons = Object.entries(WORKER_JOBS).map(([jobId, jobDef]) => {
+      const active = worker.assignment === jobId ? " people-job-active" : "";
+      return `<button type="button" class="people-job${active}" data-worker-id="${id}" data-worker-job="${jobId}" ${locked ? "disabled" : ""}>
+        <span>${jobDef.label}</span>
+        <small>${jobDef.focus}</small>
+      </button>`;
+    }).join("");
+
+    return `<article class="people-card${locked ? " people-card-locked" : ""}">
+      <div class="people-card-head">
+        <span class="people-avatar" aria-hidden="true"><img src="${person.portrait}" alt=""><span>${person.initials}</span></span>
+        <span>
+          <strong>${person.name}</strong>
+          <small>${person.role}</small>
+        </span>
+      </div>
+      <p>${person.detail}</p>
+      ${locked
+        ? `<p class="people-assignment">Needs an open worker home before joining.</p>
+          <button type="button" data-invite-worker="${id}" ${(state.inventory.coins || 0) < inviteCost || atCapacity ? "disabled" : ""}>Invite to Live Here for ${inviteCost} coins</button>`
+        : `<p class="people-assignment">Assigned: <strong>${job.label}</strong><br><small>${job.detail}</small></p>
+          <p class="people-assignment">Home: <strong>${worker.resident ? worker.lastNeedsNote || "Needs met" : "Not resident"}</strong><br><small>${stage.label} ${job.label} · ${worker.skills?.[worker.assignment] || 0} XP</small></p>
+          <div class="people-job-grid">${jobButtons}</div>`}
+      ${!locked && worker.assignment !== "rest" ? `<button type="button" data-train-worker="${id}" ${(state.inventory.coins || 0) < trainCost ? "disabled" : ""}>Train ${job.label} (${trainCost} coins)</button>` : ""}
+    </article>`;
+  }).join("");
+
+  const logMarkup = people.dailyLog?.length
+    ? `<ul class="people-log">${people.dailyLog.map((entry) => `<li>${entry}</li>`).join("")}</ul>`
+    : `<p class="hint-text">No worker report yet. Assign jobs, then end the day to see results.</p>`;
+
+  const family = people.family;
+  const familyCards = Object.entries(FAMILY_MEMBERS).map(([, member]) => `
+    <article class="people-card family-card">
+      <div class="people-card-head">
+        <span class="people-avatar family-avatar" aria-hidden="true">${member.initials}</span>
+        <span>
+          <strong>${member.name}</strong>
+          <small>${member.role}</small>
+        </span>
+      </div>
+      <p>${member.detail}</p>
+      <p class="people-assignment">Warmth: <strong>${family.warmth}</strong> · Shared meals: <strong>${family.sharedMeals}</strong></p>
+      <button type="button" id="shareFamilyMealBtn" ${(state.inventory.preparedFood || 0) <= 0 ? "disabled" : ""}>Share Prepared Food</button>
+    </article>
+  `).join("");
+
+  return `
+    <div class="people-shell">
+      <section class="people-section">
+        <h3>Workers Home</h3>
+        <img class="people-house-image" src="${housingImage}" alt="Worker housing level ${housing.level || 1}">
+        <div class="people-home-panel">
+          <div class="people-home-stat"><span>Residents</span><strong>${residents}/${homeCapacity}</strong></div>
+          <div class="people-home-stat"><span>Food</span><strong>${housing.food || 0}/${storeCapacity}</strong></div>
+          <div class="people-home-stat"><span>Water</span><strong>${housing.water || 0}/${storeCapacity}</strong></div>
+          <div class="people-home-stat"><span>Firewood</span><strong>${housing.firewood || 0}/${storeCapacity}</strong></div>
+        </div>
+        <div class="people-home-actions">
+          <button type="button" data-stock-housing="food">Stock Food</button>
+          <button type="button" data-stock-housing="water">Stock Water</button>
+          <button type="button" data-stock-housing="firewood">Stock Firewood</button>
+          ${housingUpgradeMarkup}
+        </div>
+        <p class="hint-text">Each resident uses 1 food, 1 water, and 1 firewood at day end. Assign someone to Homes to refill stores automatically from your inventory.</p>
+      </section>
+      <section class="people-section">
+        <h3>Workers</h3>
+        <p class="hint-text">Workers produce at day end if their home needs are met. Repeated work and training improve their craft output.</p>
+        <div class="people-grid">${workerCards}</div>
+      </section>
+      <section class="people-section">
+        <h3>Family</h3>
+        <div class="people-grid">${familyCards}</div>
+      </section>
+      <section class="people-section">
+        <h3>Latest Report</h3>
+        ${logMarkup}
+      </section>
+    </div>`;
+}
+
+function bindPeopleButtons() {
+  document.querySelectorAll("[data-worker-job]").forEach((button) => {
+    button.addEventListener("click", () => assignWorkerJob(button.dataset.workerId, button.dataset.workerJob));
+  });
+  document.querySelectorAll("[data-invite-worker]").forEach((button) => {
+    button.addEventListener("click", () => inviteWorker(button.dataset.inviteWorker));
+  });
+  document.querySelectorAll("[data-stock-housing]").forEach((button) => {
+    button.addEventListener("click", () => stockHousingSupply(button.dataset.stockHousing));
+  });
+  document.querySelectorAll("[data-train-worker]").forEach((button) => {
+    button.addEventListener("click", () => trainWorker(button.dataset.trainWorker));
+  });
+  document.getElementById("upgradeWorkerHousingBtn")?.addEventListener("click", upgradeWorkerHousing);
+  document.getElementById("shareFamilyMealBtn")?.addEventListener("click", shareFamilyMeal);
+}
+
+function costText(cost) {
+  return Object.entries(cost).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
+}
+
+function workerInviteCost(workerId) {
+  const index = Object.keys(PEOPLE_DEFINITIONS).indexOf(workerId);
+  return 10 + Math.max(0, index) * 4;
+}
+
+function workerTrainingCost(worker) {
+  const stage = workerSkillStage(worker, worker.assignment);
+  return 6 + (stage.level - 1) * 5;
+}
+
+function assignWorkerJob(workerId, jobId) {
+  const people = ensurePeople();
+  const worker = people.workers[workerId];
+  if (!worker?.unlocked || !WORKER_JOBS[jobId]) return;
+  worker.assignment = jobId;
+  const person = PEOPLE_DEFINITIONS[workerId];
+  pushMessage(`${person.name} is assigned to ${WORKER_JOBS[jobId].label}.`);
+  saveGame(false);
+  render();
+  openModal("people");
+}
+
+function inviteWorker(workerId) {
+  const people = ensurePeople();
+  const worker = people.workers[workerId];
+  const person = PEOPLE_DEFINITIONS[workerId];
+  if (!worker || worker.unlocked || !person) return;
+  const cost = workerInviteCost(workerId);
+  if (residentWorkerEntries().length >= workerHousingCapacity(people)) {
+    pushMessage("Upgrade worker housing before inviting another resident.");
+    return;
+  }
+  if (!spendItem("coins", cost)) {
+    pushMessage(`You need ${cost} coins to invite ${person.name}.`);
+    return;
+  }
+  worker.unlocked = true;
+  worker.resident = true;
+  worker.needsMet = true;
+  worker.lastNeedsNote = "Needs met";
+  worker.assignment = "rest";
+  pushMessage(`${person.name} moved into the worker home and joined the work board.`);
+  saveGame(false);
+  render();
+  openModal("people");
+}
+
+function stockHousingSupply(kind) {
+  const labels = { food: "food", water: "water", firewood: "firewood" };
+  const moved = stockWorkerHousingFromInventory(kind, 1);
+  pushMessage(moved ? `Stocked 1 ${labels[kind]}.` : `No available ${labels[kind]} to stock.`);
+  saveGame(false);
+  render();
+  openModal("people");
+}
+
+function upgradeWorkerHousing() {
+  const people = ensurePeople();
+  const nextLevel = (people.housing.level || 1) + 1;
+  const cost = WORKER_HOUSING_UPGRADES[nextLevel];
+  if (!cost) return;
+  if (!hasIngredients(cost)) {
+    pushMessage(`Housing upgrade needs ${costText(cost)}.`);
+    return;
+  }
+  spendIngredients(cost);
+  people.housing.level = nextLevel;
+  pushMessage(`Worker housing upgraded to level ${nextLevel}.`);
+  saveGame(false);
+  render();
+  openModal("people");
+}
+
+function trainWorker(workerId) {
+  const people = ensurePeople();
+  const worker = people.workers[workerId];
+  const person = PEOPLE_DEFINITIONS[workerId];
+  if (!worker?.unlocked || worker.assignment === "rest") return;
+  const cost = workerTrainingCost(worker);
+  if (!spendItem("coins", cost)) {
+    pushMessage(`Training needs ${cost} coins.`);
+    return;
+  }
+  addWorkerSkill(worker, worker.assignment, 4);
+  const stage = workerSkillStage(worker, worker.assignment);
+  pushMessage(`${person.name} trained ${WORKER_JOBS[worker.assignment].label} work and is now ${stage.label}.`);
+  saveGame(false);
+  render();
+  openModal("people");
+}
+
+function shareFamilyMeal() {
+  const people = ensurePeople();
+  if (!spendItem("preparedFood", 1)) {
+    pushMessage("Prepare food before sharing a family meal.");
+    return;
+  }
+  people.family.warmth += 1;
+  people.family.sharedMeals += 1;
+  people.family.notes = [`Shared a quiet prepared meal on Day ${state.day}.`, ...(people.family.notes || [])].slice(0, 5);
+  pushMessage("The household shared a meal. Family warmth grew.");
+  saveGame(false);
+  render();
+  openModal("people");
 }
 
 function marketStallMarkup() {
@@ -5929,6 +6561,8 @@ function statusMarkup() {
     ["Water", state.inventory.water],
     ["Sabbath", sabbathStatus()],
     ["Shalom", state.shalomRestDays > 0 ? "Active" : "None"],
+    ["Workers", peopleAssignmentSummary()],
+    ["Worker Homes", workerHousingSummary()],
     ["Clothing", CLOTHING_DEFINITIONS[activeClothing()].label],
     ["Rest Buffs", restBuffSummary()],
     ["Active Buffs", activeBuffs().map((buff) => buff.label).join(", ") || "None"],
@@ -6718,6 +7352,7 @@ function bindEvents() {
     }
   });
   document.getElementById("homesteadBtn").addEventListener("click", () => openHomesteadMaintenanceModal());
+  document.getElementById("peopleBtn").addEventListener("click", () => openModal("people"));
   document.getElementById("statusBtn").addEventListener("click", () => openModal("status"));
   document.getElementById("areasBtn").addEventListener("click", () => openModal("areas"));
   document.getElementById("inventoryBtn").addEventListener("click", () => openModal("inventory"));
