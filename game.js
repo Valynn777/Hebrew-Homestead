@@ -17,6 +17,7 @@ const OUTDOOR_SCENES = new Set([
 ]);
 
 const sceneImages = {
+  overviewCamp: "assets/images/scenes/progression/homestead-camp.png",
   overview: "assets/images/scenes/homestead-overview.png",
   cabin: "assets/images/scenes/cabin/cabin-entry.png",
   kitchen: "assets/images/scenes/cabin/kitchen.png",
@@ -49,6 +50,7 @@ const scenes = {
     description: "The cabin, garden, workshed, forest path, well, and Sabbath resting place sit within easy reach.",
     background: sceneImages.overview,
     hotspots: [
+      hs("build", "Build / Upgrade", 41, 41, 13, 12, "modal", { modal: "homesteadBuild" }),
       hs("cabin", "Cabin", 18, 14, 45, 49, "navigate", { target: "cabin" }),
       hs("barn", "Barn", 6, 29, 12, 16, "navigate", { target: "barn" }),
       hs("garden", "Garden", 0, 60, 48, 38, "navigate", { target: "garden" }),
@@ -1464,6 +1466,77 @@ const WORKER_HOUSING_UPGRADES = {
   3: { wood: 14, stone: 8, cloth: 2 }
 };
 
+const HOMESTEAD_BUILDINGS = {
+  home: {
+    label: "Cabin",
+    level0: "Tent Camp",
+    level1: "Simple Cabin",
+    cost: { wood: 12, stone: 6 },
+    unlocks: "Cabin rooms, kitchen, bedroom rest, and household chores."
+  },
+  workshed: {
+    label: "Workshed",
+    level0: "No Workshed",
+    level1: "Basic Workshed",
+    cost: { wood: 10, stone: 4 },
+    unlocks: "A dedicated place for tool work and expanded crafting."
+  },
+  barn: {
+    label: "Barn",
+    level0: "No Barn",
+    level1: "Basic Barn",
+    cost: { wood: 16, stone: 8, hay: 2 },
+    unlocks: "Feed storage, barn cleaning, and larger animal care."
+  },
+  coop: {
+    label: "Chicken Coop",
+    level0: "No Coop",
+    level1: "Small Chicken Coop",
+    cost: { wood: 8, hay: 2 },
+    requires: "barn",
+    unlocks: "Chickens, egg collection, and feathers."
+  },
+  goatPen: {
+    label: "Goat Pen",
+    level0: "No Goat Pen",
+    level1: "Goat Pen",
+    cost: { wood: 10, hay: 3 },
+    requires: "barn",
+    unlocks: "Goats and goat milk."
+  },
+  sheepPen: {
+    label: "Sheep Pen",
+    level0: "No Sheep Pen",
+    level1: "Sheep Pen",
+    cost: { wood: 12, hay: 4 },
+    requires: "barn",
+    unlocks: "Sheep, wool, and mutton stewardship."
+  },
+  cattleBarn: {
+    label: "Cattle Shelter",
+    level0: "No Cattle Shelter",
+    level1: "Cattle Shelter",
+    cost: { wood: 18, stone: 8, hay: 5 },
+    requires: "barn",
+    unlocks: "Cattle and cow milk."
+  }
+};
+
+const SCENE_BUILDING_REQUIREMENTS = {
+  cabin: "home",
+  livingRoom: "home",
+  bedroom: "home",
+  bathroom: "home",
+  kitchen: "home",
+  pantry: "home",
+  workshed: "workshed",
+  barn: "barn",
+  chickenCoop: "coop",
+  goatPen: "goatPen",
+  sheepPasture: "sheepPen",
+  cowPasture: "cattleBarn"
+};
+
 const FAMILY_MEMBERS = {
   home: {
     name: "Household",
@@ -1563,6 +1636,7 @@ function createNewState() {
     tools: { ...starterTools },
     toolDurability: createToolDurability(starterTools),
     upgrades: { tractor: false, irrigation: false, plumbing: false },
+    homestead: createHomesteadProgress(false),
     crops: createGardenBeds(),
     barnAnimals: createBarnAnimals(),
     barnFeedStore: 0,
@@ -1677,6 +1751,14 @@ function createMarketStall() {
   return { isOpen: false, listings: {}, nextSaleMinute: 9999, recentSales: [], todayCoins: 0 };
 }
 
+function createHomesteadProgress(established = false) {
+  const level = established ? 1 : 0;
+  return {
+    buildings: Object.fromEntries(Object.keys(HOMESTEAD_BUILDINGS).map((id) => [id, level])),
+    campfireLit: false
+  };
+}
+
 function createPeopleState() {
   return {
     workers: Object.fromEntries(Object.keys(PEOPLE_DEFINITIONS).map((id, index) => [id, {
@@ -1754,6 +1836,7 @@ function hydrateState(savedState) {
     tools,
     toolDurability,
     upgrades: { tractor: false, irrigation: false, plumbing: false, ...(savedState.upgrades || {}) },
+    homestead: hydrateHomestead(savedState),
     crops: mergeGardenBeds(savedState.crops || {}),
     barnAnimals: mergeBarnAnimals(savedState.barnAnimals || {}),
     kitchenChores: { dishes: false, counters: false, floor: false, ...(savedState.kitchenChores || {}) },
@@ -1775,6 +1858,16 @@ function hydrateState(savedState) {
     hotspotDebug: false,
     people: hydratePeople(savedState.people || {}),
     marketStall: { ...createMarketStall(), ...(savedState.marketStall || {}) }
+  };
+}
+
+function hydrateHomestead(savedState = {}) {
+  const base = createHomesteadProgress(!savedState.homestead);
+  const saved = savedState.homestead || {};
+  return {
+    ...base,
+    ...saved,
+    buildings: { ...base.buildings, ...(saved.buildings || {}) }
   };
 }
 
@@ -2007,6 +2100,23 @@ function sabbathStatus() {
   if (isSabbath()) return "Sabbath";
   if (isPreparationDay()) return "Preparation";
   return state.shalomRestDays > 0 ? "Shalom Rest" : "Work Day";
+}
+
+function ensureHomestead() {
+  state.homestead = hydrateHomestead({ homestead: state.homestead || createHomesteadProgress(false) });
+  return state.homestead;
+}
+
+function homesteadBuildingLevel(id) {
+  return ensureHomestead().buildings?.[id] || 0;
+}
+
+function homesteadBuildingBuilt(id) {
+  return homesteadBuildingLevel(id) > 0;
+}
+
+function overviewIsCamp() {
+  return !homesteadBuildingBuilt("home");
 }
 
 function hasRestedStaminaBoost() {
@@ -2401,6 +2511,13 @@ function handleHotspot(hotspot) {
 
 function navigate(target) {
   if (!canDoLabor("navigate")) return;
+  const requiredBuilding = SCENE_BUILDING_REQUIREMENTS[target];
+  if (requiredBuilding && !homesteadBuildingBuilt(requiredBuilding)) {
+    const building = HOMESTEAD_BUILDINGS[requiredBuilding];
+    pushMessage(`${building.label} is not built yet.`);
+    openModal("homesteadBuild");
+    return;
+  }
   state.currentScene = target;
   pushMessage(`Moved to ${scenes[target].title}.`);
 }
@@ -5174,6 +5291,11 @@ function openModal(type, titleOverride) {
     modalBody.innerHTML = marketStallMarkup();
     bindMarketStallButtons();
   }
+  if (type === "homesteadBuild") {
+    modalTitle.textContent = "Build Homestead";
+    modalBody.innerHTML = homesteadBuildMarkup();
+    bindHomesteadBuildButtons();
+  }
   if (type === "people") {
     modalTitle.textContent = "People";
     modalBody.innerHTML = peopleMarkup();
@@ -5663,6 +5785,65 @@ function processPassiveStallSales() {
   }
 }
 
+function homesteadBuildMarkup() {
+  const homestead = ensureHomestead();
+  const cards = Object.entries(HOMESTEAD_BUILDINGS).map(([id, building]) => {
+    const level = homestead.buildings[id] || 0;
+    const built = level > 0;
+    const requiredBuilt = !building.requires || homesteadBuildingBuilt(building.requires);
+    const canBuild = !built && requiredBuilt && hasIngredients(building.cost);
+    const requirementText = building.requires && !requiredBuilt
+      ? `<p class="hint-text">Requires ${HOMESTEAD_BUILDINGS[building.requires].label} first.</p>`
+      : "";
+    const action = built
+      ? `<button type="button" disabled>Built</button>`
+      : `<button type="button" data-build-homestead="${id}" ${canBuild ? "" : "disabled"}>Build (${costText(building.cost)})</button>`;
+    return `<article class="modal-card build-card">
+      <h3>${building.label}</h3>
+      <p><strong>${built ? building.level1 : building.level0}</strong></p>
+      <p>${building.unlocks}</p>
+      ${requirementText}
+      ${action}
+    </article>`;
+  }).join("");
+
+  return `
+    <p class="hint-text">New homesteads begin as a tent camp. Gather resources, then build permanent structures to unlock more of the map.</p>
+    <div class="card-grid">${cards}</div>`;
+}
+
+function bindHomesteadBuildButtons() {
+  document.querySelectorAll("[data-build-homestead]").forEach((button) => {
+    button.addEventListener("click", () => buildHomesteadBuilding(button.dataset.buildHomestead));
+  });
+}
+
+function buildHomesteadBuilding(id) {
+  const building = HOMESTEAD_BUILDINGS[id];
+  if (!building) return;
+  const homestead = ensureHomestead();
+  if (homestead.buildings[id] > 0) {
+    pushMessage(`${building.label} is already built.`);
+    return;
+  }
+  if (building.requires && !homesteadBuildingBuilt(building.requires)) {
+    pushMessage(`${building.label} needs ${HOMESTEAD_BUILDINGS[building.requires].label} first.`);
+    openModal("homesteadBuild");
+    return;
+  }
+  if (!hasIngredients(building.cost)) {
+    pushMessage(`${building.label} needs ${costText(building.cost)}.`);
+    openModal("homesteadBuild");
+    return;
+  }
+  spendIngredients(building.cost);
+  homestead.buildings[id] = 1;
+  pushMessage(`${building.label} built. ${building.unlocks}`);
+  saveGame(false);
+  render();
+  openModal("homesteadBuild");
+}
+
 function peopleAssignmentSummary() {
   const people = ensurePeople();
   const assignments = Object.entries(people.workers)
@@ -5675,6 +5856,14 @@ function workerHousingSummary() {
   const people = ensurePeople();
   const housing = people.housing;
   return `${residentWorkerEntries(people).length}/${workerHousingCapacity(people)} housed, stores ${housing.food || 0}/${housing.water || 0}/${housing.firewood || 0}`;
+}
+
+function homesteadProgressSummary() {
+  const homestead = ensureHomestead();
+  const built = Object.entries(HOMESTEAD_BUILDINGS)
+    .filter(([id]) => (homestead.buildings[id] || 0) > 0)
+    .map(([, building]) => building.label);
+  return built.length ? built.join(", ") : "Tent camp";
 }
 
 function peopleMarkup() {
@@ -6540,6 +6729,7 @@ function statusMarkup() {
     ["Season", seasons[state.seasonIndex]],
     ["Weather", weatherCycle[state.weatherIndex]],
     ["Time", formatTime(state.minute)],
+    ["Homestead", homesteadProgressSummary()],
     ["Hunger", `${Math.round(state.needs.hunger)}/100`],
     ["Thirst", `${Math.round(state.needs.thirst)}/100`],
     ["Hygiene", `${Math.round(state.needs.hygiene)}/100`],
@@ -6607,7 +6797,7 @@ function areaMenuMarkup() {
 
 function sceneInfoMarkup() {
   const scene = scenes[state.currentScene];
-  return `<p>${scene.description}</p><h3>Available Hotspots</h3><div class="area-list">${visibleHotspots(scene).map((hotspot) => `
+  return `<p>${sceneDisplayDescription(scene)}</p><h3>Available Hotspots</h3><div class="area-list">${visibleHotspots(scene).map((hotspot) => `
     <button type="button" disabled><strong>${hotspot.label}</strong><br><small>${hotspot.action}</small></button>
   `).join("")}</div>`;
 }
@@ -6739,8 +6929,8 @@ function renderScene() {
   const stage = document.getElementById("sceneStage");
   setSceneBackground(stage, scene);
   stage.classList.toggle("debug-hotspots", state.hotspotDebug);
-  document.getElementById("sceneTitleOverlay").textContent = scene.title;
-  document.getElementById("sceneDescriptionOverlay").textContent = scene.description;
+  document.getElementById("sceneTitleOverlay").textContent = sceneDisplayTitle(scene);
+  document.getElementById("sceneDescriptionOverlay").textContent = sceneDisplayDescription(scene);
   stage.dataset.season = seasons[state.seasonIndex].toLowerCase();
   updateSeasonLayer();
   updateNightOverlay();
@@ -6764,8 +6954,38 @@ function renderScene() {
   });
 }
 
+function sceneDisplayTitle(scene) {
+  if (scene.id === "overview" && overviewIsCamp()) return "Tent Camp";
+  return scene.title;
+}
+
+function sceneDisplayDescription(scene) {
+  if (scene.id === "overview" && overviewIsCamp()) {
+    return "A simple tent, fire pit, starter garden, and open land mark the beginning of the homestead.";
+  }
+  return scene.description;
+}
+
+function overviewCampHotspots() {
+  return [
+    hs("campShelter", "Tent Camp", 25, 35, 18, 21, "modal", { modal: "homesteadBuild" }),
+    hs("campFire", "Fire Pit", 39, 56, 9, 10, "message", { message: "The fire pit is ready for a future cooking and warmth system." }),
+    hs("starterGarden", "Starter Garden", 9, 47, 18, 18, "navigate", { target: "garden" }),
+    hs("storage", "Storage Baskets", 24, 51, 10, 11, "modal", { modal: "inventory" }),
+    hs("build", "Build / Upgrade", 52, 32, 27, 21, "modal", { modal: "homesteadBuild" }),
+    hs("forest", "Forest Path", 75, 6, 20, 26, "navigate", { target: "forest" }),
+    hs("well", "Water Jugs", 48, 48, 12, 16, "gatherWater"),
+    hs("sabbath", "Quiet Rest Spot", 63, 65, 22, 18, "navigate", { target: "sabbath" })
+  ];
+}
+
+function sceneHotspots(scene) {
+  if (scene.id === "overview" && overviewIsCamp()) return overviewCampHotspots();
+  return scene.hotspots;
+}
+
 function visibleHotspots(scene) {
-  return scene.hotspots.filter((hotspot) => {
+  return sceneHotspots(scene).filter((hotspot) => {
     if (hotspot.sabbathOnly) return isSabbath();
     if (hotspot.prepOnly) return isPreparationDay();
     if (hotspot.action === "cleanRoomChore") return Boolean(state.roomChores?.[hotspot.room]?.[hotspot.chore]);
@@ -7118,20 +7338,21 @@ function playSceneEffect(effect) {
 }
 
 function setSceneBackground(stage, scene) {
-  stage.style.backgroundImage = `url("${scene.background}")`;
-  stage.classList.toggle("has-image", imageStatus[scene.background] === true);
-  if (imageStatus[scene.background] !== undefined) return;
+  const background = scene.id === "overview" && overviewIsCamp() ? sceneImages.overviewCamp : scene.background;
+  stage.style.backgroundImage = `url("${background}")`;
+  stage.classList.toggle("has-image", imageStatus[background] === true);
+  if (imageStatus[background] !== undefined) return;
 
   const image = new Image();
   image.onload = () => {
-    imageStatus[scene.background] = true;
+    imageStatus[background] = true;
     if (state.currentScene === scene.id) renderScene();
   };
   image.onerror = () => {
-    imageStatus[scene.background] = false;
+    imageStatus[background] = false;
     if (state.currentScene === scene.id) renderScene();
   };
-  image.src = scene.background;
+  image.src = background;
 }
 
 function generateDailyGoals() {
