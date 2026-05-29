@@ -4735,13 +4735,12 @@ function addWorkerSkill(worker, jobId, amount = 1) {
   worker.skills[jobId] = (worker.skills[jobId] || 0) + amount;
 }
 
-function workerLevel(workerId, jobId) {
-  const worker = ensurePeople().workers[workerId];
+function workerLevel(workerId, jobId, people = ensurePeople()) {
+  const worker = people.workers[workerId];
   return workerSkillStage(worker, jobId).level;
 }
 
-function residentWorkerEntries() {
-  const people = ensurePeople();
+function residentWorkerEntries(people = ensurePeople()) {
   return Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.resident);
 }
 
@@ -4753,8 +4752,7 @@ function workerHousingStorageCapacity(people = ensurePeople()) {
   return 4 + ((people.housing?.level || 1) * 3);
 }
 
-function stockWorkerHousingFromInventory(kind, amount = 1) {
-  const people = ensurePeople();
+function stockWorkerHousingFromInventory(kind, amount = 1, people = ensurePeople()) {
   const housing = people.housing;
   const capacity = workerHousingStorageCapacity(people);
   let moved = 0;
@@ -4777,8 +4775,7 @@ function moveOneHousingSupply(kind) {
   return false;
 }
 
-function consumeWorkerNeeds(workerId) {
-  const people = ensurePeople();
+function consumeWorkerNeeds(workerId, people = ensurePeople()) {
   const worker = people.workers[workerId];
   const person = PEOPLE_DEFINITIONS[workerId];
   if (!worker?.resident) return true;
@@ -4817,20 +4814,20 @@ function processWorkerDay() {
 
   const homekeeperEntries = Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.assignment === "homes");
   homekeeperEntries.forEach(([id, worker]) => {
-    const result = workerHomekeeperJob(id);
+    const result = workerHomekeeperJob(id, people);
     if (result) people.dailyLog.push(result);
     addWorkerSkill(worker, "homes", 1);
   });
 
   const readyWorkers = new Set();
-  residentWorkerEntries().forEach(([id]) => {
-    if (consumeWorkerNeeds(id)) readyWorkers.add(id);
+  residentWorkerEntries(people).forEach(([id]) => {
+    if (consumeWorkerNeeds(id, people)) readyWorkers.add(id);
   });
 
   Object.entries(people.workers).forEach(([id, worker]) => {
     if (!worker.unlocked || worker.assignment === "rest" || worker.assignment === "homes") return;
     if (worker.resident && !readyWorkers.has(id)) return;
-    const result = applyWorkerJob(id, worker.assignment);
+    const result = applyWorkerJob(id, worker.assignment, people);
     if (result) {
       people.dailyLog.push(result);
       if (!result.includes("needed") && !result.includes("found no")) addWorkerSkill(worker, worker.assignment, 1);
@@ -4842,10 +4839,10 @@ function processWorkerDay() {
   }
 }
 
-function applyWorkerJob(workerId, jobId) {
+function applyWorkerJob(workerId, jobId, people = ensurePeople()) {
   const person = PEOPLE_DEFINITIONS[workerId];
   const name = person?.name || "A worker";
-  const level = workerLevel(workerId, jobId);
+  const level = workerLevel(workerId, jobId, people);
   if (jobId === "garden") return workerGardenJob(name, level);
   if (jobId === "animals") return workerAnimalJob(name, level);
   if (jobId === "forest") return workerForestJob(name, level);
@@ -4854,14 +4851,14 @@ function applyWorkerJob(workerId, jobId) {
   return "";
 }
 
-function workerHomekeeperJob(workerId) {
+function workerHomekeeperJob(workerId, people = ensurePeople()) {
   const person = PEOPLE_DEFINITIONS[workerId];
-  const worker = ensurePeople().workers[workerId];
+  const worker = people.workers[workerId];
   const level = workerSkillStage(worker, "homes").level;
   const amount = 1 + level;
-  const food = stockWorkerHousingFromInventory("food", amount);
-  const water = stockWorkerHousingFromInventory("water", amount);
-  const firewood = stockWorkerHousingFromInventory("firewood", amount);
+  const food = stockWorkerHousingFromInventory("food", amount, people);
+  const water = stockWorkerHousingFromInventory("water", amount, people);
+  const firewood = stockWorkerHousingFromInventory("firewood", amount, people);
   const total = food + water + firewood;
   if (!total) return `${person.name} tried to stock the worker homes, but supplies were missing.`;
   return `${person.name} stocked worker homes with ${food} food, ${water} water, and ${firewood} firewood.`;
@@ -5677,13 +5674,13 @@ function peopleAssignmentSummary() {
 function workerHousingSummary() {
   const people = ensurePeople();
   const housing = people.housing;
-  return `${residentWorkerEntries().length}/${workerHousingCapacity(people)} housed, stores ${housing.food || 0}/${housing.water || 0}/${housing.firewood || 0}`;
+  return `${residentWorkerEntries(people).length}/${workerHousingCapacity(people)} housed, stores ${housing.food || 0}/${housing.water || 0}/${housing.firewood || 0}`;
 }
 
 function peopleMarkup() {
   const people = ensurePeople();
   const housing = people.housing;
-  const residents = residentWorkerEntries().length;
+  const residents = residentWorkerEntries(people).length;
   const homeCapacity = workerHousingCapacity(people);
   const storeCapacity = workerHousingStorageCapacity(people);
   const housingImage = `assets/images/housing/worker-house-${Math.min(3, housing.level || 1)}.png`;
@@ -5696,7 +5693,6 @@ function peopleMarkup() {
     const worker = people.workers[id];
     const job = WORKER_JOBS[worker.assignment] || WORKER_JOBS.rest;
     const locked = !worker.unlocked;
-    const inviteCost = workerInviteCost(id);
     const atCapacity = residents >= homeCapacity;
     const stage = workerSkillStage(worker, worker.assignment);
     const trainCost = workerTrainingCost(worker);
@@ -5718,8 +5714,8 @@ function peopleMarkup() {
       </div>
       <p>${person.detail}</p>
       ${locked
-        ? `<p class="people-assignment">Needs an open worker home before joining.</p>
-          <button type="button" data-invite-worker="${id}" ${(state.inventory.coins || 0) < inviteCost || atCapacity ? "disabled" : ""}>Invite to Live Here for ${inviteCost} coins</button>`
+        ? `<p class="people-assignment">${atCapacity ? "Worker housing is full." : "Open worker home available."}</p>
+          <button type="button" data-invite-worker="${id}" ${atCapacity ? "disabled" : ""}>Invite to Live Here</button>`
         : `<p class="people-assignment">Assigned: <strong>${job.label}</strong><br><small>${job.detail}</small></p>
           <p class="people-assignment">Home: <strong>${worker.resident ? worker.lastNeedsNote || "Needs met" : "Not resident"}</strong><br><small>${stage.label} ${job.label} · ${worker.skills?.[worker.assignment] || 0} XP</small></p>
           <div class="people-job-grid">${jobButtons}</div>`}
@@ -5803,11 +5799,6 @@ function costText(cost) {
   return Object.entries(cost).map(([key, amount]) => `${amount} ${itemLabels[key] || key}`).join(", ");
 }
 
-function workerInviteCost(workerId) {
-  const index = Object.keys(PEOPLE_DEFINITIONS).indexOf(workerId);
-  return 10 + Math.max(0, index) * 4;
-}
-
 function workerTrainingCost(worker) {
   const stage = workerSkillStage(worker, worker.assignment);
   return 6 + (stage.level - 1) * 5;
@@ -5830,13 +5821,8 @@ function inviteWorker(workerId) {
   const worker = people.workers[workerId];
   const person = PEOPLE_DEFINITIONS[workerId];
   if (!worker || worker.unlocked || !person) return;
-  const cost = workerInviteCost(workerId);
-  if (residentWorkerEntries().length >= workerHousingCapacity(people)) {
+  if (residentWorkerEntries(people).length >= workerHousingCapacity(people)) {
     pushMessage("Upgrade worker housing before inviting another resident.");
-    return;
-  }
-  if (!spendItem("coins", cost)) {
-    pushMessage(`You need ${cost} coins to invite ${person.name}.`);
     return;
   }
   worker.unlocked = true;
