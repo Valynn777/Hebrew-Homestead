@@ -362,7 +362,7 @@ const scenes = {
     hotspots: [
       hs("prep", "View Sabbath Preparation", 10, 38, 25, 19, "modal", { modal: "sabbathPrep" }),
       hs("basket", "Set Aside Sabbath Basket", 39, 41, 23, 20, "setSabbathBasket"),
-      hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath", { prepOnly: true }),
+      hs("enter", "Enter Sabbath Rest", 66, 38, 23, 20, "enterSabbath", { naturalSabbathOnly: true }),
 
       hs("reflection", "Read Sabbath Reflection", 34, 67, 30, 17, "sabbathReflection"),
       hs("outside", "Back Outside", 4, 8, 17, 13, "navigate", { target: "overview" }),
@@ -1234,10 +1234,45 @@ const ORDER_POOL = [
 const sabbathTasks = [
   { id: "gatherWater", label: "Gather water", location: "Well / Water Area" },
   { id: "prepareFood", label: "Prepare clean food", location: "Kitchen" },
-  { id: "gatherHerbs", label: "Gather herbs", location: "Garden or Forest" },
-  { id: "tidyCottage", label: "Tidy the cottage", location: "Cabin Entry" },
-  { id: "putToolsAway", label: "Put tools away", location: "Workshed" },
   { id: "sabbathBasket", label: "Set aside Sabbath basket", location: "Sabbath Area" }
+];
+
+const SABBATH_SLIDES = [
+  {
+    title: "Sabbath Begins",
+    sub: "The seventh day is set apart",
+    passage: "Remember the Sabbath day, to keep it holy. Six days you shall labor and do all your work, but the seventh day is a Sabbath to the LORD your God.",
+    ref: "Exodus 20:8–10",
+    effect: "light"
+  },
+  {
+    title: "Worship and Song",
+    sub: "Praise rises with the evening",
+    passage: "It is good to give thanks to the LORD, to sing praises to Your name, O Most High; to declare Your steadfast love in the morning, and Your faithfulness by night.",
+    ref: "Psalm 92:1–2",
+    effect: "worship"
+  },
+  {
+    title: "Reading and Reflection",
+    sub: "The word lights the path",
+    passage: "Your word is a lamp to my feet and a light to my path. The unfolding of Your words gives light; it imparts understanding to the simple.",
+    ref: "Psalm 119:105, 130",
+    effect: "scroll"
+  },
+  {
+    title: "Rest and Fellowship",
+    sub: "A shared table — a foretaste of peace",
+    passage: "How good and pleasant it is when brothers dwell in unity! It is like precious oil on the head, running down on the beard, running down to the collar of his robes.",
+    ref: "Psalm 133:1–2",
+    effect: "candle"
+  },
+  {
+    title: "Sabbath Closes at Sundown",
+    sub: "Rest carries into tomorrow",
+    passage: "There remains a Sabbath rest for the people of God, for whoever has entered God's rest has also rested from his works as God did from His.",
+    ref: "Hebrews 4:9–10",
+    effect: "evening"
+  }
 ];
 
 const journalEntries = [
@@ -1255,7 +1290,7 @@ const journalEntries = [
   entry("animalRemedies", "Animal Remedies", "When an animal group shows signs of ailment, a prepared herbal remedy may help them recover. Ailments can develop when animals are not consistently fed and watered, or occasionally even under good care. An unwell group cannot provide their daily product until treated. Hyssop Remedy (hyssop + water) helps chickens and goats with respiratory distress. Mint Tonic (mint + water) helps goats with bloating and cattle with digestive upset. Cumin Poultice (cumin + cloth) helps sheep with skin irritation. Coriander Salve (coriander + plant matter) helps chickens with digestive complaints. Dill Tonic (dill + water) calms stressed sheep and cattle. Remedies are crafted at the worktable and applied from the barn animal modal. Prevention through faithful daily care is always better than treatment."),
   entry("humanRemedies", "Herbal Remedies for the Community", "The same remedies that care for animals have long been used by people as well. Neighbors and community members may send orders for specific preparations when ailments arise. Hyssop Remedy has historically been used for respiratory complaints — coughs, chest tightness, and congestion. Its volatile oils have expectorant properties that may help loosen phlegm and support breathing. Mint Tonic has been used for digestive complaints including nausea, indigestion, bloating, and cramping. Menthol compounds in mint soothe the digestive tract and ease discomfort after heavy meals. Cumin Poultice has been used for skin inflammation, rashes, and irritated wounds. Cumin's thymoquinone content has historically been valued for its antimicrobial and anti-inflammatory properties. Coriander Salve has been used for digestive complaints, loss of appetite, and mild infections. Its linalool content was known in ancient medicine for its calming and antimicrobial effects. Dill Tonic has been used for sleeplessness, anxiety, restlessness, and digestive discomfort. It has a long tradition as a calming herb for both adults and children. Note: this journal records historical and educational information. Seek appropriate care for serious ailments."),
   entry("cleanFood", "Clean Food and Faithful Stewardship", "Food systems begin with clean grains, legumes, vegetables, fruits, and herbs. Questionable or unclassified foods are not edible until reviewed."),
-  entry("sabbathPrep", "Sabbath Preparation and Rest", "Preparation Day invites water, clean food, herbs, tidying, tools put away, and a Sabbath basket. Sabbath rest is blessing, not punishment."),
+  entry("sabbathPrep", "Sabbath Preparation and Rest", "Preparation Day calls for three things: gather water, prepare clean food, and set aside the Sabbath basket. Then on Sabbath, enter rest with passages, worship, and reflection until sundown."),
   entry("sixDays", "Six Days You Shall Labor", "Six days are for ordinary work. The rhythm gives work dignity and keeps it from swallowing the whole life of the homestead."),
   entry("firstfruits", "Firstfruits and Gratitude", "Future versions can set apart the first and best harvest as a lesson in gratitude. The harvest is received, not merely produced."),
   entry("gleaning", "Gleaning and Generosity", "Future fields may leave a portion for gleaning, teaching that abundance makes room for neighborly care."),
@@ -3757,19 +3792,9 @@ function mgShoot() {
 }
 
 function setAsideSabbathBasket() {
-  if (!state.tools.sabbathBasket) {
-    pushMessage("Craft a Sabbath Basket first at the workshed.");
-    return;
-  }
-  if (state.inventory.preparedFood < 1 || state.inventory.water < 1 || state.inventory.herbs < 1) {
-    pushMessage("Set aside prepared food, water, and herbs for the Sabbath basket.");
-    return;
-  }
-  spendItem("preparedFood", 1);
-  state.inventory.water -= 1;
-  spendItem("herbs", 1);
   markPrep("sabbathBasket");
-  pushMessage("The Sabbath basket is set aside.");
+  pushMessage("The Sabbath area is set apart. The basket is ready. Rest approaches.");
+  render();
 }
 
 function sabbathReflection() {
@@ -3780,18 +3805,20 @@ function sabbathReflection() {
 }
 
 function enterSabbathRest() {
-  if (!isPreparationDay()) {
-    pushMessage("Enter Sabbath Rest becomes available on Preparation Day.");
+  if (!isSabbath() || state.isSabbathRest) {
+    pushMessage("Enter Sabbath Rest is available on the Sabbath day.");
     return;
   }
   if (!allPrepComplete()) {
-    pushMessage("Finish the Sabbath preparation checklist first.");
+    pushMessage("Complete the Sabbath preparation checklist first — water, clean food, and the basket.");
     return;
   }
   state.isSabbathRest = true;
   state.currentScene = "sabbath";
   state.minute = 18 * 60;
-  pushMessage("Sabbath rest begins. Ordinary labor pauses; delight and restoration remain.");
+  closeModal();
+  render();
+  showSabbathSlideshow();
 }
 
 function endSabbathRest() {
@@ -3800,6 +3827,96 @@ function endSabbathRest() {
     return;
   }
   nextDay();
+}
+
+function showSabbathSlideshow() {
+  document.getElementById("sabbathSlideshow")?.remove();
+  renderSabbathSlide(0);
+}
+
+function renderSabbathSlide(index) {
+  document.getElementById("sabbathSlideshow")?.remove();
+  const slide = SABBATH_SLIDES[index];
+  const isLast = index === SABBATH_SLIDES.length - 1;
+  const dots = SABBATH_SLIDES.map((_, i) =>
+    `<span class="sabbath-dot${i === index ? " sabbath-dot-active" : ""}"></span>`
+  ).join("");
+
+  const el = document.createElement("div");
+  el.id = "sabbathSlideshow";
+  el.className = "sabbath-slideshow";
+  el.innerHTML = `
+    <div class="sabbath-slide" data-effect="${slide.effect}">
+      <div class="sabbath-slide-effect" aria-hidden="true">${sabbathSlideEffectHTML(slide.effect)}</div>
+      <div class="sabbath-slide-body">
+        <p class="sabbath-slide-title">${slide.title}</p>
+        <p class="sabbath-slide-sub">${slide.sub}</p>
+        <blockquote class="sabbath-slide-passage">"${slide.passage}"</blockquote>
+        <cite class="sabbath-slide-ref">— ${slide.ref}</cite>
+      </div>
+      <div class="sabbath-slide-footer">
+        <div class="sabbath-dots">${dots}</div>
+        <button type="button" class="sabbath-slide-btn">
+          ${isLast ? "Let the Sabbath close" : "Continue"}
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  el.querySelector(".sabbath-slide-btn").addEventListener("click", () => {
+    el.classList.add("sabbath-slideshow-out");
+    if (isLast) {
+      setTimeout(() => {
+        el.remove();
+        nextDay();
+        render();
+      }, 500);
+    } else {
+      setTimeout(() => renderSabbathSlide(index + 1), 420);
+    }
+  });
+}
+
+function sabbathSlideEffectHTML(type) {
+  if (type === "light") return `
+    <span class="sabbath-glow"></span>
+    <span class="sabbath-ray" style="--x:28%;--angle:-22deg;--delay:0s;"></span>
+    <span class="sabbath-ray" style="--x:38%;--angle:-10deg;--delay:0.08s;"></span>
+    <span class="sabbath-ray" style="--x:49%;--angle:0deg;--delay:0.04s;"></span>
+    <span class="sabbath-ray" style="--x:58%;--angle:10deg;--delay:0.12s;"></span>
+    <span class="sabbath-ray" style="--x:68%;--angle:22deg;--delay:0.06s;"></span>
+  `;
+  if (type === "worship") return `
+    <span class="sabbath-glow"></span>
+    <span class="sabbath-ray" style="--x:49%;--angle:0deg;--delay:0.2s;"></span>
+    <span class="sabbath-petal" style="--x:18%;--y:60%;--rot:30deg;--duration:3s;--delay:0.3s;"></span>
+    <span class="sabbath-petal" style="--x:36%;--y:52%;--rot:-20deg;--duration:2.6s;--delay:0.6s;"></span>
+    <span class="sabbath-petal" style="--x:55%;--y:64%;--rot:45deg;--duration:3.2s;--delay:0.1s;"></span>
+    <span class="sabbath-petal" style="--x:72%;--y:55%;--rot:-35deg;--duration:2.8s;--delay:0.5s;"></span>
+    <span class="sabbath-petal" style="--x:82%;--y:68%;--rot:15deg;--duration:3s;--delay:0.8s;"></span>
+  `;
+  if (type === "scroll") return `
+    <span class="slide-scroll"></span>
+    <span class="slide-scroll-glow"></span>
+  `;
+  if (type === "candle") return `
+    <span class="slide-candle" style="--cx:38%;"></span>
+    <span class="slide-candle" style="--cx:62%;--delay:0.3s;"></span>
+    <span class="sabbath-glow" style="top:20%;left:20%;width:60%;height:55%;"></span>
+  `;
+  if (type === "evening") return `
+    <span class="slide-evening-sky"></span>
+    <span class="slide-moon"></span>
+    <span class="slide-star" style="--sx:15%;--sy:12%;--delay:0.2s;"></span>
+    <span class="slide-star" style="--sx:32%;--sy:7%;--delay:0.5s;"></span>
+    <span class="slide-star" style="--sx:54%;--sy:15%;--delay:0.3s;"></span>
+    <span class="slide-star" style="--sx:71%;--sy:8%;--delay:0.7s;"></span>
+    <span class="slide-star" style="--sx:84%;--sy:18%;--delay:0.1s;"></span>
+    <span class="slide-star" style="--sx:22%;--sy:28%;--delay:0.9s;"></span>
+    <span class="slide-star" style="--sx:65%;--sy:24%;--delay:0.4s;"></span>
+  `;
+  return "";
 }
 
 function sabbathWorshipAction() {
@@ -8307,6 +8424,7 @@ function visibleHotspots(scene) {
   return sceneHotspots(scene).filter((hotspot) => {
     if (hotspot.sabbathOnly) return isSabbath();
     if (hotspot.prepOnly) return isPreparationDay();
+    if (hotspot.naturalSabbathOnly) return isSabbath() && !state.isSabbathRest;
     if (hotspot.action === "cleanRoomChore") return Boolean(state.roomChores?.[hotspot.room]?.[hotspot.chore]);
     if (hotspot.action === "washDishes") return Boolean(state.kitchenChores?.dishes);
     if (hotspot.action === "cleanCounters") return Boolean(state.kitchenChores?.counters);
