@@ -5620,6 +5620,7 @@ function formatTime(minute) {
 }
 
 function openModal(type, titleOverride) {
+  _openAreaPanelId = null;
   const modalTitle = document.getElementById("modalTitle");
   const modalBody = document.getElementById("modalBody");
   document.getElementById("modalBackdrop").classList.remove("hidden");
@@ -5772,6 +5773,7 @@ function openOverviewAreaPanel(areaId) {
 
 function openOverviewSubModal(type, areaId) {
   openModal(type);
+  _openAreaPanelId = areaId;
   const panel = document.querySelector(".modal-panel");
   panel.classList.add("area-modal");
   const modalBody = document.getElementById("modalBody");
@@ -5890,12 +5892,18 @@ function overviewAreaManagementActions(areaId, { built, locked }) {
 function overviewAreaPanelDetailMarkup(areaId) {
   if (areaId === "camp") {
     const level = homesteadBuildingLevel("home");
-    const stages = HOME_LEVELS.map((stage, index) => {
+    const stage = homesteadBuildingStage("home");
+    const nextStage = homesteadBuildingNextStage("home");
+    const stages = HOME_LEVELS.map((s, index) => {
       const cls = index < level ? "complete" : index === level ? "current" : "";
-      return `<span class="${cls}">${stage.label}</span>`;
+      return `<span class="${cls}">${s.label}</span>`;
     }).join("");
     const station = cookingStationInfo();
-    return `<div class="home-progress-strip">${stages}</div>
+    const upgradeNote = nextStage
+      ? `<p class="hint-text">Next upgrade: ${nextStage.label}</p>`
+      : `<p class="hint-text">Home fully upgraded.</p>`;
+    return `${upgradeNote}
+      <div class="home-progress-strip">${stages}</div>
       <button type="button" class="home-station-button" data-overview-modal="cooking">
         <img src="${station.image}" alt="">
         <span><strong>${station.label}</strong><small>${station.detail}</small></span>
@@ -6457,7 +6465,7 @@ function homesteadBuildMarkup() {
 
 function bindHomesteadBuildButtons() {
   document.querySelectorAll("[data-build-homestead]").forEach((button) => {
-    button.addEventListener("click", () => buildHomesteadBuilding(button.dataset.buildHomestead));
+    button.addEventListener("click", () => buildHomesteadBuilding(button.dataset.buildHomestead, _openAreaPanelId));
   });
 }
 
@@ -6485,11 +6493,12 @@ function buildHomesteadBuilding(id, returnAreaId = null) {
     return;
   }
   spendIngredients(nextCost);
-  homestead.buildings[id] = Math.min(level + 1, homesteadBuildingMaxLevel(id));
+  ensureHomestead().buildings[id] = Math.min(level + 1, homesteadBuildingMaxLevel(id));
   pushMessage(`${building.label} ${level > 0 ? "upgraded" : "built"}: ${nextStage.label}. ${nextStage.unlocks || building.unlocks}`);
   saveGame(false);
   render();
   if (returnAreaId) openOverviewAreaPanel(returnAreaId);
+  else if (id === "home") openOverviewAreaPanel("camp");
   else openModal("homesteadBuild");
 }
 

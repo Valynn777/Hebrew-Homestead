@@ -593,7 +593,7 @@ small {
 
 .message-bar {
   position: absolute;
-  z-index: 5;
+  z-index: 25;
   left: 28px;
   right: 28px;
   bottom: 86px;
