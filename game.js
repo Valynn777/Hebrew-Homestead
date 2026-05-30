@@ -1885,6 +1885,7 @@ let activeJournalId = "welcome";
 let messageTimeout = null;
 let effectTimeout = null;
 let pendingSceneEffect = null;
+let pendingPanelEffect = null;
 let autosaveTimer = null;
 let _openAreaPanelId = null;
 let isLoadingSave = false;
@@ -3870,6 +3871,7 @@ function renderSabbathSlide(index) {
       setTimeout(() => {
         el.remove();
         nextDay();
+        state.currentScene = "overview";
         render();
       }, 500);
     } else {
@@ -4192,18 +4194,24 @@ function feedAnimal(animalId) {
     pushMessage(`You do not own any ${catalog.name.toLowerCase()} yet.`);
     return;
   }
-  if ((state.barnFeedStore || 0) < catalog.feedNeed) {
-    pushMessage(`The feed area holds ${state.barnFeedStore || 0} units. Stock it with at least ${catalog.feedNeed} to feed the ${catalog.name.toLowerCase()}.`);
+  const invFeed = (state.inventory.feed || 0) + (state.inventory.hay || 0);
+  if (invFeed < catalog.feedNeed) {
+    pushMessage(`Need ${catalog.feedNeed} feed or hay. Have ${invFeed} in inventory.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(2)) return;
-  state.barnFeedStore -= catalog.feedNeed;
+  let needed = catalog.feedNeed;
+  const fromFeed = Math.min(needed, state.inventory.feed || 0);
+  if (fromFeed > 0) spendItem("feed", fromFeed);
+  needed -= fromFeed;
+  if (needed > 0) spendItem("hay", needed);
   group.fedToday = true;
   learnFrom("animalCare");
   state.dailyStats.animalGroupsCared += 1;
+  pendingPanelEffect = "barnFeed";
   triggerSceneEffect("barnFeed");
   closeModal();
-  pushMessage(`${catalog.name} are fed.`);
+  pushMessage(`${catalog.name} fed.`);
 }
 
 function waterAnimal(animalId) {
@@ -4213,18 +4221,20 @@ function waterAnimal(animalId) {
     pushMessage(`You do not own any ${catalog.name.toLowerCase()} yet.`);
     return;
   }
-  if ((state.barnWaterStore || 0) < group.count) {
-    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Stock it with at least ${group.count} to water the ${catalog.name.toLowerCase()}.`);
+  const waterNeeded = group.count;
+  if ((state.inventory.water || 0) < waterNeeded) {
+    pushMessage(`Need ${waterNeeded} water. Have ${state.inventory.water || 0} in inventory.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(2)) return;
-  state.barnWaterStore -= group.count;
+  spendItem("water", waterNeeded);
   group.wateredToday = true;
   learnFrom("animalCare");
   state.dailyStats.animalGroupsCared += 1;
+  pendingPanelEffect = "barnWater";
   triggerSceneEffect("barnWater");
   closeModal();
-  pushMessage(`${catalog.name} are watered.`);
+  pushMessage(`${catalog.name} watered.`);
 }
 
 function cleanAnimal(animalId) {
@@ -4237,6 +4247,7 @@ function cleanAnimal(animalId) {
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
   group.cleanedToday = true;
   learnFrom("animalCare");
+  pendingPanelEffect = "tidy";
   triggerSceneEffect("tidy");
   closeModal();
   pushMessage(`${catalog.name} area cleaned.`);
@@ -4361,13 +4372,13 @@ function openBarnCareModal() {
 
 function openAnimalMaintenanceModal() {
   const totalAnimals = Object.values(state.barnAnimals).reduce((sum, g) => sum + g.count, 0);
+  const invFeed = (state.inventory.feed || 0) + (state.inventory.hay || 0);
+  const invWater = state.inventory.water || 0;
   const neededFeed = Object.entries(animalCatalog).reduce((sum, [id, cat]) => {
     return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? cat.feedNeed : 0);
   }, 0);
-  const feedStore = state.barnFeedStore || 0;
-  const waterStore = state.barnWaterStore || 0;
-  const canFeedAll = totalAnimals > 0 && feedStore >= neededFeed;
-  const canWaterAll = totalAnimals > 0 && waterStore >= totalAnimals;
+  const canFeedAll = totalAnimals > 0 && invFeed >= neededFeed;
+  const canWaterAll = totalAnimals > 0 && invWater >= totalAnimals;
 
   const perAnimalCards = Object.entries(animalCatalog).map(([id, catalog]) => {
     const group = state.barnAnimals[id];
@@ -4375,17 +4386,21 @@ function openAnimalMaintenanceModal() {
     const ailmentNote = group.ailment
       ? `<p class="hint-text" style="color:var(--danger)">Unwell: ${group.ailment.label}</p>`
       : "";
-    const canFeedThis = feedStore >= catalog.feedNeed && !group.fedToday;
+    const canFeedThis  = invFeed >= catalog.feedNeed && !group.fedToday;
+    const canWaterThis = invWater >= group.count && !group.wateredToday;
     const canCollect = group.count > 0 && !group.ailment && !group.productCollectedToday && animalProductToolReady(catalog) && !isSabbath();
     const featherBtn = id === "chickens"
-      ? `<button type="button" data-modal-action="feathers-${id}" ${group.feathersCollectedToday || isSabbath() ? "disabled" : ""}>Feathers</button>`
+      ? `<button type="button" data-modal-action="feathers-${id}" ${group.feathersCollectedToday || isSabbath() ? "disabled" : ""}>🪶 Feathers</button>`
       : "";
     return `<article class="modal-card">
       <h3>${catalog.name} <small>(${group.count})</small></h3>
       <p>${animalStatus(group)}</p>
       ${ailmentNote}
+      <div id="panelEffectLayer" class="panel-effect-layer" hidden></div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
-        <button type="button" data-modal-action="feed-${id}" ${canFeedThis ? "" : "disabled"}>Feed</button>
+        <button type="button" data-modal-action="feed-${id}"  ${canFeedThis  ? "" : "disabled"}>🌾 Feed</button>
+        <button type="button" data-modal-action="water-${id}" ${canWaterThis ? "" : "disabled"}>💧 Water</button>
+        <button type="button" data-modal-action="clean-${id}" ${group.count > 0 && !isSabbath() ? "" : "disabled"}>🧹 Clean</button>
         <button type="button" data-modal-action="collect-${id}" ${canCollect ? "" : "disabled"}>${catalog.productLabel}</button>
         ${featherBtn}
       </div>
@@ -4395,25 +4410,28 @@ function openAnimalMaintenanceModal() {
   openCustomModal("Animal Maintenance", `<div class="card-grid">
     <article class="modal-card">
       <h3>Bulk Care</h3>
-      <p>Feed store: <strong>${feedStore}</strong> &nbsp;|&nbsp; Water trough: <strong>${waterStore}</strong></p>
+      <p>🌾 Feed in inventory: <strong>${invFeed}</strong> &nbsp;|&nbsp; 💧 Water: <strong>${invWater}</strong></p>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
-        <button type="button" data-modal-action="feed-all" ${canFeedAll ? "" : "disabled"}>Feed All</button>
-        <button type="button" data-modal-action="water-all" ${canWaterAll ? "" : "disabled"}>Water All</button>
-        <button type="button" data-modal-action="clean-all" ${totalAnimals > 0 ? "" : "disabled"}>Clean All</button>
+        <button type="button" data-modal-action="feed-all"  ${canFeedAll  ? "" : "disabled"}>🌾 Feed All</button>
+        <button type="button" data-modal-action="water-all" ${canWaterAll ? "" : "disabled"}>💧 Water All</button>
+        <button type="button" data-modal-action="clean-all" ${totalAnimals > 0 ? "" : "disabled"}>🧹 Clean All</button>
       </div>
     </article>
     ${perAnimalCards || `<article class="modal-card"><h3>No Animals</h3><p>Purchase animals from the Animal Market to begin care.</p></article>`}
   </div>`);
 
+  const reopen = () => { openAnimalMaintenanceModal(); playPendingPanelEffect(); };
   const actionMap = {
-    "feed-all": () => { feedAllAnimals(); openAnimalMaintenanceModal(); },
-    "water-all": () => { waterBarnAnimals(); openAnimalMaintenanceModal(); },
-    "clean-all": () => { cleanBarnForManure(); openAnimalMaintenanceModal(); }
+    "feed-all":  () => { feedAllAnimals();    reopen(); },
+    "water-all": () => { waterBarnAnimals();  reopen(); },
+    "clean-all": () => { cleanBarnForManure(); reopen(); }
   };
   Object.keys(animalCatalog).forEach((id) => {
-    actionMap[`feed-${id}`] = () => { feedAnimal(id); openAnimalMaintenanceModal(); };
-    actionMap[`collect-${id}`] = () => { collectAnimalProduct(id); openAnimalMaintenanceModal(); };
-    actionMap[`feathers-${id}`] = () => { collectChickenFeathers(); openAnimalMaintenanceModal(); };
+    actionMap[`feed-${id}`]    = () => { feedAnimal(id);            reopen(); };
+    actionMap[`water-${id}`]   = () => { waterAnimal(id);           reopen(); };
+    actionMap[`clean-${id}`]   = () => { cleanAnimal(id);           reopen(); };
+    actionMap[`collect-${id}`] = () => { collectAnimalProduct(id);  reopen(); };
+    actionMap[`feathers-${id}`] = () => { collectChickenFeathers(); reopen(); };
   });
   bindModalActions(actionMap);
 }
@@ -4458,6 +4476,7 @@ function openHomesteadMaintenanceModal(activeTab = "animals") {
     hmPanel.appendChild(s);
   });
   bindHomesteadMaintenance();
+  playPendingPanelEffect();
 }
 
 function hmBuildTab(tab) {
@@ -4505,9 +4524,10 @@ function hmAnimalsTab() {
       group.productCollectedToday ? `<span class="hm-badge hm-badge-ok">✓ Collected</span>` : `<span class="hm-badge hm-badge-warn">${catalog.productLabel}</span>`,
       group.ailment         ? `<span class="hm-badge hm-badge-alert">⚠ ${group.ailment.label}</span>` : `<span class="hm-badge hm-badge-ok">✓ Healthy</span>`
     ].join("");
-    const canFeedThis = feedStore >= catalog.feedNeed && !group.fedToday;
-    const canCollect  = !group.ailment && !group.productCollectedToday && animalProductToolReady(catalog) && !isSabbath();
-    const featherBtn  = id === "chickens"
+    const canFeedThis  = invFeed >= catalog.feedNeed && !group.fedToday;
+    const canWaterThis = invWater >= group.count && !group.wateredToday;
+    const canCollect   = !group.ailment && !group.productCollectedToday && animalProductToolReady(catalog) && !isSabbath();
+    const featherBtn   = id === "chickens"
       ? `<button type="button" data-hm-action="feathers-${id}" ${group.feathersCollectedToday || isSabbath() ? "disabled" : ""}>🪶 Feathers</button>`
       : "";
     const treatBtn = group.ailment
@@ -4521,11 +4541,12 @@ function hmAnimalsTab() {
       <div class="hm-badge-row">${badges}</div>
       ${group.ailment ? `<p style="font-size:0.77rem;color:var(--danger);margin:0 0 4px">Remedy: ${itemLabels[group.ailment.remedy]} — have ${state.inventory[group.ailment.remedy] || 0}</p>` : ""}
       <div class="hm-animal-btns">
-        <button type="button" data-hm-action="feed-${id}"    ${canFeedThis                                         ? "" : "disabled"}>Feed</button>
-        <button type="button" data-hm-action="clean-${id}"   ${group.count > 0 && !isSabbath()                    ? "" : "disabled"}>Clean</button>
-        <button type="button" data-hm-action="collect-${id}" ${group.count > 0 && canCollect                      ? "" : "disabled"}>${catalog.productLabel}</button>
+        <button type="button" data-hm-action="feed-${id}"    ${canFeedThis  ? "" : "disabled"}>🌾 Feed</button>
+        <button type="button" data-hm-action="water-${id}"   ${canWaterThis ? "" : "disabled"}>💧 Water</button>
+        <button type="button" data-hm-action="clean-${id}"   ${group.count > 0 && !isSabbath() ? "" : "disabled"}>🧹 Clean</button>
+        <button type="button" data-hm-action="collect-${id}" ${group.count > 0 && canCollect   ? "" : "disabled"}>${catalog.productLabel}</button>
         ${featherBtn}${treatBtn}
-        <button type="button" data-hm-action="harvest-${id}" ${group.count > 0 && canPreviewLabor("harvest")      ? "" : "disabled"}>Harvest</button>
+        <button type="button" data-hm-action="harvest-${id}" ${group.count > 0 && canPreviewLabor("harvest") ? "" : "disabled"}>Harvest</button>
       </div>
     </article>`;
   }).filter(Boolean).join("");
@@ -4534,7 +4555,7 @@ function hmAnimalsTab() {
     ? `<p class="hint-text">No animals yet — buy some in the <strong>Craft &amp; Supply</strong> tab.</p>`
     : "";
 
-  return `${resourceBar}${bulkActions}<div class="card-grid">${animalCards}${empty}</div>`;
+  return `<div id="panelEffectLayer" class="panel-effect-layer" hidden></div>${resourceBar}${bulkActions}<div class="card-grid">${animalCards}${empty}</div>`;
 }
 
 function hmGardenTab() {
@@ -4880,6 +4901,7 @@ function bindHomesteadMaintenance() {
       else if (a === "water-all")      { waterBarnAnimals();     reopenAnimals(); }
       else if (a === "clean-barn")     { cleanBarnForManure();   reopenAnimals(); }
       else if (a.startsWith("feed-"))    { feedAnimal(a.slice(5));          reopenAnimals(); }
+      else if (a.startsWith("water-"))   { waterAnimal(a.slice(6));         reopenAnimals(); }
       else if (a.startsWith("clean-"))   { cleanAnimal(a.slice(6));         reopenAnimals(); }
       else if (a.startsWith("collect-")) { collectAnimalProduct(a.slice(8)); reopenAnimals(); }
       else if (a.startsWith("feathers-")){ collectChickenFeathers();         reopenAnimals(); }
@@ -4919,23 +4941,21 @@ function bindHomesteadMaintenance() {
 
 function waterBarnAnimals() {
   const totalAnimals = barnAnimalCount();
-  if (!totalAnimals) {
-    pushMessage("There are no animals to water yet.");
-    return;
-  }
+  if (!totalAnimals) { pushMessage("No animals to water yet."); return; }
   const need = barnWaterNeed();
-  if (!need) {
-    pushMessage("The barn animals are already watered.");
-    return;
-  }
-  if ((state.barnWaterStore || 0) < need) {
-    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Fill it with at least ${need} to water all animals.`);
+  if (!need) { pushMessage("All animals are already watered."); return; }
+  if ((state.inventory.water || 0) < need) {
+    pushMessage(`Need ${need} water to water all animals. Have ${state.inventory.water || 0} in inventory.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  autoWaterBarnAnimals();
+  spendItem("water", need);
+  Object.values(state.barnAnimals).forEach((g) => { if (g.count > 0) g.wateredToday = true; });
+  learnFrom("animalCare");
+  pendingPanelEffect = "barnWater";
+  triggerSceneEffect("barnWater");
   closeModal();
-  pushMessage(`All barn animals were watered. (${state.barnWaterStore} units remaining.)`);
+  pushMessage(`All animals watered.`);
 }
 
 function barnAnimalCount() {
@@ -4983,25 +5003,32 @@ function addFeedTrough() {
 function feedAllAnimals() {
   const totalAnimals = Object.values(state.barnAnimals).reduce((sum, g) => sum + g.count, 0);
   if (!totalAnimals) {
-    pushMessage("Buy animals before feeding from the trough.");
+    pushMessage("No animals to feed yet.");
     return;
   }
   const needed = Object.entries(animalCatalog).reduce((sum, [id, catalog]) => {
-    return sum + ((state.barnAnimals[id]?.count || 0) > 0 ? catalog.feedNeed : 0);
+    return sum + ((state.barnAnimals[id]?.count || 0) > 0 && !state.barnAnimals[id].fedToday ? catalog.feedNeed : 0);
   }, 0);
-  if ((state.barnFeedStore || 0) < needed) {
-    pushMessage(`The feed area holds ${state.barnFeedStore || 0} units. Stock it with at least ${needed} to feed all animals.`);
+  if (!needed) { pushMessage("All animals are already fed."); return; }
+  const invFeed = (state.inventory.feed || 0) + (state.inventory.hay || 0);
+  if (invFeed < needed) {
+    pushMessage(`Need ${needed} feed or hay to feed all animals. Have ${invFeed} in inventory.`);
     return;
   }
   if (!canDoLabor("animalCare") || !spendStamina(3)) return;
-  state.barnFeedStore -= needed;
+  let remaining = needed;
+  const fromFeed = Math.min(remaining, state.inventory.feed || 0);
+  if (fromFeed > 0) spendItem("feed", fromFeed);
+  remaining -= fromFeed;
+  if (remaining > 0) spendItem("hay", remaining);
   const fedGroups = Object.values(state.barnAnimals).filter((g) => g.count > 0).length;
   Object.values(state.barnAnimals).forEach((g) => { if (g.count > 0) g.fedToday = true; });
   learnFrom("animalCare");
   state.dailyStats.animalGroupsCared += fedGroups;
+  pendingPanelEffect = "barnFeed";
   triggerSceneEffect("barnFeed");
   closeModal();
-  pushMessage(`All animals fed from the trough. (${state.barnFeedStore} units remaining.)`);
+  pushMessage(`All animals fed.`);
 }
 
 function addWaterTrough() {
@@ -5515,10 +5542,10 @@ function harvestCrop(cropId) {
   const baseQuality = qualityFromScore((qualityScore(soilQuality) + qualityScore(bed.seedQuality || "standard")) / 2);
   const quality = improveQualityByLearning(baseQuality, "gardening");
   const ratio = Math.max(0.08, Math.min(1, bed.plantedUnits / bed.capacity));
-  const baseYield = gardenBeds[cropId]?.requiresUpgrade === "tractor" ? 8 : 4;
-  const soilBonus = bed.fertilized ? 2 : bed.composted ? 1 : 0;
-  const harvestAmount = Math.max(1, Math.round((baseYield + soilBonus) * ratio));
-  const seedAmount = Math.max(1, Math.round((catalog.seedYield || bed.capacity) * ratio));
+  const soilBonus = bed.fertilized ? 3 : bed.composted ? 1 : 0;
+  const yieldPerUnit = gardenBeds[cropId]?.requiresUpgrade === "tractor" ? 2 : 1;
+  const harvestAmount = Math.max(1, Math.round(bed.plantedUnits * yieldPerUnit + soilBonus));
+  const seedAmount = Math.max(1, Math.round(bed.plantedUnits * 0.75));
   const seedQuality = improveQualityByLearning(qualityFromScore((qualityScore(quality) + qualityScore(bed.seedQuality || "standard")) / 2), "gardening");
   addItem(catalog.harvestItem, harvestAmount + bonus, quality);
   addItem(catalog.seedItem, seedAmount, seedQuality);
@@ -8701,6 +8728,56 @@ function cropBedObject(bedId, bedMeta) {
 
 function triggerSceneEffect(type, target = null) {
   pendingSceneEffect = { type, target };
+}
+
+function playPendingPanelEffect() {
+  if (!pendingPanelEffect) return;
+  const type = pendingPanelEffect;
+  pendingPanelEffect = null;
+  const layer = document.getElementById("panelEffectLayer");
+  if (!layer) return;
+  const html = panelEffectHTML(type);
+  if (!html) return;
+  layer.innerHTML = html;
+  layer.hidden = false;
+  setTimeout(() => { layer.innerHTML = ""; layer.hidden = true; }, 2400);
+}
+
+function panelEffectHTML(type) {
+  const m = {
+    barnFeed: `
+      <span class="hay-strand" style="--x:32%;--y:35%;--rot:-18deg;--rot2:14deg;--delay:0s;"></span>
+      <span class="hay-strand" style="--x:44%;--y:28%;--rot:10deg;--rot2:-22deg;--delay:0.1s;"></span>
+      <span class="hay-strand" style="--x:55%;--y:33%;--rot:-8deg;--rot2:20deg;--delay:0.18s;"></span>
+      <span class="hay-strand" style="--x:66%;--y:26%;--rot:20deg;--rot2:-12deg;--delay:0.06s;"></span>
+      <span class="hay-strand" style="--x:38%;--y:44%;--rot:-22deg;--rot2:8deg;--delay:0.26s;"></span>
+    `,
+    barnWater: `
+      <span class="water-pour-arc"></span>
+      <span class="trough-ripple"></span>
+      <span class="trough-ripple-inner"></span>
+    `,
+    tidy: `
+      <span class="tidy-sparkle" style="--x:18%;--y:70%;--delay:0s;"></span>
+      <span class="tidy-sparkle" style="--x:36%;--y:56%;--delay:0.15s;"></span>
+      <span class="tidy-sparkle" style="--x:58%;--y:65%;--delay:0.3s;"></span>
+      <span class="tidy-sparkle" style="--x:76%;--y:50%;--delay:0.45s;"></span>
+      <span class="tidy-sweep"></span>
+    `,
+    barnCollect: `
+      <span class="collect-glow"></span>
+      <span class="product-star" style="--x:28%;--y:38%;--delay:0s;"></span>
+      <span class="product-star" style="--x:46%;--y:28%;--delay:0.18s;"></span>
+      <span class="product-star" style="--x:62%;--y:36%;--delay:0.32s;"></span>
+      <span class="product-star" style="--x:74%;--y:44%;--delay:0.1s;"></span>
+    `,
+    barnFeathers: `
+      <span class="feather-float" style="--x:28%;--y:28%;--dx:20px;--rot:14deg;--duration:1.6s;--delay:0s;"></span>
+      <span class="feather-float" style="--x:44%;--y:20%;--dx:-16px;--rot:-22deg;--duration:1.45s;--delay:0.12s;"></span>
+      <span class="feather-float" style="--x:60%;--y:26%;--dx:24px;--rot:6deg;--duration:1.75s;--delay:0.06s;"></span>
+    `
+  };
+  return m[type] || "";
 }
 
 function playSceneEffect(effect) {
