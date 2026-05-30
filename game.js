@@ -3792,7 +3792,7 @@ function mgShoot() {
 }
 
 function setAsideSabbathBasket() {
-  markPrep("sabbathBasket");
+  state.sabbathPrep.sabbathBasket = true;
   pushMessage("The Sabbath area is set apart. The basket is ready. Rest approaches.");
   render();
 }
