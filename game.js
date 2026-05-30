@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const SAVE_VERSION = 10;
+const SAVE_VERSION = 11;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
 const NAMED_SAVE_PREFIX = `${SAVE_KEY}-save-`;
@@ -18,7 +18,7 @@ const OUTDOOR_SCENES = new Set([
 
 const sceneImages = {
   overviewCamp: "assets/images/scenes/progression/homestead-camp.png",
-  overview: "assets/images/scenes/homestead-overview.png",
+  overview: "assets/images/scenes/homestead-property-map.png",
   cabin: "assets/images/scenes/cabin/cabin-entry.png",
   kitchen: "assets/images/scenes/cabin/kitchen.png",
   livingRoom: "assets/images/scenes/cabin/living-room.png",
@@ -1537,6 +1537,174 @@ const SCENE_BUILDING_REQUIREMENTS = {
   cowPasture: "cattleBarn"
 };
 
+const OVERVIEW_AREAS = {
+  camp: {
+    label: "Tent Camp",
+    status: "Starting camp",
+    detail: "A tent, fire pit, and simple baskets mark the first foothold on the land.",
+    marker: { x: 45, y: 51 },
+    hotspot: { x: 38, y: 43, w: 14, h: 14 },
+    image: sceneImages.overviewCamp,
+    modal: "homesteadBuild",
+    actionLabel: "Plan Camp Upgrades"
+  },
+  cabin: {
+    label: "Cabin Site",
+    builtLabel: "Cabin",
+    status: "Future home",
+    detail: "Build the cabin to unlock household rooms, kitchen work, and deeper rest.",
+    marker: { x: 50, y: 39 },
+    hotspot: { x: 43, y: 31, w: 15, h: 14 },
+    image: sceneImages.cabin,
+    target: "cabin",
+    building: "home"
+  },
+  garden: {
+    label: "Starter Garden",
+    builtLabel: "Garden",
+    status: "Open",
+    detail: "Starter beds are ready now, with room nearby for future field expansion.",
+    marker: { x: 29, y: 42 },
+    hotspot: { x: 22, y: 31, w: 15, h: 19 },
+    image: sceneImages.garden,
+    target: "garden"
+  },
+  well: {
+    label: "Water Area",
+    status: "Open",
+    detail: "Gather water here now; later upgrades can make water chores smoother.",
+    marker: { x: 19, y: 29 },
+    hotspot: { x: 12, y: 21, w: 14, h: 15 },
+    image: sceneImages.well,
+    target: "well"
+  },
+  workshed: {
+    label: "Workshed Site",
+    builtLabel: "Workshed",
+    status: "Future workshop",
+    detail: "A dedicated workshed unlocks better tool work and expanded crafting.",
+    marker: { x: 42, y: 34 },
+    hotspot: { x: 36, y: 27, w: 13, h: 13 },
+    image: sceneImages.workshed,
+    target: "workshed",
+    building: "workshed"
+  },
+  barn: {
+    label: "Barn Site",
+    builtLabel: "Barn",
+    status: "Future livestock",
+    detail: "The barn becomes the center for feed storage and larger animal care.",
+    marker: { x: 41, y: 83 },
+    hotspot: { x: 34, y: 76, w: 14, h: 14 },
+    image: sceneImages.barn,
+    target: "barn",
+    building: "barn"
+  },
+  chickenCoop: {
+    label: "Coop Site",
+    builtLabel: "Chicken Coop",
+    status: "Future chickens",
+    detail: "Build the coop after the barn to unlock chickens, eggs, and feathers.",
+    marker: { x: 61, y: 47 },
+    hotspot: { x: 56, y: 40, w: 11, h: 12 },
+    image: sceneImages.chickenCoop,
+    target: "chickenCoop",
+    building: "coop"
+  },
+  goatPen: {
+    label: "Goat Pen Site",
+    builtLabel: "Goat Pen",
+    status: "Future goats",
+    detail: "A goat pen adds goats and goat milk to the homestead rhythm.",
+    marker: { x: 66, y: 54 },
+    hotspot: { x: 60, y: 48, w: 12, h: 12 },
+    image: sceneImages.goatPen,
+    target: "goatPen",
+    building: "goatPen"
+  },
+  sheepPasture: {
+    label: "Sheep Pen Site",
+    builtLabel: "Sheep Pen",
+    status: "Future sheep",
+    detail: "The sheep pen supports sheep, wool, and careful flock care.",
+    marker: { x: 48, y: 84 },
+    hotspot: { x: 43, y: 78, w: 11, h: 12 },
+    image: sceneImages.sheepPasture,
+    target: "sheepPasture",
+    building: "sheepPen"
+  },
+  cowPasture: {
+    label: "Cattle Shelter Site",
+    builtLabel: "Cattle Shelter",
+    status: "Future cattle",
+    detail: "Cattle need a larger shelter before cow milk and cattle care unlock.",
+    marker: { x: 74, y: 39 },
+    hotspot: { x: 68, y: 32, w: 13, h: 14 },
+    image: sceneImages.cowPasture,
+    target: "cowPasture",
+    building: "cattleBarn"
+  },
+  workerHomes: {
+    label: "Worker Homes",
+    status: "People",
+    detail: "Resident workers live here, receive supplies, and take assignments.",
+    marker: { x: 57, y: 55 },
+    hotspot: { x: 51, y: 48, w: 13, h: 13 },
+    image: "assets/images/housing/worker-house-1.png",
+    modal: "people",
+    actionLabel: "Open People"
+  },
+  marketplace: {
+    label: "Trade Road",
+    builtLabel: "Market",
+    status: "Open",
+    detail: "A small trading place connects the homestead to neighbors and orders.",
+    marker: { x: 53, y: 63 },
+    hotspot: { x: 47, y: 57, w: 13, h: 12 },
+    image: sceneImages.marketplace,
+    target: "marketplace"
+  },
+  forest: {
+    label: "Forest Path",
+    status: "Open",
+    detail: "The path leads to wood, stone, herbs, fishing, and scouting beyond camp.",
+    marker: { x: 31, y: 18 },
+    hotspot: { x: 21, y: 7, w: 20, h: 21 },
+    image: sceneImages.forest,
+    target: "forest"
+  },
+  sabbath: {
+    label: "Sabbath Rest",
+    status: "Set apart",
+    detail: "A peaceful area for Sabbath preparation, worship, gathering, and rest.",
+    marker: { x: 76, y: 75 },
+    hotspot: { x: 67, y: 66, w: 19, h: 19 },
+    image: sceneImages.sabbath,
+    target: "sabbath"
+  },
+  build: {
+    label: "Build Board",
+    status: "Plan",
+    detail: "Review resource costs and choose the next homestead upgrade.",
+    marker: { x: 45, y: 51 },
+    hotspot: { x: 39, y: 45, w: 13, h: 12 },
+    image: sceneImages.overview,
+    modal: "homesteadBuild",
+    actionLabel: "Open Build Board",
+    mapHidden: true
+  }
+};
+
+const WORKER_JOB_AREAS = {
+  rest: "workerHomes",
+  homes: "workerHomes",
+  garden: "garden",
+  animals: "barn",
+  forest: "forest",
+  kitchen: "cabin",
+  market: "marketplace"
+};
+
 const FAMILY_MEMBERS = {
   home: {
     name: "Household",
@@ -1637,6 +1805,7 @@ function createNewState() {
     toolDurability: createToolDurability(starterTools),
     upgrades: { tractor: false, irrigation: false, plumbing: false },
     homestead: createHomesteadProgress(false),
+    map: createMapState(),
     crops: createGardenBeds(),
     barnAnimals: createBarnAnimals(),
     barnFeedStore: 0,
@@ -1759,6 +1928,12 @@ function createHomesteadProgress(established = false) {
   };
 }
 
+function createMapState() {
+  return {
+    player: { area: "camp", ...OVERVIEW_AREAS.camp.marker }
+  };
+}
+
 function createPeopleState() {
   return {
     workers: Object.fromEntries(Object.keys(PEOPLE_DEFINITIONS).map((id, index) => [id, {
@@ -1829,6 +2004,7 @@ function hydrateState(savedState) {
   return {
     ...createNewState(),
     ...savedState,
+    currentScene: "overview",
     inventory: { ...starterInventory, ...(savedState.inventory || {}) },
     qualityInventory: hydrateQualityInventory(savedState),
     skills: { ...createSkills(), ...(savedState.skills || {}) },
@@ -1837,6 +2013,7 @@ function hydrateState(savedState) {
     toolDurability,
     upgrades: { tractor: false, irrigation: false, plumbing: false, ...(savedState.upgrades || {}) },
     homestead: hydrateHomestead(savedState),
+    map: hydrateMapState(savedState.map || {}),
     crops: mergeGardenBeds(savedState.crops || {}),
     barnAnimals: mergeBarnAnimals(savedState.barnAnimals || {}),
     kitchenChores: { dishes: false, counters: false, floor: false, ...(savedState.kitchenChores || {}) },
@@ -1868,6 +2045,22 @@ function hydrateHomestead(savedState = {}) {
     ...base,
     ...saved,
     buildings: { ...base.buildings, ...(saved.buildings || {}) }
+  };
+}
+
+function hydrateMapState(savedMap = {}) {
+  const base = createMapState();
+  const savedPlayer = savedMap.player || {};
+  const area = OVERVIEW_AREAS[savedPlayer.area] ? savedPlayer.area : base.player.area;
+  const fallback = OVERVIEW_AREAS[area].marker;
+  return {
+    ...base,
+    ...savedMap,
+    player: {
+      area,
+      x: Number.isFinite(savedPlayer.x) ? savedPlayer.x : fallback.x,
+      y: Number.isFinite(savedPlayer.y) ? savedPlayer.y : fallback.y
+    }
   };
 }
 
@@ -2459,6 +2652,10 @@ function handleHotspot(hotspot) {
   }
 
   const action = hotspot.action;
+  if (action === "overviewArea") {
+    selectOverviewArea(hotspot.area);
+    return;
+  }
   if (action === "navigate") navigate(hotspot.target);
   if (action === "modal") openModal(hotspot.modal);
   if (action === "message") pushMessage(hotspot.message || "There is nothing more to do here yet.");
@@ -2509,6 +2706,31 @@ function handleHotspot(hotspot) {
   render();
 }
 
+function selectOverviewArea(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (!area) return;
+  movePlayerMarker(areaId);
+  pushMessage(`Walking to ${overviewAreaLabel(areaId)}.`);
+  if (!updatePlayerMarkerElement()) renderScene();
+  window.setTimeout(() => {
+    if (state.currentScene === "overview") openOverviewAreaPanel(areaId);
+  }, 560);
+}
+
+function movePlayerMarker(areaId) {
+  const area = OVERVIEW_AREAS[areaId] || OVERVIEW_AREAS.camp;
+  state.map = hydrateMapState(state.map || {});
+  state.map.player = { area: areaId, ...area.marker };
+}
+
+function updatePlayerMarkerElement() {
+  const marker = document.querySelector(".player-marker");
+  if (!marker || !state.map?.player) return false;
+  marker.style.setProperty("--x", `${state.map.player.x}%`);
+  marker.style.setProperty("--y", `${state.map.player.y}%`);
+  return true;
+}
+
 function navigate(target) {
   if (!canDoLabor("navigate")) return;
   const requiredBuilding = SCENE_BUILDING_REQUIREMENTS[target];
@@ -2518,6 +2740,8 @@ function navigate(target) {
     openModal("homesteadBuild");
     return;
   }
+  const overviewArea = overviewAreaForTarget(target);
+  if (overviewArea) movePlayerMarker(overviewArea);
   state.currentScene = target;
   pushMessage(`Moved to ${scenes[target].title}.`);
 }
@@ -3539,6 +3763,27 @@ function feedAnimal(animalId) {
   triggerSceneEffect("barnFeed");
   closeModal();
   pushMessage(`${catalog.name} are fed.`);
+}
+
+function waterAnimal(animalId) {
+  const catalog = animalCatalog[animalId];
+  const group = state.barnAnimals[animalId];
+  if (!group.count) {
+    pushMessage(`You do not own any ${catalog.name.toLowerCase()} yet.`);
+    return;
+  }
+  if ((state.barnWaterStore || 0) < group.count) {
+    pushMessage(`The water trough holds ${state.barnWaterStore || 0} units. Stock it with at least ${group.count} to water the ${catalog.name.toLowerCase()}.`);
+    return;
+  }
+  if (!canDoLabor("animalCare") || !spendStamina(2)) return;
+  state.barnWaterStore -= group.count;
+  group.wateredToday = true;
+  learnFrom("animalCare");
+  state.dailyStats.animalGroupsCared += 1;
+  triggerSceneEffect("barnWater");
+  closeModal();
+  pushMessage(`${catalog.name} are watered.`);
 }
 
 function cleanAnimal(animalId) {
@@ -5243,6 +5488,7 @@ function openModal(type, titleOverride) {
   document.getElementById("modalBackdrop").classList.remove("hidden");
   const panel = document.querySelector(".modal-panel");
   panel.classList.remove("hm-modal");
+  panel.classList.remove("area-modal");
   panel.querySelectorAll(".hm-corner").forEach((el) => el.remove());
 
   if (type === "inventory") {
@@ -5351,9 +5597,10 @@ function openModal(type, titleOverride) {
     modalBody.innerHTML = areaMenuMarkup();
     document.querySelectorAll("[data-area-target]").forEach((button) => {
       button.addEventListener("click", () => {
-        closeModal();
-        navigate(button.dataset.areaTarget);
+        state.currentScene = "overview";
+        movePlayerMarker(button.dataset.areaTarget);
         render();
+        openOverviewAreaPanel(button.dataset.areaTarget);
       });
     });
   }
@@ -5370,17 +5617,165 @@ function openModal(type, titleOverride) {
   }
 }
 
+function openOverviewAreaPanel(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (!area) return;
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalBody");
+  const panel = document.querySelector(".modal-panel");
+  panel.classList.remove("hm-modal");
+  panel.classList.add("area-modal");
+  panel.querySelectorAll(".hm-corner").forEach((el) => el.remove());
+  modalTitle.textContent = overviewAreaLabel(areaId);
+  modalBody.innerHTML = overviewAreaPanelMarkup(areaId);
+  document.getElementById("modalBackdrop").classList.remove("hidden");
+  bindOverviewAreaPanel(areaId);
+}
+
+function overviewAreaPanelMarkup(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  const built = overviewAreaBuilt(areaId);
+  const locked = overviewAreaLocked(areaId);
+  const building = area.building ? HOMESTEAD_BUILDINGS[area.building] : null;
+  const levelLabel = building ? (built ? building.level1 : building.level0) : area.status;
+  const requirement = building?.requires && !homesteadBuildingBuilt(building.requires)
+    ? `Requires ${HOMESTEAD_BUILDINGS[building.requires].label} first.`
+    : "";
+  const buildCost = building && !built ? costText(building.cost) : "";
+  const canBuild = building && !built && !locked && hasIngredients(building.cost);
+  const workers = overviewWorkersForArea(areaId);
+  const workerText = workers.length ? workers.join(", ") : "No assigned workers here.";
+  const action = overviewAreaActionMarkup(areaId, { built, locked, building, buildCost, canBuild });
+
+  return `<div class="area-panel-shell">
+    <figure class="area-panel-image">
+      <img src="${area.image}" alt="">
+      <figcaption>${overviewAreaStatus(areaId)}</figcaption>
+    </figure>
+    <div class="area-panel-content">
+      <p class="area-kicker">${area.status}</p>
+      <p>${area.detail}</p>
+      <div class="area-stat-grid">
+        <div class="area-stat"><span>Current</span><strong>${levelLabel}</strong></div>
+        <div class="area-stat"><span>Workers</span><strong>${workerText}</strong></div>
+        <div class="area-stat"><span>Map</span><strong>${built || !building ? "Open" : "Site marked"}</strong></div>
+      </div>
+      ${overviewAreaPanelDetailMarkup(areaId)}
+      ${requirement ? `<p class="hint-text">${requirement}</p>` : ""}
+      ${buildCost && !built ? `<p class="hint-text">Build cost: ${buildCost}</p>` : ""}
+      <div class="area-panel-actions">${action}</div>
+    </div>
+  </div>`;
+}
+
+function overviewAreaActionMarkup(areaId, { built, locked, building, buildCost, canBuild }) {
+  const panelActions = overviewAreaManagementActions(areaId, { built, locked });
+  const actionButtons = panelActions.map((action) => {
+    const attrs = action.modal
+      ? `data-overview-modal="${action.modal}"`
+      : action.action
+        ? `data-overview-action="${action.action}"`
+        : "";
+    return `<button type="button" ${attrs} ${action.disabled ? "disabled" : ""}>${action.label}</button>`;
+  }).join("");
+  const buildButton = building && !built
+    ? `<button type="button" data-build-overview-area="${areaId}" ${canBuild ? "" : "disabled"}>Build ${building.label}${buildCost ? ` (${buildCost})` : ""}</button>`
+    : "";
+  const buildBoard = areaId !== "build"
+    ? `<button type="button" data-enter-overview-area="build">Open Build Board</button>`
+    : "";
+  return `${actionButtons}${buildButton}${buildBoard}`;
+}
+
+function bindOverviewAreaPanel(areaId) {
+  document.querySelectorAll("[data-enter-overview-area]").forEach((button) => {
+    button.addEventListener("click", () => openOverviewAreaPanel(button.dataset.enterOverviewArea));
+  });
+  document.querySelectorAll("[data-overview-modal]").forEach((button) => {
+    button.addEventListener("click", () => openModal(button.dataset.overviewModal));
+  });
+  document.querySelectorAll("[data-overview-action]").forEach((button) => {
+    button.addEventListener("click", () => runOverviewPanelAction(button.dataset.overviewAction));
+  });
+  document.querySelectorAll("[data-overview-crop]").forEach((button) => {
+    button.addEventListener("click", () => openCropModal(button.dataset.overviewCrop));
+  });
+  document.querySelectorAll("[data-overview-animal]").forEach((button) => {
+    button.addEventListener("click", () => openAnimalModal(button.dataset.overviewAnimal));
+  });
+  document.querySelectorAll("[data-build-overview-area]").forEach((button) => {
+    button.addEventListener("click", () => buildHomesteadBuilding(OVERVIEW_AREAS[button.dataset.buildOverviewArea].building, areaId));
+  });
+}
+
+function overviewAreaManagementActions(areaId, { built, locked }) {
+  if (areaId === "camp" || areaId === "build") return [{ label: "Open Build Board", modal: "homesteadBuild" }, { label: "Open Inventory", modal: "inventory" }];
+  if (areaId === "cabin") return [{ label: "Build / Upgrade Home", modal: "homesteadBuild" }, { label: "Open People", modal: "people" }, { label: "Open Cooking", modal: "cooking", disabled: !built || locked }];
+  if (areaId === "garden") return [{ label: "Refill Watering Can", action: "refillWateringCan" }, { label: "Open Inventory", modal: "inventory" }];
+  if (areaId === "well") return [{ label: "Gather Water", action: "gatherWater" }, { label: "Fill Water Jar", action: "fillWaterJar" }, { label: "Drink Water", action: "drinkWater" }];
+  if (areaId === "workshed") return [{ label: "Open Crafting", modal: "crafting", disabled: !built || locked }, { label: "Owned Tools", modal: "tools" }, { label: "Supply Catalog", modal: "shop" }];
+  if (areaId === "barn") return [{ label: "Barn Care", modal: "barnCare", disabled: !built || locked }, { label: "Animal Maintenance", modal: "animalMaintenance", disabled: !built || locked }, { label: "Animal Market", modal: "shop" }];
+  if (["chickenCoop", "goatPen", "sheepPasture", "cowPasture"].includes(areaId)) return [{ label: "Animal Care", action: `animal:${animalIdForArea(areaId)}`, disabled: !built || locked }, { label: "Animal Maintenance", modal: "animalMaintenance", disabled: !built || locked }, { label: "Animal Market", modal: "shop" }];
+  if (areaId === "workerHomes") return [{ label: "Open People", modal: "people" }];
+  if (areaId === "marketplace") return [{ label: "Market Stall", modal: "marketStall" }, { label: "Community Orders", modal: "orders" }, { label: "Supply Catalog", modal: "shop" }];
+  if (areaId === "forest") return [{ label: "Gather Wood", action: "forestWood" }, { label: "Forage Herbs", action: "forestHerbs" }, { label: "Fish Pond", action: "fishPond" }];
+  if (areaId === "sabbath") return [{ label: "Set Aside Basket", action: "setSabbathBasket" }, { label: "Enter Sabbath Rest", action: "enterSabbath" }, { label: "Sabbath Preparation", modal: "sabbathPrep" }];
+  return [];
+}
+
+function overviewAreaPanelDetailMarkup(areaId) {
+  if (areaId === "garden") {
+    const beds = Object.keys(gardenBeds).filter((id) => gardenBeds[id].scene === "garden").slice(0, 15);
+    return `<div class="overview-mini-grid">${beds.map((id) => `<button type="button" data-overview-crop="${id}">${state.crops[id]?.name || id}</button>`).join("")}</div>`;
+  }
+  if (["chickenCoop", "goatPen", "sheepPasture", "cowPasture"].includes(areaId)) {
+    const animalId = animalIdForArea(areaId);
+    const animal = animalCatalog[animalId];
+    const group = state.barnAnimals[animalId];
+    return `<div class="overview-mini-grid">
+      <button type="button" data-overview-animal="${animalId}">${animal.name}</button>
+      <button type="button" data-overview-action="feed:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Feed</button>
+      <button type="button" data-overview-action="water:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Water</button>
+      <button type="button" data-overview-action="clean:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Clean</button>
+    </div>`;
+  }
+  return "";
+}
+
+function animalIdForArea(areaId) {
+  return { chickenCoop: "chickens", goatPen: "goats", sheepPasture: "sheep", cowPasture: "cattle" }[areaId] || "chickens";
+}
+
+function runOverviewPanelAction(action) {
+  if (action === "refillWateringCan") refillWateringCan();
+  if (action === "gatherWater") gatherWater();
+  if (action === "fillWaterJar") fillWaterJar();
+  if (action === "drinkWater") drinkWater("well");
+  if (action === "forestWood") forestGather({ resource: "wood", amount: 2, stamina: 5 });
+  if (action === "forestHerbs") forestGather({ resource: "herbs", amount: 2, stamina: 4, prep: "gatherHerbs" });
+  if (action === "fishPond") fishPond();
+  if (action === "setSabbathBasket") setAsideSabbathBasket();
+  if (action === "enterSabbath") enterSabbathRest();
+  if (action.startsWith("animal:")) openAnimalModal(action.split(":")[1]);
+  if (action.startsWith("feed:")) feedAnimal(action.split(":")[1]);
+  if (action.startsWith("water:")) waterAnimal(action.split(":")[1]);
+  if (action.startsWith("clean:")) cleanAnimal(action.split(":")[1]);
+  render();
+}
+
 function openCustomModal(title, body) {
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("modalBody").innerHTML = body;
   document.getElementById("modalBackdrop").classList.remove("hidden");
   const panel = document.querySelector(".modal-panel");
   panel.classList.remove("hm-modal");
+  panel.classList.remove("area-modal");
   panel.querySelectorAll(".hm-corner").forEach((el) => el.remove());
 }
 
 function closeModal() {
   document.getElementById("modalBackdrop").classList.add("hidden");
+  document.querySelector(".modal-panel")?.classList.remove("area-modal");
 }
 
 function bindRecipeButtons(type) {
@@ -5818,7 +6213,7 @@ function bindHomesteadBuildButtons() {
   });
 }
 
-function buildHomesteadBuilding(id) {
+function buildHomesteadBuilding(id, returnAreaId = null) {
   const building = HOMESTEAD_BUILDINGS[id];
   if (!building) return;
   const homestead = ensureHomestead();
@@ -5828,12 +6223,14 @@ function buildHomesteadBuilding(id) {
   }
   if (building.requires && !homesteadBuildingBuilt(building.requires)) {
     pushMessage(`${building.label} needs ${HOMESTEAD_BUILDINGS[building.requires].label} first.`);
-    openModal("homesteadBuild");
+    if (returnAreaId) openOverviewAreaPanel(returnAreaId);
+    else openModal("homesteadBuild");
     return;
   }
   if (!hasIngredients(building.cost)) {
     pushMessage(`${building.label} needs ${costText(building.cost)}.`);
-    openModal("homesteadBuild");
+    if (returnAreaId) openOverviewAreaPanel(returnAreaId);
+    else openModal("homesteadBuild");
     return;
   }
   spendIngredients(building.cost);
@@ -5841,7 +6238,8 @@ function buildHomesteadBuilding(id) {
   pushMessage(`${building.label} built. ${building.unlocks}`);
   saveGame(false);
   render();
-  openModal("homesteadBuild");
+  if (returnAreaId) openOverviewAreaPanel(returnAreaId);
+  else openModal("homesteadBuild");
 }
 
 function peopleAssignmentSummary() {
@@ -6771,27 +7169,8 @@ function buffDetailsMarkup() {
 }
 
 function areaMenuMarkup() {
-  const areaButtons = [
-    ["overview", "Homestead Overview"],
-    ["cabin", "Cabin Entry"],
-    ["livingRoom", "Living Room"],
-    ["bedroom", "Bedroom"],
-    ["bathroom", "Bathroom"],
-    ["kitchen", "Kitchen"],
-    ["pantry", "Pantry"],
-    ["barn", "Barn"],
-    ["garden", "Garden"],
-    ["apiary", "Apiary"],
-    ["workshed", "Workshed"],
-    ["forest", "Forest"],
-    ["treeFarm", "Tree Farm"],
-    ["rockQuarry", "Rock Quarry"],
-    ["marketplace", "Marketplace"],
-    ["well", "Well / Water Area"],
-    ["sabbath", "Sabbath Area"]
-  ];
-  return `<div class="area-list">${areaButtons.map(([id, label]) => `
-    <button type="button" data-area-target="${id}"><strong>${label}</strong><br><small>${scenes[id].description}</small></button>
+  return `<div class="area-list">${Object.entries(OVERVIEW_AREAS).filter(([, area]) => !area.mapHidden).map(([id, area]) => `
+    <button type="button" data-area-target="${id}"><strong>${overviewAreaLabel(id)}</strong><br><small>${area.detail}</small></button>
   `).join("")}</div>`;
 }
 
@@ -6928,6 +7307,7 @@ function renderScene() {
   const scene = scenes[state.currentScene];
   const stage = document.getElementById("sceneStage");
   setSceneBackground(stage, scene);
+  stage.dataset.scene = scene.id;
   stage.classList.toggle("debug-hotspots", state.hotspotDebug);
   document.getElementById("sceneTitleOverlay").textContent = sceneDisplayTitle(scene);
   document.getElementById("sceneDescriptionOverlay").textContent = sceneDisplayDescription(scene);
@@ -6942,8 +7322,10 @@ function renderScene() {
   const hotspots = visibleHotspots(scene);
   document.getElementById("hotspotLayer").innerHTML = hotspots.map((hotspot) => {
     const alertClass = hotspotNeedsAlert(hotspot) ? " hotspot--alert" : "";
-    return `<button type="button" class="hotspot${alertClass}" data-hotspot="${hotspot.id}" style="left:${hotspot.x}%; top:${hotspot.y}%; width:${hotspot.w}%; height:${hotspot.h}%;">
-      <span>${hotspot.label}${hotspot.requirement ? `<span class="requirement">Needs ${toolLabels[hotspot.requirement]}</span>` : ""}</span>
+    const mapClass = scene.id === "overview" ? " map-hotspot" : "";
+    const status = scene.id === "overview" ? overviewHotspotStatusMarkup(hotspot) : "";
+    return `<button type="button" class="hotspot${mapClass}${alertClass}" data-hotspot="${hotspot.id}" style="left:${hotspot.x}%; top:${hotspot.y}%; width:${hotspot.w}%; height:${hotspot.h}%;">
+      <span>${hotspot.label}${status}${hotspot.requirement ? `<span class="requirement">Needs ${toolLabels[hotspot.requirement]}</span>` : ""}</span>
     </button>`;
   }).join("");
   document.querySelectorAll("[data-hotspot]").forEach((button) => {
@@ -6955,32 +7337,27 @@ function renderScene() {
 }
 
 function sceneDisplayTitle(scene) {
-  if (scene.id === "overview" && overviewIsCamp()) return "Tent Camp";
+  if (scene.id === "overview" && overviewIsCamp()) return "Homestead Map";
   return scene.title;
 }
 
 function sceneDisplayDescription(scene) {
   if (scene.id === "overview" && overviewIsCamp()) {
-    return "A simple tent, fire pit, starter garden, and open land mark the beginning of the homestead.";
+    return "A tent camp anchors the land while future building sites wait around the homestead map.";
   }
   return scene.description;
 }
 
-function overviewCampHotspots() {
-  return [
-    hs("campShelter", "Tent Camp", 25, 35, 18, 21, "modal", { modal: "homesteadBuild" }),
-    hs("campFire", "Fire Pit", 39, 56, 9, 10, "message", { message: "The fire pit is ready for a future cooking and warmth system." }),
-    hs("starterGarden", "Starter Garden", 9, 47, 18, 18, "navigate", { target: "garden" }),
-    hs("storage", "Storage Baskets", 24, 51, 10, 11, "modal", { modal: "inventory" }),
-    hs("build", "Build / Upgrade", 52, 32, 27, 21, "modal", { modal: "homesteadBuild" }),
-    hs("forest", "Forest Path", 75, 6, 20, 26, "navigate", { target: "forest" }),
-    hs("well", "Water Jugs", 48, 48, 12, 16, "gatherWater"),
-    hs("sabbath", "Quiet Rest Spot", 63, 65, 22, 18, "navigate", { target: "sabbath" })
-  ];
+function overviewMapHotspots() {
+  return Object.entries(OVERVIEW_AREAS).filter(([, area]) => !area.mapHidden).map(([id, area]) => {
+    const label = overviewAreaLabel(id);
+    const { x, y, w, h } = area.hotspot;
+    return hs(id, label, x, y, w, h, "overviewArea", { area: id });
+  });
 }
 
 function sceneHotspots(scene) {
-  if (scene.id === "overview" && overviewIsCamp()) return overviewCampHotspots();
+  if (scene.id === "overview") return overviewMapHotspots();
   return scene.hotspots;
 }
 
@@ -6994,6 +7371,54 @@ function visibleHotspots(scene) {
     if (hotspot.action === "sweepKitchen") return Boolean(state.kitchenChores?.floor);
     return true;
   });
+}
+
+function overviewAreaForTarget(target) {
+  return Object.entries(OVERVIEW_AREAS).find(([, area]) => area.target === target)?.[0] || null;
+}
+
+function overviewAreaLabel(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (!area) return "Homestead Area";
+  return overviewAreaBuilt(areaId) && area.builtLabel ? area.builtLabel : area.label;
+}
+
+function overviewAreaBuilt(areaId) {
+  const building = OVERVIEW_AREAS[areaId]?.building;
+  return !building || homesteadBuildingBuilt(building);
+}
+
+function overviewAreaLocked(areaId) {
+  const buildingId = OVERVIEW_AREAS[areaId]?.building;
+  const building = buildingId ? HOMESTEAD_BUILDINGS[buildingId] : null;
+  return Boolean(building?.requires && !homesteadBuildingBuilt(building.requires));
+}
+
+function overviewAreaStatus(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (!area) return "";
+  if (area.building) {
+    if (homesteadBuildingBuilt(area.building)) return "Built";
+    if (overviewAreaLocked(areaId)) return "Locked";
+    return "Build Site";
+  }
+  return area.status;
+}
+
+function overviewHotspotStatusMarkup(hotspot) {
+  const status = overviewAreaStatus(hotspot.area);
+  return status ? `<span class="requirement">${status}</span>` : "";
+}
+
+function overviewWorkersForArea(areaId) {
+  const people = ensurePeople();
+  const names = [];
+  Object.entries(people.workers).forEach(([workerId, worker]) => {
+    if (!worker.unlocked || !worker.resident) return;
+    const destination = isSabbath() ? "sabbath" : WORKER_JOB_AREAS[worker.assignment] || "workerHomes";
+    if (destination === areaId) names.push(PEOPLE_DEFINITIONS[workerId].name);
+  });
+  return names;
 }
 
 function decorationMarkup(sceneId) {
@@ -7088,16 +7513,44 @@ function decorationMarkup(sceneId) {
   return `
     ${effect}
     ${buffs}
-    <span class="smoke" style="--x: 23.6%; --y: 16%; --size: 42px; --delay: 0s;"></span>
-    <span class="smoke" style="--x: 22.8%; --y: 15.8%; --size: 48px; --delay: 10s;"></span>
-    <span class="lantern-glow" style="--x: 49.6%; --y: 42.6%; --w: 5.6%; --h: 9.5%;"></span>
-    <span class="lantern-glow" style="--x: 87.8%; --y: 67.8%; --w: 5.4%; --h: 8%;"></span>
-    <span class="well-shimmer" style="--x: 61.7%; --y: 72%; --w: 7.4%; --h: 7.5%;"></span>
-    <span class="drift" style="--y: 9%; --w: 18%; --h: 7%; --duration: 52s; --delay: -12s;"></span>
-    <span class="drift" style="--y: 15%; --w: 11%; --h: 4%; --duration: 64s; --delay: -34s;"></span>
-    <span class="leaf" style="--x: 72%; --duration: 32s; --delay: 0s;"></span>
-    <span class="leaf" style="--x: 78%; --duration: 40s; --delay: 18s;"></span>
+    ${overviewSiteObjects()}
+    ${overviewMarkersMarkup()}
   `;
+}
+
+function overviewMarkersMarkup() {
+  const map = hydrateMapState(state.map || {});
+  state.map = map;
+  const player = map.player;
+  const workers = overviewWorkerMarkers();
+  return `<span class="map-marker-layer">
+    <span class="map-marker player-marker" style="--x:${player.x}%; --y:${player.y}%;" title="You"><span>HH</span></span>
+    ${workers}
+  </span>`;
+}
+
+function overviewWorkerMarkers() {
+  const people = ensurePeople();
+  const entries = Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.resident);
+  return entries.map(([workerId, worker], index) => {
+    const person = PEOPLE_DEFINITIONS[workerId];
+    const areaId = isSabbath() ? "sabbath" : WORKER_JOB_AREAS[worker.assignment] || "workerHomes";
+    const marker = OVERVIEW_AREAS[areaId]?.marker || OVERVIEW_AREAS.workerHomes.marker;
+    const offsetX = ((index % 3) - 1) * 1.6;
+    const offsetY = (Math.floor(index / 3) - 0.5) * 2.4;
+    return `<span class="map-marker worker-marker" style="--x:${marker.x + offsetX}%; --y:${marker.y + offsetY}%; --delay:${(index * 0.35).toFixed(2)}s;" title="${person.name}: ${WORKER_JOBS[worker.assignment]?.label || "Rest"}">
+      <img src="${person.portrait}" alt="">
+      <span>${person.initials}</span>
+    </span>`;
+  }).join("");
+}
+
+function overviewSiteObjects() {
+  const siteMarkup = Object.entries(OVERVIEW_AREAS)
+    .filter(([id, area]) => area.building && !homesteadBuildingBuilt(area.building) && !overviewAreaLocked(id))
+    .map(([, area]) => `<span class="map-site-outline" style="--x:${area.marker.x}%; --y:${area.marker.y}%;"></span>`)
+    .join("");
+  return siteMarkup;
 }
 
 function kitchenChoreObjects() {
@@ -7338,7 +7791,7 @@ function playSceneEffect(effect) {
 }
 
 function setSceneBackground(stage, scene) {
-  const background = scene.id === "overview" && overviewIsCamp() ? sceneImages.overviewCamp : scene.background;
+  const background = scene.background;
   stage.style.backgroundImage = `url("${background}")`;
   stage.classList.toggle("has-image", imageStatus[background] === true);
   if (imageStatus[background] !== undefined) return;
