@@ -1386,6 +1386,26 @@ const CLOTHING_DEFINITIONS = {
 };
 const CRAFT_QUALITY_ITEMS = new Set(["feed", "hay", "cloth", "fertilizer", "arrows"]);
 
+const PROFILE_EMBLEMS = {
+  pomegranate: { src: "assets/images/player-profile/pomegranate.png", label: "Pomegranate", desc: "A symbol of blessing, abundance, and the commandments of the covenant." },
+  menorah:     { src: "assets/images/player-profile/menorah.png",     label: "Menorah",     desc: "The seven-branched lampstand — light, wisdom, and the presence of God." },
+  shofar:      { src: "assets/images/player-profile/shofar.png",      label: "Shofar",      desc: "The ram's horn, sounded at feasts, new moons, and the call to sacred assembly." },
+  hyssop:      { src: "assets/images/player-profile/hyssop.png",      label: "Hyssop",      desc: "A humble plant used in purification rites, representing cleansing and new beginnings." },
+  ruth:        { src: "assets/images/people/ruth.png",   label: "Ruth",   desc: "Patient and faithful. Ruth brings steady care to the garden and household." },
+  caleb:       { src: "assets/images/people/caleb.png",  label: "Caleb",  desc: "Strong and reliable. Caleb handles forest work and heavy hauling." },
+  miriam:      { src: "assets/images/people/miriam.png", label: "Miriam", desc: "Gentle and diligent. Miriam keeps the animals fed, watered, and clean." },
+  hannah:      { src: "assets/images/people/hannah.png", label: "Hannah", desc: "Warm and skilled. Hannah turns simple ingredients into nourishing meals." },
+  ezra:        { src: "assets/images/people/ezra.png",   label: "Ezra",   desc: "Fair and honest. Ezra tends the market stall and community relationships." }
+};
+
+const PROFILE_FRAMES = [
+  { id: "gold",       label: "Gold",         color: "#c8a84b" },
+  { id: "silver",     label: "Silver",       color: "#9aa0aa" },
+  { id: "green",      label: "Olive Green",  color: "#5a7a3a" },
+  { id: "terracotta", label: "Terracotta",   color: "#b5522b" },
+  { id: "midnight",   label: "Midnight Blue",color: "#2d3f6b" }
+];
+
 const PEOPLE_DEFINITIONS = {
   ruth: {
     name: "Ruth",
@@ -1894,7 +1914,8 @@ function createNewState() {
     messages: ["Welcome to Hebrew Homestead. Click a scene hotspot to begin."],
     dailyStats: createDailyStats(),
     dailyGoals: [],
-    marketStall: createMarketStall()
+    marketStall: createMarketStall(),
+    profile: { name: "Homesteader", emblem: "pomegranate", frame: "gold" }
   };
 }
 
@@ -3050,6 +3071,40 @@ function batheInTub() {
   state.buffs.relaxed = Math.max(state.buffs.relaxed || 0, 4);
   triggerSceneEffect("hygiene");
   pushMessage("You bathed and feel relaxed. Hygiene and relaxation needs eased.");
+}
+
+function campRest() {
+  const now = absoluteMinute();
+  const elapsed = now - (state.lastRestMinute ?? -400);
+  if (elapsed < REST_COOLDOWN_MINUTES) {
+    const remaining = REST_COOLDOWN_MINUTES - elapsed;
+    const hrs = Math.floor(remaining / 60);
+    const mins = remaining % 60;
+    pushMessage(`You rested recently. Rest will be available again in about ${hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`} of in-game time.`);
+    return;
+  }
+  if (state.minute + 45 >= NIGHTFALL_MINUTE) {
+    pushMessage("It is too late for a short rest. Sleep through the night instead.");
+    return;
+  }
+  state.lastRestMinute = now;
+  adjustNeeds({ relaxation: -30, hunger: 3, thirst: 3 });
+  state.restBuffs.settled = Math.max(state.restBuffs.settled || 0, 2);
+  triggerSceneEffect("rest");
+  advanceTime(45);
+  pushMessage("You rested under the open sky. Relaxation eased.");
+}
+
+function campWashUp() {
+  if ((state.inventory.water || 0) < 1) {
+    pushMessage("Gather water from the well before washing up.");
+    return;
+  }
+  state.inventory.water -= 1;
+  adjustNeeds({ hygiene: -40 });
+  triggerSceneEffect("hygiene");
+  advanceTime(10);
+  pushMessage("You washed up at camp. Hygiene improved.");
 }
 
 function washHands() {
@@ -4822,6 +4877,7 @@ function plantCrop(cropId, cropType, qty = 1) {
   } else {
     pushMessage(`Planted ${toPlant} ${catalog.name} seedlings.`);
   }
+  returnToAreaPanel();
 }
 
 function waterCrop(cropId) {
@@ -4841,6 +4897,7 @@ function waterCrop(cropId) {
   closeModal();
   triggerSceneEffect("waterCrop", cropId);
   pushMessage(`${bed.name} watered.`);
+  returnToAreaPanel();
 }
 
 function weedCrop(cropId) {
@@ -4858,6 +4915,7 @@ function weedCrop(cropId) {
   closeModal();
   triggerSceneEffect("weed", cropId);
   pushMessage(`${bed.name} weeded. Plant matter was collected for compost.`);
+  returnToAreaPanel();
 }
 
 function compostCropBed(cropId) {
@@ -4878,6 +4936,7 @@ function compostCropBed(cropId) {
   triggerSceneEffect("compost", cropId);
   closeModal();
   pushMessage(`${bed.name} has compost worked into the soil.`);
+  returnToAreaPanel();
 }
 
 function fertilizeCrop(cropId) {
@@ -5030,6 +5089,7 @@ function harvestCrop(cropId) {
   closeModal();
   triggerSceneEffect("harvest", cropId);
   pushMessage(`Harvested crops from ${bed.name}. Seed quality and soil care shaped the harvest.${bonus ? " Clean Laundry added 1 extra harvest item." : ""}`);
+  returnToAreaPanel();
 }
 
 function cropStatus(cropId) {
@@ -5753,6 +5813,56 @@ function openModal(type, titleOverride) {
       btn.addEventListener("click", () => fulfillCommunityOrder(Number(btn.dataset.fillOrder)));
     });
   }
+  if (type === "profile") {
+    modalTitle.textContent = "Player Profile";
+    modalBody.innerHTML = profileMarkup();
+    bindProfileButtons();
+  }
+  if (type === "campEat") {
+    modalTitle.textContent = "Eat";
+    const foodItems = Object.entries(state.inventory)
+      .filter(([key, amount]) => FOOD_EAT_VALUES[key] && amount > 0)
+      .map(([key, amount]) => `<div class="inventory-item">
+        <span>${itemLabels[key] || key}</span>
+        <strong>${amount}</strong>
+        <button type="button" data-eat-item="${key}">Eat</button>
+      </div>`).join("");
+    modalBody.innerHTML = foodItems
+      ? `<div class="inventory-list">${foodItems}</div>`
+      : `<p class="hint-text">No edible food in inventory. Cook a meal or gather fresh food first.</p>`;
+    document.querySelectorAll("[data-eat-item]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        eatFood(btn.dataset.eatItem);
+        openOverviewSubModal("campEat", _openAreaPanelId || "camp");
+      });
+    });
+  }
+  if (type === "stoneHarvest") {
+    modalTitle.textContent = "Rock Quarry";
+    const uses = toolUsesLeft("pickaxe");
+    const maxHarvest = Math.min(5, uses);
+    const choices = [...new Set([1, 3, maxHarvest].filter((v) => v > 0))];
+    modalBody.innerHTML = `<div class="card-grid">
+      <article class="modal-card">
+        <h3>Equipped Tool</h3>
+        <p><strong>${state.tools.pickaxe ? toolLabels.pickaxe : "No pickaxe equipped"}</strong></p>
+        <p>${state.tools.pickaxe ? toolDurabilitySummary("pickaxe") : "Craft a Pickaxe at the workshed before quarrying stone."}</p>
+      </article>
+      <article class="modal-card">
+        <h3>Harvest Stone</h3>
+        <p>Each pickaxe use gathers 2 stone from the quarry.</p>
+        <p>By hand: pick up 1 loose stone (5 stamina).</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${choices.map((count) => `<button type="button" data-modal-action="pickaxe-${count}">Harvest ${count} use${count === 1 ? "" : "s"}</button>`).join("")}
+          ${!choices.length ? `<button type="button" data-modal-action="stoneByHand">Gather Loose Stones</button>` : ""}
+        </div>
+      </article>
+    </div>`;
+    bindModalActions({
+      ...Object.fromEntries(choices.map((count) => [`pickaxe-${count}`, () => harvestStoneWithPickaxe(count)])),
+      stoneByHand: () => stonePile()
+    });
+  }
 }
 
 function openOverviewAreaPanel(areaId) {
@@ -5836,10 +5946,7 @@ function overviewAreaActionMarkup(areaId, { built, locked, building, buildCost, 
   const buildButton = building && nextStage
     ? `<button type="button" data-build-overview-area="${areaId}" ${canBuild ? "" : "disabled"}>${buildVerb} ${nextStage.label}${buildCost ? ` (${buildCost})` : ""}</button>`
     : "";
-  const buildBoard = areaId !== "build"
-    ? `<button type="button" data-enter-overview-area="build">Open Build Board</button>`
-    : "";
-  return `${actionButtons}${buildButton}${buildBoard}`;
+  return `${actionButtons}${buildButton}`;
 }
 
 function bindOverviewAreaPanel(areaId) {
@@ -5853,8 +5960,15 @@ function bindOverviewAreaPanel(areaId) {
     button.addEventListener("click", () => {
       runOverviewPanelAction(button.dataset.overviewAction);
       const a = button.dataset.overviewAction;
-      const opensOwnModal = a.startsWith("animal:") || a.startsWith("feed:") || a.startsWith("water:") || a.startsWith("clean:") || a === "enterSabbath";
-      if (!opensOwnModal) openOverviewAreaPanel(areaId);
+      const opensOwnModal = a.startsWith("animal:") || a === "enterSabbath" || a === "fishPond" || a === "campSleep";
+      if (!opensOwnModal) {
+        openOverviewAreaPanel(areaId);
+        const isCareAction = a.startsWith("feed:") || a.startsWith("water:") || a.startsWith("clean:");
+        if (isCareAction) {
+          const img = document.querySelector(".area-panel-image");
+          if (img) { img.classList.add("action-pulse"); setTimeout(() => img.classList.remove("action-pulse"), 500); }
+        }
+      }
     });
   });
   document.querySelectorAll("[data-overview-crop]").forEach((button) => {
@@ -5870,6 +5984,11 @@ function bindOverviewAreaPanel(areaId) {
 
 function overviewAreaManagementActions(areaId, { built, locked }) {
   if (areaId === "camp") return [
+    { label: "Sleep for the Night", action: "campSleep" },
+    { label: "Rest a While", action: "campRest" },
+    { label: "Eat", modal: "campEat" },
+    { label: "Drink Water", action: "campDrink" },
+    { label: "Wash Up", action: "campBathe" },
     { label: "Cooking Station", modal: "cooking" },
     { label: "Build / Upgrade Home", modal: "homesteadBuild" },
     { label: "Open Inventory", modal: "inventory" },
@@ -5881,10 +6000,10 @@ function overviewAreaManagementActions(areaId, { built, locked }) {
   if (areaId === "well") return [{ label: "Gather Water", action: "gatherWater" }, { label: "Fill Water Jar", action: "fillWaterJar" }, { label: "Drink Water", action: "drinkWater" }];
   if (areaId === "workshed") return [{ label: "Open Crafting", modal: "crafting", disabled: !built || locked }, { label: "Owned Tools", modal: "tools" }, { label: "Supply Catalog", modal: "shop" }];
   if (areaId === "barn") return [{ label: "Barn Care", modal: "barnCare", disabled: !built || locked }, { label: "Animal Maintenance", modal: "animalMaintenance", disabled: !built || locked }, { label: "Animal Market", modal: "shop" }];
-  if (["chickenCoop", "goatPen", "sheepPasture", "cowPasture"].includes(areaId)) return [{ label: "Animal Care", action: `animal:${animalIdForArea(areaId)}`, disabled: !built || locked }, { label: "Animal Maintenance", modal: "animalMaintenance", disabled: !built || locked }, { label: "Animal Market", modal: "shop" }];
+  if (["chickenCoop", "goatPen", "sheepPasture", "cowPasture"].includes(areaId)) return [{ label: "Animal Maintenance", modal: "animalMaintenance", disabled: !built || locked }, { label: "Animal Market", modal: "shop" }];
   if (areaId === "workerHomes") return [{ label: "Open People", modal: "people" }];
   if (areaId === "marketplace") return [{ label: "Market Stall", modal: "marketStall" }, { label: "Community Orders", modal: "orders" }, { label: "Supply Catalog", modal: "shop" }];
-  if (areaId === "forest") return [{ label: "Gather Wood", action: "forestWood" }, { label: "Forage Herbs", action: "forestHerbs" }, { label: "Fish Pond", action: "fishPond" }];
+  if (areaId === "forest") return [];
   if (areaId === "sabbath") return [{ label: "Set Aside Basket", action: "setSabbathBasket" }, { label: "Enter Sabbath Rest", action: "enterSabbath" }, { label: "Sabbath Preparation", modal: "sabbathPrep" }];
   return [];
 }
@@ -5909,22 +6028,81 @@ function overviewAreaPanelDetailMarkup(areaId) {
         <span><strong>${station.label}</strong><small>${station.detail}</small></span>
       </button>`;
   }
+  if (areaId === "forest") {
+    return `<div class="harvest-btn-grid">
+      <button type="button" class="harvest-btn" data-overview-action="forestWood">
+        <img src="assets/images/scenes/forest/trees.png" alt="">
+        <span>Chop Wood</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-action="forestHerbs">
+        <img src="assets/images/plants/herb-4.svg" alt="">
+        <span>Gather Herbs</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-action="fishPond">
+        <img src="assets/images/scenes/forest/forest.png" alt="">
+        <span>Fish Pond</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-modal="stoneHarvest">
+        <img src="assets/images/scenes/forest/rock quarry.png" alt="">
+        <span>Rock Quarry</span>
+      </button>
+    </div>`;
+  }
   if (areaId === "garden") {
-    const beds = Object.keys(gardenBeds).filter((id) => gardenBeds[id].scene === "garden").slice(0, 15);
-    return `<div class="overview-mini-grid">${beds.map((id) => `<button type="button" data-overview-crop="${id}">${state.crops[id]?.name || id}</button>`).join("")}</div>`;
+    const beds = Object.keys(gardenBeds).filter((id) => gardenBeds[id].scene === "garden").slice(0, 12);
+    return `<div class="harvest-btn-grid">${beds.map((id) => {
+      const bed = state.crops[id];
+      const ready = bed?.plantings.some((p) => p.readyToHarvest);
+      const label = (bed?.name || id) + (ready ? " ✓" : "");
+      return `<button type="button" class="harvest-btn" data-overview-crop="${id}">
+        <img src="${cropBedImage(id)}" alt="">
+        <span>${label}</span>
+      </button>`;
+    }).join("")}</div>`;
   }
   if (["chickenCoop", "goatPen", "sheepPasture", "cowPasture"].includes(areaId)) {
     const animalId = animalIdForArea(areaId);
     const animal = animalCatalog[animalId];
     const group = state.barnAnimals[animalId];
-    return `<div class="overview-mini-grid">
-      <button type="button" data-overview-animal="${animalId}">${animal.name}</button>
-      <button type="button" data-overview-action="feed:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Feed</button>
-      <button type="button" data-overview-action="water:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Water</button>
-      <button type="button" data-overview-action="clean:${animalId}" ${(group?.count || 0) ? "" : "disabled"}>Clean</button>
+    const img = sceneImages[areaId] || sceneImages.barn;
+    const hasCare = (group?.count || 0) > 0;
+    return `<div class="harvest-btn-grid">
+      <button type="button" class="harvest-btn" data-overview-animal="${animalId}">
+        <img src="${img}" alt="">
+        <span>View ${animal.name}</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-action="feed:${animalId}" ${hasCare ? "" : "disabled"}>
+        <img src="${img}" alt="">
+        <span>Feed${group?.fedToday ? " ✓" : ""}</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-action="water:${animalId}" ${hasCare ? "" : "disabled"}>
+        <img src="${img}" alt="">
+        <span>Water${group?.wateredToday ? " ✓" : ""}</span>
+      </button>
+      <button type="button" class="harvest-btn" data-overview-action="clean:${animalId}" ${hasCare ? "" : "disabled"}>
+        <img src="${img}" alt="">
+        <span>Clean${group?.cleanedToday ? " ✓" : ""}</span>
+      </button>
     </div>`;
   }
   return "";
+}
+
+function returnToAreaPanel() {
+  if (!_openAreaPanelId) return;
+  const id = _openAreaPanelId;
+  openOverviewAreaPanel(id);
+  const img = document.querySelector(".area-panel-image");
+  if (img) { img.classList.add("action-pulse"); setTimeout(() => img.classList.remove("action-pulse"), 500); }
+}
+
+function cropBedImage(bedId) {
+  const plantings = state.crops[bedId]?.plantings || [];
+  if (!plantings.length) return sceneImages.garden;
+  const crop = cropTypes[plantings[0].cropType];
+  const stage = Math.min(plantings[0].growthStage || 0, 4);
+  const catMap = { grain: "grain", legume: "legume", vegetable: "cucumber", fruit: "grape", herb: "herb" };
+  return `assets/images/plants/${catMap[crop?.category] || "grain"}-${stage}.svg`;
 }
 
 function overviewAreaImage(areaId) {
@@ -5953,6 +6131,10 @@ function runOverviewPanelAction(action) {
   if (action === "fishPond") fishPond();
   if (action === "setSabbathBasket") setAsideSabbathBasket();
   if (action === "enterSabbath") enterSabbathRest();
+  if (action === "campSleep") sleepThroughNight();
+  if (action === "campRest") campRest();
+  if (action === "campDrink") drinkWater("camp");
+  if (action === "campBathe") campWashUp();
   if (action.startsWith("animal:")) openAnimalModal(action.split(":")[1]);
   if (action.startsWith("feed:")) feedAnimal(action.split(":")[1]);
   if (action.startsWith("water:")) waterAnimal(action.split(":")[1]);
@@ -6027,6 +6209,77 @@ function toolsMarkup() {
 function toolStatusText(key) {
   if (!state.tools[key]) return "Not owned yet";
   return toolDurabilityMax[key] ? toolDurabilitySummary(key) : "Owned";
+}
+
+function profileMarkup() {
+  const profile = state.profile || (state.profile = { name: "Homesteader", emblem: "pomegranate", frame: "gold" });
+  const emblem = PROFILE_EMBLEMS[profile.emblem] || PROFILE_EMBLEMS.pomegranate;
+  const frameColor = PROFILE_FRAMES.find((f) => f.id === profile.frame)?.color || PROFILE_FRAMES[0].color;
+  const currentClothing = CLOTHING_DEFINITIONS[activeClothing()];
+  const season = ["Spring", "Summer", "Autumn", "Winter"][state.seasonIndex] || "Spring";
+  const topSkill = Object.entries(state.skills || {})
+    .sort(([, a], [, b]) => b - a)[0];
+  const topSkillLabel = topSkill ? (SKILL_DEFINITIONS[topSkill[0]]?.label || topSkill[0]) : "None";
+
+  const emblemPicker = Object.entries(PROFILE_EMBLEMS).map(([id, e]) => {
+    const sel = id === profile.emblem ? " profile-emblem-selected" : "";
+    return `<button type="button" class="profile-emblem-option${sel}" data-profile-emblem="${id}" title="${e.desc}">
+      <span class="profile-emblem-circle" style="border-color:${frameColor}">
+        <img src="${e.src}" alt="${e.label}">
+      </span>
+      <span>${e.label}</span>
+    </button>`;
+  }).join("");
+
+  const framePicker = PROFILE_FRAMES.map((f) => {
+    const sel = f.id === profile.frame ? " profile-frame-selected" : "";
+    return `<button type="button" class="profile-frame-swatch${sel}" data-profile-frame="${f.id}" style="background:${f.color}" title="${f.label}"></button>`;
+  }).join("");
+
+  return `<div class="profile-panel">
+    <div class="profile-hero">
+      <div class="profile-emblem-large" style="border-color:${frameColor}">
+        <img src="${emblem.src}" alt="${emblem.label}">
+      </div>
+      <div class="profile-hero-info">
+        <label class="profile-name-label">Name
+          <input type="text" id="profileNameInput" class="profile-name-input" value="${escapeAttribute(profile.name)}" maxlength="28" placeholder="Homesteader">
+        </label>
+        <p class="hint-text">${emblem.desc}</p>
+        <div class="area-stat-grid">
+          <div class="area-stat"><span>Day</span><strong>${state.day}</strong></div>
+          <div class="area-stat"><span>Season</span><strong>${season}</strong></div>
+          <div class="area-stat"><span>Clothing</span><strong>${currentClothing.label}</strong></div>
+          <div class="area-stat"><span>Top Skill</span><strong>${topSkillLabel}</strong></div>
+        </div>
+      </div>
+    </div>
+    <h3>Choose Emblem</h3>
+    <div class="profile-emblem-grid">${emblemPicker}</div>
+    <h3>Choose Frame</h3>
+    <div class="profile-frame-row">${framePicker}</div>
+  </div>`;
+}
+
+function bindProfileButtons() {
+  document.getElementById("profileNameInput")?.addEventListener("input", (e) => {
+    state.profile.name = e.target.value || "Homesteader";
+    saveGame(false);
+  });
+  document.querySelectorAll("[data-profile-emblem]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.profile.emblem = btn.dataset.profileEmblem;
+      saveGame(false);
+      openModal("profile");
+    });
+  });
+  document.querySelectorAll("[data-profile-frame]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.profile.frame = btn.dataset.profileFrame;
+      saveGame(false);
+      openModal("profile");
+    });
+  });
 }
 
 function characterMarkup() {
@@ -8279,6 +8532,7 @@ function bindEvents() {
       updateMobileMenuToggle();
     }
   });
+  document.getElementById("profileBtn")?.addEventListener("click", () => openModal("profile"));
   document.getElementById("homesteadBtn").addEventListener("click", () => openHomesteadMaintenanceModal());
   document.getElementById("peopleBtn").addEventListener("click", () => openModal("people"));
   document.getElementById("statusBtn").addEventListener("click", () => openModal("status"));
@@ -8300,6 +8554,14 @@ function bindEvents() {
   }
   document.getElementById("modalBackdrop").addEventListener("click", (event) => {
     if (event.target.id === "modalBackdrop") closeModal();
+  });
+  document.getElementById("modalBody").addEventListener("click", (event) => {
+    const btn = event.target.closest("button");
+    if (!btn || btn.disabled) return;
+    btn.classList.remove("btn-tap");
+    void btn.offsetWidth;
+    btn.classList.add("btn-tap");
+    btn.addEventListener("animationend", () => btn.classList.remove("btn-tap"), { once: true });
   });
   document.addEventListener("keydown", (event) => {
     if (handleHiddenTesterShortcut(event)) return;
