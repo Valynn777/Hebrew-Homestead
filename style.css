@@ -1939,21 +1939,21 @@ small {
 }
 
 .modal-panel.area-modal {
-  width: min(1120px, calc(100% - 42px));
-  max-height: min(88vh, 860px);
+  width: 100%;
+  max-height: calc(100svh - 32px);
   background: rgba(255, 250, 240, 0.96);
 }
 
 .area-panel-shell {
   display: grid;
-  grid-template-columns: minmax(280px, 1.05fr) minmax(280px, 0.95fr);
+  grid-template-columns: minmax(280px, 520px) minmax(280px, 1fr);
   gap: 16px;
   align-items: stretch;
 }
 
 .area-panel-image {
   position: relative;
-  min-height: 300px;
+  min-height: 440px;
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1964,7 +1964,7 @@ small {
 .area-panel-image img {
   width: 100%;
   height: 100%;
-  min-height: 300px;
+  min-height: 440px;
   display: block;
   object-fit: cover;
 }
@@ -2043,6 +2043,28 @@ small {
 
 .area-panel-actions button {
   min-height: 42px;
+}
+
+.area-subpanel-back {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.area-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: rgba(255, 253, 246, 0.9);
+  border: 1px solid var(--line);
+}
+
+.area-back-btn:hover {
+  background: rgba(240, 232, 212, 0.9);
 }
 
 .home-progress-strip {
@@ -2587,6 +2609,10 @@ small {
     border-radius: 8px;
   }
 
+  .modal-panel.area-modal {
+    max-height: calc(100svh - 12px);
+  }
+
   .modal-header {
     padding: 10px 12px;
   }
@@ -2607,7 +2633,7 @@ small {
 
   .area-panel-image,
   .area-panel-image img {
-    min-height: 210px;
+    min-height: 220px;
   }
 
   .cooking-station-card {
@@ -2874,6 +2900,10 @@ small {
     width: 100%;
     max-height: calc(100svh - 12px);
     border-radius: 8px;
+  }
+
+  .modal-panel.area-modal {
+    max-height: calc(100svh - 12px);
   }
 
   .modal-panel.hm-modal {

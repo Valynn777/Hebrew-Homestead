@@ -1781,6 +1781,7 @@ let messageTimeout = null;
 let effectTimeout = null;
 let pendingSceneEffect = null;
 let autosaveTimer = null;
+let _openAreaPanelId = null;
 let isLoadingSave = false;
 let isWritingSave = false;
 let lastSaveInfo = { status: "Not saved yet", savedAt: null, error: "" };
@@ -5753,6 +5754,7 @@ function openModal(type, titleOverride) {
 }
 
 function openOverviewAreaPanel(areaId) {
+  _openAreaPanelId = areaId;
   const area = OVERVIEW_AREAS[areaId];
   if (!area) return;
   const modalTitle = document.getElementById("modalTitle");
@@ -5765,6 +5767,18 @@ function openOverviewAreaPanel(areaId) {
   modalBody.innerHTML = overviewAreaPanelMarkup(areaId);
   document.getElementById("modalBackdrop").classList.remove("hidden");
   bindOverviewAreaPanel(areaId);
+}
+
+function openOverviewSubModal(type, areaId) {
+  openModal(type);
+  const panel = document.querySelector(".modal-panel");
+  panel.classList.add("area-modal");
+  const modalBody = document.getElementById("modalBody");
+  const backWrap = document.createElement("div");
+  backWrap.className = "area-subpanel-back";
+  backWrap.innerHTML = `<button type="button" class="area-back-btn">&#8592; ${overviewAreaLabel(areaId)}</button>`;
+  modalBody.insertBefore(backWrap, modalBody.firstChild);
+  backWrap.querySelector(".area-back-btn").addEventListener("click", () => openOverviewAreaPanel(areaId));
 }
 
 function overviewAreaPanelMarkup(areaId) {
@@ -5830,10 +5844,15 @@ function bindOverviewAreaPanel(areaId) {
     button.addEventListener("click", () => openOverviewAreaPanel(button.dataset.enterOverviewArea));
   });
   document.querySelectorAll("[data-overview-modal]").forEach((button) => {
-    button.addEventListener("click", () => openModal(button.dataset.overviewModal));
+    button.addEventListener("click", () => openOverviewSubModal(button.dataset.overviewModal, areaId));
   });
   document.querySelectorAll("[data-overview-action]").forEach((button) => {
-    button.addEventListener("click", () => runOverviewPanelAction(button.dataset.overviewAction));
+    button.addEventListener("click", () => {
+      runOverviewPanelAction(button.dataset.overviewAction);
+      const a = button.dataset.overviewAction;
+      const opensOwnModal = a.startsWith("animal:") || a.startsWith("feed:") || a.startsWith("water:") || a.startsWith("clean:") || a === "enterSabbath";
+      if (!opensOwnModal) openOverviewAreaPanel(areaId);
+    });
   });
   document.querySelectorAll("[data-overview-crop]").forEach((button) => {
     button.addEventListener("click", () => openCropModal(button.dataset.overviewCrop));
