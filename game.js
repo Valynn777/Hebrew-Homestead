@@ -1271,6 +1271,7 @@ const REST_LIMITS = { shortRest: 2, nap: 1 };
 const REST_COOLDOWN_MINUTES = 360;
 const SLEEP_THROUGH_NIGHT_MINUTE = 18 * 60;
 const NIGHTFALL_MINUTE = 22 * 60;
+const WORK_END_MINUTE = 17 * 60;
 const NEED_MAX = 100;
 const NEED_LABELS = {
   hunger: "Hunger",
@@ -7663,13 +7664,18 @@ function overviewHotspotStatusMarkup(hotspot) {
   return status ? `<span class="requirement">${status}</span>` : "";
 }
 
+function workerCurrentAreaId(worker) {
+  if (isSabbath()) return "sabbath";
+  if (state.minute >= WORK_END_MINUTE) return "workerHomes";
+  return WORKER_JOB_AREAS[worker.assignment] || "workerHomes";
+}
+
 function overviewWorkersForArea(areaId) {
   const people = ensurePeople();
   const names = [];
   Object.entries(people.workers).forEach(([workerId, worker]) => {
     if (!worker.unlocked || !worker.resident) return;
-    const destination = isSabbath() ? "sabbath" : WORKER_JOB_AREAS[worker.assignment] || "workerHomes";
-    if (destination === areaId) names.push(PEOPLE_DEFINITIONS[workerId].name);
+    if (workerCurrentAreaId(worker) === areaId) names.push(PEOPLE_DEFINITIONS[workerId].name);
   });
   return names;
 }
@@ -7787,7 +7793,7 @@ function overviewWorkerMarkers() {
   const entries = Object.entries(people.workers).filter(([, worker]) => worker.unlocked && worker.resident);
   return entries.map(([workerId, worker], index) => {
     const person = PEOPLE_DEFINITIONS[workerId];
-    const areaId = isSabbath() ? "sabbath" : WORKER_JOB_AREAS[worker.assignment] || "workerHomes";
+    const areaId = workerCurrentAreaId(worker);
     const marker = OVERVIEW_AREAS[areaId]?.marker || OVERVIEW_AREAS.workerHomes.marker;
     const offsetX = ((index % 3) - 1) * 1.6;
     const offsetY = (Math.floor(index / 3) - 0.5) * 2.4;
