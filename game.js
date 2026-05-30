@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const SAVE_VERSION = 11;
+const SAVE_VERSION = 12;
 const SAVE_KEY = "hebrew-homestead-click-v1";
 const SAVE_BACKUP_KEY = `${SAVE_KEY}-backup`;
 const NAMED_SAVE_PREFIX = `${SAVE_KEY}-save-`;
@@ -17,8 +17,14 @@ const OUTDOOR_SCENES = new Set([
 ]);
 
 const sceneImages = {
-  overviewCamp: "assets/images/scenes/progression/homestead-camp.png",
+  overviewCamp: "assets/images/scenes/home/home-camp.png",
   overview: "assets/images/scenes/homestead-property-map.png",
+  homeCamp: "assets/images/scenes/home/home-camp.png",
+  homeCabin: "assets/images/scenes/home/home-cabin.png",
+  homeExpandedCabin: "assets/images/scenes/home/home-expanded-cabin.png",
+  homeStone: "assets/images/scenes/home/home-stone.png",
+  cookingFirepit: "assets/images/scenes/home/cooking-firepit.png",
+  cookingStove: "assets/images/scenes/home/cooking-stove.png",
   cabin: "assets/images/scenes/cabin/cabin-entry.png",
   kitchen: "assets/images/scenes/cabin/kitchen.png",
   livingRoom: "assets/images/scenes/cabin/living-room.png",
@@ -1466,13 +1472,66 @@ const WORKER_HOUSING_UPGRADES = {
   3: { wood: 14, stone: 8, cloth: 2 }
 };
 
+const HOME_LEVELS = [
+  {
+    label: "Camp Area",
+    status: "Starting camp",
+    detail: "A tent, fire pit, stacked firewood, and simple baskets mark the first foothold on the land.",
+    image: sceneImages.homeCamp
+  },
+  {
+    label: "Small Cabin",
+    status: "Home built",
+    detail: "A small cabin gives the household covered rooms, deeper rest, and a proper stove for broader cooking.",
+    image: sceneImages.homeCabin,
+    cost: { wood: 12, stone: 6 },
+    unlocks: "Cabin rooms, kitchen work, bedroom rest, and household chores."
+  },
+  {
+    label: "Expanded Cabin",
+    status: "Home improved",
+    detail: "An enlarged and insulated cabin keeps the household steadier through long work days and rough weather.",
+    image: sceneImages.homeExpandedCabin,
+    cost: { wood: 18, stone: 10, cloth: 2 },
+    unlocks: "A sturdier home with more room for future household systems."
+  },
+  {
+    label: "Stone Home",
+    status: "Home reinforced",
+    detail: "Stone and timber make the home durable, warm, and ready for later household upgrades.",
+    image: sceneImages.homeStone,
+    cost: { stone: 24, wood: 16, cloth: 3 },
+    unlocks: "A durable final home stage for future expansion."
+  }
+];
+
+const FIREPIT_RECIPE_IDS = new Set([
+  "barleyFlatbread",
+  "lentilStew",
+  "herbTea",
+  "simpleSabbathMeal",
+  "cleanFishMeal",
+  "venisonStew",
+  "chickenSoup",
+  "muttonStew",
+  "goatStew",
+  "beefStew",
+  "onionLentilSoup",
+  "garlicHerbSoup",
+  "leekSoup",
+  "harvestStew",
+  "troutMeal",
+  "salmonMeal"
+]);
+
 const HOMESTEAD_BUILDINGS = {
   home: {
-    label: "Cabin",
-    level0: "Tent Camp",
-    level1: "Simple Cabin",
-    cost: { wood: 12, stone: 6 },
-    unlocks: "Cabin rooms, kitchen, bedroom rest, and household chores."
+    label: "Home",
+    level0: HOME_LEVELS[0].label,
+    level1: HOME_LEVELS[1].label,
+    levels: HOME_LEVELS,
+    cost: HOME_LEVELS[1].cost,
+    unlocks: HOME_LEVELS[1].unlocks
   },
   workshed: {
     label: "Workshed",
@@ -1539,14 +1598,15 @@ const SCENE_BUILDING_REQUIREMENTS = {
 
 const OVERVIEW_AREAS = {
   camp: {
-    label: "Tent Camp",
+    label: "Camp Area",
+    builtLabel: "Home",
     status: "Starting camp",
-    detail: "A tent, fire pit, and simple baskets mark the first foothold on the land.",
+    detail: "The home area begins as a camp and can grow into a cabin, an expanded cabin, and a stronger stone home.",
     marker: { x: 45, y: 51 },
     hotspot: { x: 38, y: 43, w: 14, h: 14 },
     image: sceneImages.overviewCamp,
-    modal: "homesteadBuild",
-    actionLabel: "Plan Camp Upgrades"
+    building: "home",
+    actionLabel: "Manage Home"
   },
   cabin: {
     label: "Cabin Site",
@@ -1557,7 +1617,8 @@ const OVERVIEW_AREAS = {
     hotspot: { x: 43, y: 31, w: 15, h: 14 },
     image: sceneImages.cabin,
     target: "cabin",
-    building: "home"
+    building: "home",
+    mapHidden: true
   },
   garden: {
     label: "Starter Garden",
@@ -1701,7 +1762,7 @@ const WORKER_JOB_AREAS = {
   garden: "garden",
   animals: "barn",
   forest: "forest",
-  kitchen: "cabin",
+  kitchen: "camp",
   market: "marketplace"
 };
 
@@ -2302,6 +2363,41 @@ function ensureHomestead() {
 
 function homesteadBuildingLevel(id) {
   return ensureHomestead().buildings?.[id] || 0;
+}
+
+function homesteadBuildingMaxLevel(id) {
+  const building = HOMESTEAD_BUILDINGS[id];
+  return building?.levels?.length ? building.levels.length - 1 : 1;
+}
+
+function homesteadBuildingStage(id, level = homesteadBuildingLevel(id)) {
+  const building = HOMESTEAD_BUILDINGS[id];
+  if (!building?.levels?.length) {
+    return {
+      label: level > 0 ? building?.level1 : building?.level0,
+      status: level > 0 ? "Built" : "Build Site",
+      detail: building?.unlocks || "",
+      unlocks: building?.unlocks || "",
+      image: null
+    };
+  }
+  const clamped = Math.max(0, Math.min(homesteadBuildingMaxLevel(id), level));
+  return building.levels[clamped];
+}
+
+function homesteadBuildingNextStage(id) {
+  const nextLevel = homesteadBuildingLevel(id) + 1;
+  return nextLevel <= homesteadBuildingMaxLevel(id) ? homesteadBuildingStage(id, nextLevel) : null;
+}
+
+function homesteadBuildingNextCost(id) {
+  const nextStage = homesteadBuildingNextStage(id);
+  if (!nextStage) return null;
+  return nextStage.cost || HOMESTEAD_BUILDINGS[id]?.cost || null;
+}
+
+function homesteadBuildingLevelLabel(id) {
+  return homesteadBuildingStage(id).label || HOMESTEAD_BUILDINGS[id]?.label || "Homestead";
 }
 
 function homesteadBuildingBuilt(id) {
@@ -4997,6 +5093,15 @@ function prepRecipe(id) {
 function cookItem(id, mode = "direct") {
   const item = cookingRecipes.find((recipeItem) => recipeItem.id === id);
   if (!item || !canDoLabor("cook")) return;
+  if (!canCookAtCurrentStation(item.id)) {
+    pushMessage("That recipe needs the cabin stove. The firepit is best for pot meals, roasting, and simple open-flame cooking.");
+    return;
+  }
+  if (!ensureHomestead().campfireLit) {
+    pushMessage("Light the cooking fire first.");
+    openModal("cooking");
+    return;
+  }
   if (item.cleanStatus !== "clean" || !edibleItems[item.id]) {
     pushMessage("This food is not approved by clean food rules.");
     return;
@@ -5017,8 +5122,37 @@ function cookPreppedFood() {
     pushMessage("Prep food on the counter before using this stove option.");
     return;
   }
+  if (!canCookAtCurrentStation(item.id)) {
+    pushMessage("That prepped recipe needs the cabin stove.");
+    openModal("cooking");
+    return;
+  }
+  if (!ensureHomestead().campfireLit) {
+    pushMessage("Light the cooking fire first.");
+    openModal("cooking");
+    return;
+  }
   state.preppedFood = null;
   finishCookedRecipe(item, nextQuality(prepped.quality), "prepped");
+}
+
+function lightCookingFire() {
+  const homestead = ensureHomestead();
+  if (homestead.campfireLit) {
+    pushMessage("The cooking fire is already ready.");
+    openModal("cooking");
+    return;
+  }
+  if (!spendItem("wood", 1)) {
+    pushMessage("Lighting the cooking fire needs 1 wood.");
+    openModal("cooking");
+    return;
+  }
+  homestead.campfireLit = true;
+  pushMessage(homesteadBuildingBuilt("home") ? "The stove fire is lit and ready for cooking." : "The firepit is lit and ready for camp cooking.");
+  saveGame(false);
+  render();
+  openModal("cooking");
 }
 
 function finishCookedRecipe(item, quality, mode) {
@@ -5355,6 +5489,7 @@ function nextDay() {
   state.dailyRest = createDailyRest();
   state.restBuffs = createRestBuffs();
   state.preppedFood = null;
+  ensureHomestead().campfireLit = false;
   if (state.day % 2 === 0) state.kitchenChores.floor = true;
   updateRoomChoresForNewDay();
   resetBarnAnimalDailyCare();
@@ -5637,32 +5772,33 @@ function overviewAreaPanelMarkup(areaId) {
   const built = overviewAreaBuilt(areaId);
   const locked = overviewAreaLocked(areaId);
   const building = area.building ? HOMESTEAD_BUILDINGS[area.building] : null;
-  const levelLabel = building ? (built ? building.level1 : building.level0) : area.status;
+  const levelLabel = building ? homesteadBuildingLevelLabel(area.building) : area.status;
   const requirement = building?.requires && !homesteadBuildingBuilt(building.requires)
     ? `Requires ${HOMESTEAD_BUILDINGS[building.requires].label} first.`
     : "";
-  const buildCost = building && !built ? costText(building.cost) : "";
-  const canBuild = building && !built && !locked && hasIngredients(building.cost);
+  const nextCost = building ? homesteadBuildingNextCost(area.building) : null;
+  const buildCost = nextCost ? costText(nextCost) : "";
+  const canBuild = Boolean(building && nextCost && !locked && hasIngredients(nextCost));
   const workers = overviewWorkersForArea(areaId);
   const workerText = workers.length ? workers.join(", ") : "No assigned workers here.";
   const action = overviewAreaActionMarkup(areaId, { built, locked, building, buildCost, canBuild });
 
   return `<div class="area-panel-shell">
     <figure class="area-panel-image">
-      <img src="${area.image}" alt="">
+      <img src="${overviewAreaImage(areaId)}" alt="">
       <figcaption>${overviewAreaStatus(areaId)}</figcaption>
     </figure>
     <div class="area-panel-content">
-      <p class="area-kicker">${area.status}</p>
-      <p>${area.detail}</p>
+      <p class="area-kicker">${overviewAreaStatus(areaId) || area.status}</p>
+      <p>${overviewAreaDetail(areaId)}</p>
       <div class="area-stat-grid">
         <div class="area-stat"><span>Current</span><strong>${levelLabel}</strong></div>
         <div class="area-stat"><span>Workers</span><strong>${workerText}</strong></div>
-        <div class="area-stat"><span>Map</span><strong>${built || !building ? "Open" : "Site marked"}</strong></div>
+        <div class="area-stat"><span>Map</span><strong>${areaId === "camp" || built || !building ? "Open" : "Site marked"}</strong></div>
       </div>
       ${overviewAreaPanelDetailMarkup(areaId)}
       ${requirement ? `<p class="hint-text">${requirement}</p>` : ""}
-      ${buildCost && !built ? `<p class="hint-text">Build cost: ${buildCost}</p>` : ""}
+      ${buildCost ? `<p class="hint-text">Next upgrade: ${buildCost}</p>` : ""}
       <div class="area-panel-actions">${action}</div>
     </div>
   </div>`;
@@ -5678,8 +5814,10 @@ function overviewAreaActionMarkup(areaId, { built, locked, building, buildCost, 
         : "";
     return `<button type="button" ${attrs} ${action.disabled ? "disabled" : ""}>${action.label}</button>`;
   }).join("");
-  const buildButton = building && !built
-    ? `<button type="button" data-build-overview-area="${areaId}" ${canBuild ? "" : "disabled"}>Build ${building.label}${buildCost ? ` (${buildCost})` : ""}</button>`
+  const nextStage = building ? homesteadBuildingNextStage(OVERVIEW_AREAS[areaId].building) : null;
+  const buildVerb = built ? "Upgrade" : "Build";
+  const buildButton = building && nextStage
+    ? `<button type="button" data-build-overview-area="${areaId}" ${canBuild ? "" : "disabled"}>${buildVerb} ${nextStage.label}${buildCost ? ` (${buildCost})` : ""}</button>`
     : "";
   const buildBoard = areaId !== "build"
     ? `<button type="button" data-enter-overview-area="build">Open Build Board</button>`
@@ -5709,7 +5847,13 @@ function bindOverviewAreaPanel(areaId) {
 }
 
 function overviewAreaManagementActions(areaId, { built, locked }) {
-  if (areaId === "camp" || areaId === "build") return [{ label: "Open Build Board", modal: "homesteadBuild" }, { label: "Open Inventory", modal: "inventory" }];
+  if (areaId === "camp") return [
+    { label: "Cooking Station", modal: "cooking" },
+    { label: "Build / Upgrade Home", modal: "homesteadBuild" },
+    { label: "Open Inventory", modal: "inventory" },
+    { label: "Open People", modal: "people", disabled: !homesteadBuildingBuilt("home") }
+  ];
+  if (areaId === "build") return [{ label: "Open Build Board", modal: "homesteadBuild" }, { label: "Open Inventory", modal: "inventory" }];
   if (areaId === "cabin") return [{ label: "Build / Upgrade Home", modal: "homesteadBuild" }, { label: "Open People", modal: "people" }, { label: "Open Cooking", modal: "cooking", disabled: !built || locked }];
   if (areaId === "garden") return [{ label: "Refill Watering Can", action: "refillWateringCan" }, { label: "Open Inventory", modal: "inventory" }];
   if (areaId === "well") return [{ label: "Gather Water", action: "gatherWater" }, { label: "Fill Water Jar", action: "fillWaterJar" }, { label: "Drink Water", action: "drinkWater" }];
@@ -5724,6 +5868,19 @@ function overviewAreaManagementActions(areaId, { built, locked }) {
 }
 
 function overviewAreaPanelDetailMarkup(areaId) {
+  if (areaId === "camp") {
+    const level = homesteadBuildingLevel("home");
+    const stages = HOME_LEVELS.map((stage, index) => {
+      const cls = index < level ? "complete" : index === level ? "current" : "";
+      return `<span class="${cls}">${stage.label}</span>`;
+    }).join("");
+    const station = cookingStationInfo();
+    return `<div class="home-progress-strip">${stages}</div>
+      <button type="button" class="home-station-button" data-overview-modal="cooking">
+        <img src="${station.image}" alt="">
+        <span><strong>${station.label}</strong><small>${station.detail}</small></span>
+      </button>`;
+  }
   if (areaId === "garden") {
     const beds = Object.keys(gardenBeds).filter((id) => gardenBeds[id].scene === "garden").slice(0, 15);
     return `<div class="overview-mini-grid">${beds.map((id) => `<button type="button" data-overview-crop="${id}">${state.crops[id]?.name || id}</button>`).join("")}</div>`;
@@ -5740,6 +5897,18 @@ function overviewAreaPanelDetailMarkup(areaId) {
     </div>`;
   }
   return "";
+}
+
+function overviewAreaImage(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (areaId === "camp") return homesteadBuildingStage("home").image || area.image;
+  return area?.image || sceneImages.overview;
+}
+
+function overviewAreaDetail(areaId) {
+  const area = OVERVIEW_AREAS[areaId];
+  if (areaId === "camp") return homesteadBuildingStage("home").detail || area.detail;
+  return area?.detail || "";
 }
 
 function animalIdForArea(areaId) {
@@ -5788,6 +5957,9 @@ function bindRecipeButtons(type) {
 }
 
 function bindCookingButtons() {
+  document.querySelectorAll("[data-light-campfire]").forEach((button) => {
+    button.addEventListener("click", () => lightCookingFire());
+  });
   document.querySelectorAll("[data-cook]").forEach((button) => {
     button.addEventListener("click", () => cookItem(button.dataset.cook, "direct"));
   });
@@ -5933,14 +6105,67 @@ function recipeMarkup(list, type) {
   }).join("")}</div>`;
 }
 
+function cookingStationInfo() {
+  if (homesteadBuildingBuilt("home")) {
+    return {
+      type: "stove",
+      label: "Cabin Stove",
+      status: "Stove cooking",
+      image: sceneImages.cookingStove,
+      detail: "The cabin stove supports full cooking, counter prep, and warmer household meals."
+    };
+  }
+  return {
+    type: "firepit",
+    label: "Firepit Cooking",
+    status: "Campfire cooking",
+    image: sceneImages.cookingFirepit,
+    detail: "The firepit is limited to pot, roasting, and open-flame meals until the cabin stove is built."
+  };
+}
+
+function activeCookingRecipes() {
+  if (homesteadBuildingBuilt("home")) return cookingRecipes;
+  return cookingRecipes.filter((item) => FIREPIT_RECIPE_IDS.has(item.id));
+}
+
+function canCookAtCurrentStation(recipeId) {
+  return homesteadBuildingBuilt("home") || FIREPIT_RECIPE_IDS.has(recipeId);
+}
+
+function cookingStationMarkup() {
+  const station = cookingStationInfo();
+  const homestead = ensureHomestead();
+  const lit = Boolean(homestead.campfireLit);
+  const flameLabel = lit ? "Fire Ready" : station.type === "stove" ? "Light Stove" : "Light Firepit";
+  return `<section class="cooking-station-card">
+    <figure class="cooking-station-image ${lit ? "is-lit" : ""}" data-station="${station.type}">
+      <img src="${station.image}" alt="">
+      <span class="station-flame"></span>
+      <span class="station-steam station-steam-one"></span>
+      <span class="station-steam station-steam-two"></span>
+      <figcaption>${station.status}</figcaption>
+    </figure>
+    <div class="cooking-station-copy">
+      <p class="area-kicker">${station.label}</p>
+      <p>${station.detail}</p>
+      <button type="button" data-light-campfire ${lit ? "disabled" : ""}>${flameLabel}</button>
+      ${station.type === "firepit" ? `<p class="hint-text">Build the Small Cabin to replace this with the stove and unlock the full recipe list.</p>` : ""}
+    </div>
+  </section>`;
+}
+
 function cookingMarkup() {
+  const stationRecipes = activeCookingRecipes();
   const prepped = state.preppedFood;
   const preppedRecipe = prepped ? cookingRecipes.find((item) => item.id === prepped.recipeId) : null;
+  const preppedAllowed = preppedRecipe ? canCookAtCurrentStation(preppedRecipe.id) : false;
   const preppedCard = preppedRecipe ? `
     <article class="modal-card">
       <h3>Cook Prepped ${preppedRecipe.name}</h3>
       <p>Counter prep is ready. Cooking now will finish at ${QUALITY_LABELS[nextQuality(prepped.quality)]} quality.</p>
-      <button type="button" data-cook-prepped="${preppedRecipe.id}">Cook Prepped Food</button>
+      ${preppedAllowed ? "" : `<p class="hint-text">This prepped recipe needs the cabin stove.</p>`}
+      <button type="button" data-cook-prepped="${preppedRecipe.id}" ${preppedAllowed ? "" : "disabled"}>Cook Prepped Food</button>
     </article>
   ` : `
     <article class="modal-card">
@@ -5950,10 +6175,11 @@ function cookingMarkup() {
     </article>
   `;
   return `
+    ${cookingStationMarkup()}
     <div class="card-grid">${preppedCard}</div>
     <h3>Cook Directly</h3>
-    <p class="hint-text">Direct stove cooking skips counter prep and keeps food at ingredient quality.</p>
-    ${recipeMarkup(cookingRecipes, "cook")}
+    <p class="hint-text">Direct cooking skips counter prep and keeps food at ingredient quality.</p>
+    ${recipeMarkup(stationRecipes, "cook")}
   `;
 }
 
@@ -6184,19 +6410,21 @@ function homesteadBuildMarkup() {
   const homestead = ensureHomestead();
   const cards = Object.entries(HOMESTEAD_BUILDINGS).map(([id, building]) => {
     const level = homestead.buildings[id] || 0;
-    const built = level > 0;
+    const currentStage = homesteadBuildingStage(id, level);
+    const nextStage = homesteadBuildingNextStage(id);
+    const nextCost = homesteadBuildingNextCost(id);
     const requiredBuilt = !building.requires || homesteadBuildingBuilt(building.requires);
-    const canBuild = !built && requiredBuilt && hasIngredients(building.cost);
+    const canBuild = Boolean(nextCost && requiredBuilt && hasIngredients(nextCost));
     const requirementText = building.requires && !requiredBuilt
       ? `<p class="hint-text">Requires ${HOMESTEAD_BUILDINGS[building.requires].label} first.</p>`
       : "";
-    const action = built
-      ? `<button type="button" disabled>Built</button>`
-      : `<button type="button" data-build-homestead="${id}" ${canBuild ? "" : "disabled"}>Build (${costText(building.cost)})</button>`;
+    const action = !nextStage
+      ? `<button type="button" disabled>Fully Upgraded</button>`
+      : `<button type="button" data-build-homestead="${id}" ${canBuild ? "" : "disabled"}>${level > 0 ? "Upgrade" : "Build"} ${nextStage.label} (${costText(nextCost)})</button>`;
     return `<article class="modal-card build-card">
       <h3>${building.label}</h3>
-      <p><strong>${built ? building.level1 : building.level0}</strong></p>
-      <p>${building.unlocks}</p>
+      <p><strong>${currentStage.label}</strong></p>
+      <p>${nextStage?.unlocks || currentStage.unlocks || building.unlocks}</p>
       ${requirementText}
       ${action}
     </article>`;
@@ -6217,8 +6445,11 @@ function buildHomesteadBuilding(id, returnAreaId = null) {
   const building = HOMESTEAD_BUILDINGS[id];
   if (!building) return;
   const homestead = ensureHomestead();
-  if (homestead.buildings[id] > 0) {
-    pushMessage(`${building.label} is already built.`);
+  const level = homestead.buildings[id] || 0;
+  const nextStage = homesteadBuildingNextStage(id);
+  const nextCost = homesteadBuildingNextCost(id);
+  if (!nextStage || !nextCost) {
+    pushMessage(`${building.label} is fully upgraded.`);
     return;
   }
   if (building.requires && !homesteadBuildingBuilt(building.requires)) {
@@ -6227,15 +6458,15 @@ function buildHomesteadBuilding(id, returnAreaId = null) {
     else openModal("homesteadBuild");
     return;
   }
-  if (!hasIngredients(building.cost)) {
-    pushMessage(`${building.label} needs ${costText(building.cost)}.`);
+  if (!hasIngredients(nextCost)) {
+    pushMessage(`${nextStage.label} needs ${costText(nextCost)}.`);
     if (returnAreaId) openOverviewAreaPanel(returnAreaId);
     else openModal("homesteadBuild");
     return;
   }
-  spendIngredients(building.cost);
-  homestead.buildings[id] = 1;
-  pushMessage(`${building.label} built. ${building.unlocks}`);
+  spendIngredients(nextCost);
+  homestead.buildings[id] = Math.min(level + 1, homesteadBuildingMaxLevel(id));
+  pushMessage(`${building.label} ${level > 0 ? "upgraded" : "built"}: ${nextStage.label}. ${nextStage.unlocks || building.unlocks}`);
   saveGame(false);
   render();
   if (returnAreaId) openOverviewAreaPanel(returnAreaId);
@@ -6260,8 +6491,8 @@ function homesteadProgressSummary() {
   const homestead = ensureHomestead();
   const built = Object.entries(HOMESTEAD_BUILDINGS)
     .filter(([id]) => (homestead.buildings[id] || 0) > 0)
-    .map(([, building]) => building.label);
-  return built.length ? built.join(", ") : "Tent camp";
+    .map(([id, building]) => id === "home" ? homesteadBuildingLevelLabel(id) : building.label);
+  return built.length ? built.join(", ") : HOME_LEVELS[0].label;
 }
 
 function peopleMarkup() {
@@ -7170,7 +7401,7 @@ function buffDetailsMarkup() {
 
 function areaMenuMarkup() {
   return `<div class="area-list">${Object.entries(OVERVIEW_AREAS).filter(([, area]) => !area.mapHidden).map(([id, area]) => `
-    <button type="button" data-area-target="${id}"><strong>${overviewAreaLabel(id)}</strong><br><small>${area.detail}</small></button>
+    <button type="button" data-area-target="${id}"><strong>${overviewAreaLabel(id)}</strong><br><small>${overviewAreaDetail(id)}</small></button>
   `).join("")}</div>`;
 }
 
@@ -7380,6 +7611,7 @@ function overviewAreaForTarget(target) {
 function overviewAreaLabel(areaId) {
   const area = OVERVIEW_AREAS[areaId];
   if (!area) return "Homestead Area";
+  if (areaId === "camp") return homesteadBuildingBuilt("home") ? "Home" : HOME_LEVELS[0].label;
   return overviewAreaBuilt(areaId) && area.builtLabel ? area.builtLabel : area.label;
 }
 
@@ -7397,8 +7629,10 @@ function overviewAreaLocked(areaId) {
 function overviewAreaStatus(areaId) {
   const area = OVERVIEW_AREAS[areaId];
   if (!area) return "";
+  if (areaId === "camp") return homesteadBuildingStage("home").status || homesteadBuildingLevelLabel("home");
   if (area.building) {
-    if (homesteadBuildingBuilt(area.building)) return "Built";
+    if (!homesteadBuildingNextStage(area.building) && homesteadBuildingBuilt(area.building)) return "Built";
+    if (homesteadBuildingBuilt(area.building)) return "Upgrade";
     if (overviewAreaLocked(areaId)) return "Locked";
     return "Build Site";
   }
@@ -7547,7 +7781,7 @@ function overviewWorkerMarkers() {
 
 function overviewSiteObjects() {
   const siteMarkup = Object.entries(OVERVIEW_AREAS)
-    .filter(([id, area]) => area.building && !homesteadBuildingBuilt(area.building) && !overviewAreaLocked(id))
+    .filter(([id, area]) => id !== "camp" && area.building && !homesteadBuildingBuilt(area.building) && !overviewAreaLocked(id))
     .map(([, area]) => `<span class="map-site-outline" style="--x:${area.marker.x}%; --y:${area.marker.y}%;"></span>`)
     .join("");
   return siteMarkup;

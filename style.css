@@ -2045,6 +2045,160 @@ small {
   min-height: 42px;
 }
 
+.home-progress-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.home-progress-strip span {
+  min-height: 34px;
+  border: 1px solid rgba(113, 89, 52, 0.22);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: rgba(255, 253, 246, 0.78);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.home-progress-strip span.complete {
+  color: #fff8dc;
+  background: #54704d;
+}
+
+.home-progress-strip span.current {
+  color: #3c2f1b;
+  border-color: rgba(200, 168, 64, 0.9);
+  background: #f3d775;
+}
+
+.home-station-button {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  border: 1px solid rgba(113, 89, 52, 0.22);
+  border-radius: 8px;
+  padding: 8px;
+  color: #3c2f1b;
+  background: rgba(255, 253, 246, 0.92);
+  text-align: left;
+}
+
+.home-station-button img {
+  width: 112px;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.home-station-button span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.home-station-button small {
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.cooking-station-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(240px, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.cooking-station-image {
+  position: relative;
+  min-height: 220px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #2e251b;
+}
+
+.cooking-station-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+}
+
+.cooking-station-image figcaption {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  border-radius: 8px;
+  padding: 6px 9px;
+  color: #fff8dc;
+  background: rgba(32, 28, 20, 0.78);
+  font-weight: 800;
+}
+
+.cooking-station-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cooking-station-copy button {
+  align-self: flex-start;
+}
+
+.station-flame,
+.station-steam {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.cooking-station-image.is-lit .station-flame {
+  left: 40%;
+  top: 57%;
+  width: 13%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 211, 83, 0.72), rgba(224, 94, 32, 0.34) 42%, transparent 72%);
+  filter: blur(2px);
+  animation: stationFlame 1.1s ease-in-out infinite alternate;
+  opacity: 1;
+}
+
+.cooking-station-image[data-station="stove"].is-lit .station-flame {
+  left: 50%;
+  top: 61%;
+  width: 10%;
+  height: 12%;
+}
+
+.cooking-station-image.is-lit .station-steam {
+  width: 30px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 68%);
+  filter: blur(2px);
+  animation: stationSteam 2.4s ease-out infinite;
+}
+
+.station-steam-one {
+  left: 47%;
+  top: 33%;
+}
+
+.station-steam-two {
+  left: 55%;
+  top: 31%;
+  animation-delay: 0.65s;
+}
+
 /* ── Homestead Maintenance parchment panel ────────────────────────────────── */
 .modal-panel.hm-modal {
   width: min(1140px, 98%);
@@ -2454,6 +2608,14 @@ small {
   .area-panel-image,
   .area-panel-image img {
     min-height: 210px;
+  }
+
+  .cooking-station-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-progress-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .modal-panel.hm-modal {
@@ -2920,6 +3082,31 @@ small {
   35%, 70% {
     opacity: 0.95;
     transform: scale(1.08);
+  }
+}
+
+@keyframes stationFlame {
+  0% {
+    transform: translateY(2px) scale(0.92);
+    opacity: 0.78;
+  }
+  100% {
+    transform: translateY(-3px) scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes stationSteam {
+  0% {
+    transform: translateY(18px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.62;
+  }
+  100% {
+    transform: translate(-10px, -70px) scale(1.4);
+    opacity: 0;
   }
 }
 
